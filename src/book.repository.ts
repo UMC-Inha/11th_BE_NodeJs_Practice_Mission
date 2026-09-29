@@ -26,10 +26,12 @@ export class BookRepository {
       'INSERT INTO book (category_id, title, description, is_available) VALUES (?, ?, ?, true)';
 
     // 두 번째 인자로 넘긴 배열이 ? 자리에 순서대로 안전하게 바인딩됩니다.
+    // pool.execute()는 undefined를 받으면 쿼리를 보내기 전에 에러를 냅니다.
+    // description은 NULL 허용 컬럼이라, 안 보냈으면 null로 바꿔 넘깁니다(트러블슈팅 No.1).
     const [result] = await this.pool.execute(sql, [
       body.categoryId,
       body.title,
-      body.description,
+      body.description ?? null,
     ]);
     return result;
   }

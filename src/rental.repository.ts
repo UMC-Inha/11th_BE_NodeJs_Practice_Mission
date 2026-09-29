@@ -27,7 +27,10 @@ export class RentalRepository {
 
   // [선택 미션] PATCH /rentals/{rentalId}/return
   async markReturned(rentalId: number): Promise<any> {
-    const sql = 'UPDATE rental SET returned_at = NOW() WHERE rental_id = ?';
+    // 워크북 쿼리(WHERE rental_id = ?)만 쓰면 같은 요청을 다시 보낼 때 반납일이 덮어써집니다.
+    // 아직 반납하지 않은 기록만 바꾸도록 조건을 하나 더 겁니다(트러블슈팅 No.2).
+    const sql =
+      'UPDATE rental SET returned_at = NOW() WHERE rental_id = ? AND returned_at IS NULL';
 
     const [result] = await this.pool.execute(sql, [rentalId]);
     return result;

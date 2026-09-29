@@ -1,5 +1,5 @@
 // src/rental.service.ts
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { RentalRepository } from './rental.repository.js';
 
 @Injectable()
@@ -16,7 +16,15 @@ export class RentalService {
   }
 
   async returnRental(rentalId: number): Promise<any> {
-    await this.rentalRepository.markReturned(rentalId);
+    const result = await this.rentalRepository.markReturned(rentalId);
+
+    // UPDATE는 조건에 맞는 행이 없어도 에러 없이 끝납니다(affectedRows = 0).
+    // 없는 번호이거나 이미 반납한 기록이면 200 대신 404로 알려 줍니다.
+    if (result.affectedRows === 0) {
+      throw new NotFoundException(
+        `반납할 수 있는 대여 기록이 없습니다. (rentalId: ${rentalId}, 없는 번호이거나 이미 반납됨)`,
+      );
+    }
 
     const [rental] = await this.rentalRepository.findById(rentalId);
     return rental;
