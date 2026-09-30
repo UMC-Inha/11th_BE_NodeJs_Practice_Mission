@@ -30,4 +30,11 @@ export class BookRepository {
   ]);
   return result;
   }
+  //미션
+  async findByCategory(categoryId: number): Promise<any> {
+  const sql = 'SELECT * FROM book WHERE category_id = ?';
+
+  const [rows] = await this.pool.query(sql, [categoryId]);
+  return rows;
+}
 }

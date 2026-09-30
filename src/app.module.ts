@@ -6,6 +6,9 @@ import { databaseProviders } from './database.provider.js';
 import { BookController } from './book.controller.js';
 import { BookService } from './book.service.js';
 import { BookRepository } from './book.repository.js';
+import { RentalController } from './rental.controller.js';
+import { RentalService } from './rental.service.js';
+import { RentalRepository } from './rental.repository.js';
 
 @Module({
   imports: [
@@ -14,12 +17,14 @@ import { BookRepository } from './book.repository.js';
       isGlobal: true,
     }),
   ],
-  controllers: [AppController, BookController,],
+  controllers: [AppController, BookController, RentalController],
   providers: [
     ...databaseProviders, // 1. DB 커넥션 풀을 부품으로 등록
     AppService,
     BookService, 
     BookRepository,
+    RentalService,
+    RentalRepository,
   ],
   exports: [...databaseProviders],
 })
