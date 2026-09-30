@@ -1,7 +1,11 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
-import { ConfigModule } from '@nestjs/config';
+import { databaseProviders } from './database.provider.js';
+import { BookController } from './book.controller.js';
+import { BookService } from './book.service.js';
+import { BookRepository } from './book.repository.js';
 
 @Module({
   imports: [
@@ -10,7 +14,13 @@ import { ConfigModule } from '@nestjs/config';
       isGlobal: true,
     }),
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [AppController, BookController,],
+  providers: [
+    ...databaseProviders, // 1. DB 커넥션 풀을 부품으로 등록
+    AppService,
+    BookService, 
+    BookRepository,
+  ],
+  exports: [...databaseProviders],
 })
 export class AppModule {}
