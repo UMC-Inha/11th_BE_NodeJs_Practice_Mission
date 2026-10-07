@@ -1,11 +1,10 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { BooksModule } from './books.module.js';
 import { databaseProviders } from './database.provider.js';
-import { BookController } from './book.controller.js';
-import { BookService } from './book.service.js';
-import { BookRepository } from './book.repository.js';
 import { RentalController } from './rental.controller.js';
 import { RentalService } from './rental.service.js';
 import { RentalRepository } from './rental.repository.js';
@@ -16,13 +15,27 @@ import { RentalRepository } from './rental.repository.js';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    TypeOrmModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        type: 'mysql',
+        host: config.getOrThrow<string>('DB_HOST'),
+        port: Number(config.get<string>('DB_PORT', '3306')),
+        username: config.getOrThrow<string>('DB_USER'),
+        password: config.get<string>('DB_PASSWORD', ''),
+        database: config.getOrThrow<string>('DB_NAME'),
+        autoLoadEntities: true,
+        synchronize: false,
+        relationLoadStrategy: 'join',
+        logging: process.env.DB_LOGGING === 'true',
+      }),
+    }),
+    BooksModule,
   ],
-  controllers: [AppController, BookController, RentalController],
+  controllers: [AppController, RentalController],
   providers: [
     ...databaseProviders, // 1. DB 커넥션 풀을 부품으로 등록
     AppService,
-    BookService,
-    BookRepository,
     RentalService,
     RentalRepository,
   ],
