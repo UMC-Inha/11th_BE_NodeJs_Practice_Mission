@@ -1,0 +1,17 @@
+import { Inject, Injectable } from '@nestjs/common';
+import type { Pool, ResultSetHeader } from 'mysql2/promise';
+import { DATABASE_CONNECTION } from './database.provider.js';
+
+@Injectable()
+export class RentalRepository {
+  constructor(@Inject(DATABASE_CONNECTION) private readonly pool: Pool) {}
+
+  async create(userId: number, bookId: number): Promise<ResultSetHeader> {
+    const sql = `
+      INSERT INTO rental (user_id, book_id, rented_at, due_at)
+      VALUES (?, ?, NOW(), DATE_ADD(NOW(), INTERVAL 7 DAY))
+    `;
+    const [result] = await this.pool.execute<ResultSetHeader>(sql, [userId, bookId]);
+    return result;
+  }
+}

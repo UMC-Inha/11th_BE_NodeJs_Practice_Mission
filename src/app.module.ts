@@ -1,16 +1,36 @@
+// src/app.module.ts
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { databaseProviders } from './database.provider.js';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
-import { ConfigModule } from '@nestjs/config';
+import { BookController } from './book.controller.js';
+import { BookService } from './book.service.js';
+import { BookRepository } from './book.repository.js';
+
+import { RentalController } from './rental.controller.js';
+import { RentalService } from './rental.service.js';
+import { RentalRepository } from './rental.repository.js';
 
 @Module({
   imports: [
-    // 환경 변수를 애플리케이션 전역에서 사용 가능하도록 설정
     ConfigModule.forRoot({
       isGlobal: true,
     }),
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [
+    AppController,
+    RentalController,
+    BookController, // 추가!
+  ],
+  providers: [
+    ...databaseProviders,
+    AppService,
+    RentalService,
+    RentalRepository,
+    BookService, // 추가!
+    BookRepository, // 추가
+  ],
+  exports: [...databaseProviders],
 })
 export class AppModule {}
