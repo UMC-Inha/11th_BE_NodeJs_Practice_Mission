@@ -30,7 +30,7 @@ export class BookRepository {
     const [result] = await this.pool.execute(sql, [
       body.categoryId,
       body.title,
-      body.description,
+      body.description ?? null,
     ]);
     return result;
   }
