@@ -1,0 +1,406 @@
+[
+  {
+    "label": "전체 목록과 응답 DTO",
+    "method": "GET",
+    "url": "/books",
+    "request": null,
+    "status": 200,
+    "response": [
+      {
+        "bookId": "5",
+        "title": "해리포터",
+        "description": null,
+        "categoryName": "문학",
+        "isAvailable": true
+      },
+      {
+        "bookId": "4",
+        "title": "클린 코드",
+        "description": "애자일 소프트웨어 장인 정신",
+        "categoryName": "문학",
+        "isAvailable": true
+      },
+      {
+        "bookId": "3",
+        "title": "우주를 읽는 법",
+        "description": "과학 교양",
+        "categoryName": "과학",
+        "isAvailable": true
+      },
+      {
+        "bookId": "2",
+        "title": "겨울의 편지",
+        "description": "에세이",
+        "categoryName": "문학",
+        "isAvailable": false
+      },
+      {
+        "bookId": "1",
+        "title": "달빛 도서관",
+        "description": "소설",
+        "categoryName": "문학",
+        "isAvailable": true
+      }
+    ]
+  },
+  {
+    "label": "도서 등록",
+    "method": "POST",
+    "url": "/books",
+    "request": {
+      "categoryId": 1,
+      "title": "스프링 ORM 실습 1791356856383",
+      "description": "4주차 ORM 검증"
+    },
+    "status": 201,
+    "response": {
+      "bookId": "6",
+      "title": "스프링 ORM 실습 1791356856383",
+      "description": "4주차 ORM 검증",
+      "categoryName": "문학",
+      "isAvailable": true
+    }
+  },
+  {
+    "label": "등록 후 최신순 확인",
+    "method": "GET",
+    "url": "/books",
+    "request": null,
+    "status": 200,
+    "response": [
+      {
+        "bookId": "6",
+        "title": "스프링 ORM 실습 1791356856383",
+        "description": "4주차 ORM 검증",
+        "categoryName": "문학",
+        "isAvailable": true
+      },
+      {
+        "bookId": "5",
+        "title": "해리포터",
+        "description": null,
+        "categoryName": "문학",
+        "isAvailable": true
+      },
+      {
+        "bookId": "4",
+        "title": "클린 코드",
+        "description": "애자일 소프트웨어 장인 정신",
+        "categoryName": "문학",
+        "isAvailable": true
+      },
+      {
+        "bookId": "3",
+        "title": "우주를 읽는 법",
+        "description": "과학 교양",
+        "categoryName": "과학",
+        "isAvailable": true
+      },
+      {
+        "bookId": "2",
+        "title": "겨울의 편지",
+        "description": "에세이",
+        "categoryName": "문학",
+        "isAvailable": false
+      },
+      {
+        "bookId": "1",
+        "title": "달빛 도서관",
+        "description": "소설",
+        "categoryName": "문학",
+        "isAvailable": true
+      }
+    ]
+  },
+  {
+    "label": "제목 검색",
+    "method": "GET",
+    "url": "/books?keyword=%EC%8A%A4%ED%94%84%EB%A7%81%20ORM%20%EC%8B%A4%EC%8A%B5%201791356856383",
+    "request": null,
+    "status": 200,
+    "response": [
+      {
+        "bookId": "6",
+        "title": "스프링 ORM 실습 1791356856383",
+        "description": "4주차 ORM 검증",
+        "categoryName": "문학",
+        "isAvailable": true
+      }
+    ]
+  },
+  {
+    "label": "검색 결과 없음",
+    "method": "GET",
+    "url": "/books?keyword=존재하지않는검색결과1234567890",
+    "request": null,
+    "status": 200,
+    "response": []
+  },
+  {
+    "label": "와일드카드는 문자로 검색",
+    "method": "GET",
+    "url": "/books?keyword=%25",
+    "request": null,
+    "status": 200,
+    "response": []
+  },
+  {
+    "label": "중복 도서 등록 차단",
+    "method": "POST",
+    "url": "/books",
+    "request": {
+      "categoryId": 1,
+      "title": "스프링 ORM 실습 1791356856383"
+    },
+    "status": 409,
+    "response": {
+      "message": "이미 등록된 도서 제목입니다.",
+      "error": "Conflict",
+      "statusCode": 409
+    }
+  },
+  {
+    "label": "빈 제목 차단",
+    "method": "POST",
+    "url": "/books",
+    "request": {
+      "categoryId": 1,
+      "title": ""
+    },
+    "status": 400,
+    "response": {
+      "message": [
+        "title should not be empty"
+      ],
+      "error": "Bad Request",
+      "statusCode": 400
+    }
+  },
+  {
+    "label": "공백 제목 차단",
+    "method": "POST",
+    "url": "/books",
+    "request": {
+      "categoryId": 1,
+      "title": "   "
+    },
+    "status": 400,
+    "response": {
+      "message": [
+        "title should not be empty"
+      ],
+      "error": "Bad Request",
+      "statusCode": 400
+    }
+  },
+  {
+    "label": "제목 누락",
+    "method": "POST",
+    "url": "/books",
+    "request": {
+      "categoryId": 1
+    },
+    "status": 400,
+    "response": {
+      "message": [
+        "title must be shorter than or equal to 100 characters",
+        "title should not be empty",
+        "title must be a string"
+      ],
+      "error": "Bad Request",
+      "statusCode": 400
+    }
+  },
+  {
+    "label": "101자 제목",
+    "method": "POST",
+    "url": "/books",
+    "request": {
+      "categoryId": 1,
+      "title": "가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가가"
+    },
+    "status": 400,
+    "response": {
+      "message": [
+        "title must be shorter than or equal to 100 characters"
+      ],
+      "error": "Bad Request",
+      "statusCode": 400
+    }
+  },
+  {
+    "label": "문자열 카테고리 차단",
+    "method": "POST",
+    "url": "/books",
+    "request": {
+      "categoryId": "1",
+      "title": "잘못된 타입"
+    },
+    "status": 400,
+    "response": {
+      "message": [
+        "categoryId must not be greater than 9007199254740991",
+        "categoryId must not be less than 1",
+        "categoryId must be an integer number"
+      ],
+      "error": "Bad Request",
+      "statusCode": 400
+    }
+  },
+  {
+    "label": "카테고리 0 차단",
+    "method": "POST",
+    "url": "/books",
+    "request": {
+      "categoryId": 0,
+      "title": "잘못된 번호"
+    },
+    "status": 400,
+    "response": {
+      "message": [
+        "categoryId must not be less than 1"
+      ],
+      "error": "Bad Request",
+      "statusCode": 400
+    }
+  },
+  {
+    "label": "없는 카테고리",
+    "method": "POST",
+    "url": "/books",
+    "request": {
+      "categoryId": 999999,
+      "title": "없는 카테고리"
+    },
+    "status": 404,
+    "response": {
+      "message": "존재하지 않는 카테고리입니다.",
+      "error": "Not Found",
+      "statusCode": 404
+    }
+  },
+  {
+    "label": "알 수 없는 필드 차단",
+    "method": "POST",
+    "url": "/books",
+    "request": {
+      "categoryId": 1,
+      "title": "오타",
+      "titel": "오타"
+    },
+    "status": 400,
+    "response": {
+      "message": [
+        "property titel should not exist"
+      ],
+      "error": "Bad Request",
+      "statusCode": 400
+    }
+  },
+  {
+    "label": "description 타입 오류",
+    "method": "POST",
+    "url": "/books",
+    "request": {
+      "categoryId": 1,
+      "title": "설명 타입 오류",
+      "description": 1
+    },
+    "status": 400,
+    "response": {
+      "message": [
+        "description must be a string"
+      ],
+      "error": "Bad Request",
+      "statusCode": 400
+    }
+  },
+  {
+    "label": "description 생략",
+    "method": "POST",
+    "url": "/books",
+    "request": {
+      "categoryId": 1,
+      "title": "스프링 ORM 실습 1791356856383 설명 없음"
+    },
+    "status": 201,
+    "response": {
+      "bookId": "8",
+      "title": "스프링 ORM 실습 1791356856383 설명 없음",
+      "description": null,
+      "categoryName": "문학",
+      "isAvailable": true
+    }
+  },
+  {
+    "label": "기존 카테고리 조회 유지",
+    "method": "GET",
+    "url": "/books/category/1",
+    "request": null,
+    "status": 200,
+    "response": [
+      {
+        "bookId": "8",
+        "title": "스프링 ORM 실습 1791356856383 설명 없음",
+        "description": null,
+        "categoryName": "문학",
+        "isAvailable": true
+      },
+      {
+        "bookId": "6",
+        "title": "스프링 ORM 실습 1791356856383",
+        "description": "4주차 ORM 검증",
+        "categoryName": "문학",
+        "isAvailable": true
+      },
+      {
+        "bookId": "5",
+        "title": "해리포터",
+        "description": null,
+        "categoryName": "문학",
+        "isAvailable": true
+      },
+      {
+        "bookId": "4",
+        "title": "클린 코드",
+        "description": "애자일 소프트웨어 장인 정신",
+        "categoryName": "문학",
+        "isAvailable": true
+      },
+      {
+        "bookId": "2",
+        "title": "겨울의 편지",
+        "description": "에세이",
+        "categoryName": "문학",
+        "isAvailable": false
+      },
+      {
+        "bookId": "1",
+        "title": "달빛 도서관",
+        "description": "소설",
+        "categoryName": "문학",
+        "isAvailable": true
+      }
+    ]
+  },
+  {
+    "label": "잘못된 Path Parameter",
+    "method": "GET",
+    "url": "/books/category/abc",
+    "request": null,
+    "status": 400,
+    "response": {
+      "message": "Validation failed (numeric string is expected)",
+      "error": "Bad Request",
+      "statusCode": 400
+    }
+  },
+  {
+    "label": "동시 중복 등록",
+    "status": [
+      201,
+      409
+    ],
+    "response": "한 건만 저장됨"
+  }
+]
