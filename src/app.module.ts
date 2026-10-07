@@ -1,27 +1,41 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 import { databaseProviders } from './database.provider.js';
-import { BookController } from './book.controller.js';
 import { BookService } from './book.service.js';
 import { BookRepository } from './book.repository.js';
 import { RentalController } from './rental.controller.js';
 import { RentalService } from './rental.service.js';
 import { RentalRepository } from './rental.repository.js';
+import { BooksModule } from './books/books.module.js';
 
 @Module({
   imports: [
-    // 환경 변수를 애플리케이션 전역에서 사용 가능하도록 설정
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    TypeOrmModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        type: 'mysql' as const,
+        host: configService.get<string>('DB_HOST', 'localhost'),
+        port: configService.get<number>('DB_PORT', 3306),
+        username: configService.get<string>('DB_USER', 'root'),
+        password: configService.get<string>('DB_PASSWORD', ''),
+        database: configService.get<string>('DB_NAME', ''),
+        autoLoadEntities: true,
+        synchronize: false,
+      }),
+    }),
+    BooksModule,
   ],
-  controllers: [AppController, BookController, RentalController],
+  controllers: [AppController, RentalController],
   providers: [
-    ...databaseProviders, // 1. DB 커넥션 풀을 부품으로 등록
+    ...databaseProviders,
     AppService,
-    BookService, 
+    BookService,
     BookRepository,
     RentalService,
     RentalRepository,
