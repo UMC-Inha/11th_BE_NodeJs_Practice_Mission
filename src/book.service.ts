@@ -4,7 +4,6 @@ import { BookRepository } from './book.repository.js';
 
 @Injectable()
 export class BookService {
-  // 창고지기(BookRepository)를 주입받습니다.
   constructor(private readonly bookRepository: BookRepository) {}
 
   async getBooksByCategory(categoryId: number) {

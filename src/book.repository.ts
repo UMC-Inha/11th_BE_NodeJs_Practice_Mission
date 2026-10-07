@@ -19,8 +19,6 @@ export class BookRepository {
   async findAll(): Promise<any> {
     const sql = 'SELECT * FROM book';
 
-    // pool.query()는 [조회된 행들, 메타데이터 필드들] 형태의 배열을 돌려줍니다.
-    // 우리는 실제 행 데이터만 필요하므로 구조 분해 할당으로 [rows]만 쏙 꺼냅니다.
     const [rows] = await this.pool.query(sql);
     return rows;
   }
@@ -29,7 +27,6 @@ export class BookRepository {
     const sql =
       'INSERT INTO book (category_id, title, description, is_available) VALUES (?, ?, ?, true)';
 
-    // 두 번째 인자로 넘긴 배열이 ? 자리에 순서대로 안전하게 바인딩됩니다.
     const [result] = await this.pool.execute(sql, [
       body.categoryId,
       body.title,
