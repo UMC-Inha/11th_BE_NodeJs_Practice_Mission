@@ -1,5 +1,7 @@
 // src/book.controller.ts
 import { Body, Controller, Get, Param, ParseIntPipe, Post } from '@nestjs/common';
+import { CreateBookDto } from './create-book.dto.js';
+import type { BookResponseDto } from './book-response.dto.js';
 import { BookService } from './book.service.js';
 
 @Controller('books') // 이 컨트롤러로 들어오는 기본 주소: /books
@@ -15,12 +17,12 @@ export class BookController {
   }
 
   @Post()
-  async createBook(@Body() body: Record<string, any>): Promise<string> {
+  async createBook(@Body() body: CreateBookDto): Promise<BookResponseDto> {
     return this.bookService.createBook(body);
   }
 
   @Get()
-  async getBooks(): Promise<any> {
+  async getBooks(): Promise<BookResponseDto[]> {
     return await this.bookService.getAllBooks();
   }
 }

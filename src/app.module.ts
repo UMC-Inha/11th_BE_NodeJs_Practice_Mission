@@ -1,36 +1,34 @@
-// src/app.module.ts
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
-import { databaseProviders } from './database.provider.js';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { BooksModule } from './books.module.js';
+import { DatabaseModule } from './database.module.js';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
-import { BookController } from './book.controller.js';
-import { BookService } from './book.service.js';
-import { BookRepository } from './book.repository.js';
-
 import { RentalController } from './rental.controller.js';
 import { RentalService } from './rental.service.js';
 import { RentalRepository } from './rental.repository.js';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
+    ConfigModule.forRoot({ isGlobal: true }),
+    TypeOrmModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        type: 'mysql',
+        host: configService.getOrThrow<string>('DB_HOST'),
+        port: Number(configService.get('DB_PORT', 3306)),
+        username: configService.getOrThrow<string>('DB_USER'),
+        password: configService.getOrThrow<string>('DB_PASSWORD'),
+        database: configService.getOrThrow<string>('DB_NAME'),
+        autoLoadEntities: true,
+        synchronize: false,
+      }),
     }),
+    DatabaseModule,
+    BooksModule,
   ],
-  controllers: [
-    AppController,
-    RentalController,
-    BookController, // 추가!
-  ],
-  providers: [
-    ...databaseProviders,
-    AppService,
-    RentalService,
-    RentalRepository,
-    BookService, // 추가!
-    BookRepository, // 추가
-  ],
-  exports: [...databaseProviders],
+  controllers: [AppController, RentalController],
+  providers: [AppService, RentalService, RentalRepository],
 })
 export class AppModule {}
