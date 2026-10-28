@@ -1,0 +1,3057 @@
+{
+  "collection": {
+    "item": [
+      {
+        "id": "0b4a954b-2b28-4dfe-abca-f5df0b306849",
+        "name": "닉네임 중복 체크 - 이미 있음(수현)",
+        "request": {
+          "url": {
+            "path": [
+              "members",
+              "nickname",
+              "%EC%88%98%ED%98%84"
+            ],
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "method": "GET"
+        },
+        "response": [],
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "id": "06b9fb9f-c161-483c-9cb7-3433cdfdb31b",
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('200', () => pm.response.to.have.status(200));",
+                "pm.test('available false', () => pm.expect(pm.response.json()).to.eql({ available: false }));"
+              ],
+              "_lastExecutionId": "998e73f5-e8ce-4e2e-8abe-20ab16966d0e"
+            }
+          }
+        ]
+      },
+      {
+        "id": "a4b7d4f5-1166-4dfd-a045-31d2fade53e1",
+        "name": "닉네임 중복 체크 - 사용 가능(케빈)",
+        "request": {
+          "url": {
+            "path": [
+              "members",
+              "nickname",
+              "%EC%BC%80%EB%B9%88"
+            ],
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "method": "GET"
+        },
+        "response": [],
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "id": "9fcb1b73-5937-4dab-993d-fd26d83e60aa",
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('available true', () => pm.expect(pm.response.json()).to.eql({ available: true }));"
+              ],
+              "_lastExecutionId": "a508b06c-4b57-4b92-a399-410a3f7f4cca"
+            }
+          }
+        ]
+      },
+      {
+        "id": "e8161a9d-7cae-43f6-a5a3-0f3c63a4deb4",
+        "name": "이메일 중복 체크 - 이미 있음",
+        "request": {
+          "url": {
+            "path": [
+              "members",
+              "email",
+              "noco@umc.com"
+            ],
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "method": "GET"
+        },
+        "response": [],
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "id": "ea07da08-4277-450c-b177-2f2a41756781",
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('available false', () => pm.expect(pm.response.json()).to.eql({ available: false }));"
+              ],
+              "_lastExecutionId": "3669d8e1-7858-48fc-8de2-dbdb2be88935"
+            }
+          }
+        ]
+      },
+      {
+        "id": "85ec5702-ac1b-4b33-a9fd-5714006c3b70",
+        "name": "이메일 중복 체크 - 사용 가능",
+        "request": {
+          "url": {
+            "path": [
+              "members",
+              "email",
+              "kevin@umc.com"
+            ],
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "method": "GET"
+        },
+        "response": [],
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "id": "4be8828f-d737-493c-aac7-e9a63c691078",
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('available true', () => pm.expect(pm.response.json()).to.eql({ available: true }));"
+              ],
+              "_lastExecutionId": "48f82b41-aa8f-4b7e-a87e-179885b9e0c3"
+            }
+          }
+        ]
+      },
+      {
+        "id": "23fc8df2-87e5-48a0-b77b-fea0f7fbb1e1",
+        "name": "유저별 평점 조회 - 1번 회원 최신순",
+        "request": {
+          "url": {
+            "path": [
+              "members",
+              "1",
+              "ratings"
+            ],
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "method": "GET"
+        },
+        "response": [],
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "id": "d5b3dac8-d5b1-4313-b2db-8ba77527e085",
+              "type": "text/javascript",
+              "exec": [
+                "const body = pm.response.json();",
+                "pm.test('2건, ratingId 내림차순', () => pm.expect(body.map(r => r.ratingId)).to.eql([2, 1]));",
+                "pm.test('명세 6개 필드만', () => pm.expect(Object.keys(body[0])).to.eql(['ratingId','movieId','score','comment','createdAt','updatedAt']));"
+              ],
+              "_lastExecutionId": "92d2d1b7-c729-4e20-98bf-92f8c614e500"
+            }
+          }
+        ]
+      },
+      {
+        "id": "bcf34be5-e83f-4457-a609-8e73318108b9",
+        "name": "유저별 평점 조회 - 없는 회원 404",
+        "request": {
+          "url": {
+            "path": [
+              "members",
+              "999",
+              "ratings"
+            ],
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "method": "GET"
+        },
+        "response": [],
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "id": "ca7396b2-30f9-4286-a3e5-5ec8c5400f19",
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('404', () => pm.response.to.have.status(404));"
+              ],
+              "_lastExecutionId": "7c1d8d13-0c72-47fa-91f8-94cc1d4e8089"
+            }
+          }
+        ]
+      },
+      {
+        "id": "38dda5d1-dba9-4b82-8a46-1b0391bd693c",
+        "name": "(선택) 닉네임 1자 → 400",
+        "request": {
+          "url": {
+            "path": [
+              "members",
+              "nickname",
+              "a"
+            ],
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "method": "GET"
+        },
+        "response": [],
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "id": "757f0dfc-91cd-420d-8124-e32a5aae14cb",
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('400', () => pm.response.to.have.status(400));"
+              ],
+              "_lastExecutionId": "9d2ca6a6-f7aa-45ef-a6ba-94cbbc50c711"
+            }
+          }
+        ]
+      },
+      {
+        "id": "0f1d0b71-c429-45a0-bbc0-4b1182113618",
+        "name": "(선택) 이메일 형식 오류 → 400",
+        "request": {
+          "url": {
+            "path": [
+              "members",
+              "email",
+              "noco-umc.com"
+            ],
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "method": "GET"
+        },
+        "response": [],
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "id": "f4331872-fd11-40c0-b5f6-be8953195b3a",
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('400', () => pm.response.to.have.status(400));"
+              ],
+              "_lastExecutionId": "f6f40db2-4612-4431-b04e-1fd17b571468"
+            }
+          }
+        ]
+      },
+      {
+        "id": "01584df3-295c-4c51-b6c1-0aa2c655aa51",
+        "name": "(선택) 페이지네이션 page=1&size=1",
+        "request": {
+          "url": {
+            "path": [
+              "members",
+              "1",
+              "ratings"
+            ],
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "query": [
+              {
+                "key": "page",
+                "value": "1"
+              },
+              {
+                "key": "size",
+                "value": "1"
+              }
+            ],
+            "variable": []
+          },
+          "method": "GET"
+        },
+        "response": [],
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "id": "bb636b35-a492-44a7-9f03-b6857a40c8a5",
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('두 번째 페이지는 ratingId 1', () => pm.expect(pm.response.json().map(r => r.ratingId)).to.eql([1]));"
+              ],
+              "_lastExecutionId": "ca714201-5e81-4a78-9a21-f357d104618d"
+            }
+          }
+        ]
+      },
+      {
+        "id": "9c727ae3-6e55-4ced-b0e1-95b250bfd15d",
+        "name": "CORS - 허용 출처 5173",
+        "request": {
+          "url": {
+            "path": [
+              "members",
+              "nickname",
+              "noco"
+            ],
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "Origin",
+              "value": "http://localhost:5173"
+            }
+          ],
+          "method": "GET"
+        },
+        "response": [],
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "id": "9e170381-9c63-4466-bd04-ef128c5b247f",
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('Access-Control-Allow-Origin', () => pm.expect(pm.response.headers.get('Access-Control-Allow-Origin')).to.eql('http://localhost:5173'));"
+              ],
+              "_lastExecutionId": "244cb537-1a4d-4d04-9e46-7d161753db1f"
+            }
+          }
+        ]
+      },
+      {
+        "id": "d88b18dd-6308-4122-a028-d574b45617a4",
+        "name": "CORS - 허용 안 된 출처 (헤더 없음)",
+        "request": {
+          "url": {
+            "path": [
+              "members",
+              "nickname",
+              "noco"
+            ],
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "Origin",
+              "value": "http://localhost:8081"
+            }
+          ],
+          "method": "GET"
+        },
+        "response": [],
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "id": "0f395cb7-da8e-4e65-8769-d96d709fb789",
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('서버는 200', () => pm.response.to.have.status(200));",
+                "pm.test('허용 헤더 없음', () => pm.expect(pm.response.headers.has('Access-Control-Allow-Origin')).to.be.false);"
+              ],
+              "_lastExecutionId": "8e0e9332-63f1-4d8e-8ec3-96e19bbcbafd"
+            }
+          }
+        ]
+      }
+    ],
+    "event": [],
+    "variable": [
+      {
+        "type": "any",
+        "value": "http://localhost:3000",
+        "key": "baseUrl"
+      }
+    ],
+    "info": {
+      "_postman_id": "415d5895-3e39-49d0-92ff-6a52ce6a18b0",
+      "name": "UMC 5주차 영화 평점 API (케빈)",
+      "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+      "description": {
+        "content": "닉네임/이메일 중복 체크, 유저별 평점 조회, 선택 미션(형식 검증·페이지네이션)과 CORS 헤더 확인. sql/schema.sql + sql/seed.sql 시드 기준.",
+        "type": "text/plain"
+      }
+    }
+  },
+  "environment": {
+    "id": "8f773c15-5476-4f2f-b2f9-a0fce82775c1",
+    "values": []
+  },
+  "globals": {
+    "id": "fb8aaa7e-64d4-4cc7-a6e7-60568953b40a",
+    "values": []
+  },
+  "run": {
+    "stats": {
+      "iterations": {
+        "total": 1,
+        "pending": 0,
+        "failed": 0
+      },
+      "items": {
+        "total": 11,
+        "pending": 0,
+        "failed": 0
+      },
+      "scripts": {
+        "total": 11,
+        "pending": 0,
+        "failed": 0
+      },
+      "prerequests": {
+        "total": 11,
+        "pending": 0,
+        "failed": 0
+      },
+      "requests": {
+        "total": 11,
+        "pending": 0,
+        "failed": 0
+      },
+      "tests": {
+        "total": 11,
+        "pending": 0,
+        "failed": 0
+      },
+      "assertions": {
+        "total": 14,
+        "pending": 0,
+        "failed": 0
+      },
+      "testScripts": {
+        "total": 11,
+        "pending": 0,
+        "failed": 0
+      },
+      "prerequestScripts": {
+        "total": 0,
+        "pending": 0,
+        "failed": 0
+      }
+    },
+    "timings": {
+      "responseAverage": 2.909090909090909,
+      "responseMin": 1,
+      "responseMax": 11,
+      "responseSd": 3.028787499810488,
+      "dnsAverage": 0,
+      "dnsMin": 0,
+      "dnsMax": 0,
+      "dnsSd": 0,
+      "firstByteAverage": 0,
+      "firstByteMin": 0,
+      "firstByteMax": 0,
+      "firstByteSd": 0,
+      "started": 1793196977491,
+      "completed": 1793196977627
+    },
+    "executions": [
+      {
+        "cursor": {
+          "position": 0,
+          "iteration": 0,
+          "length": 11,
+          "cycles": 1,
+          "empty": false,
+          "eof": false,
+          "bof": true,
+          "cr": false,
+          "ref": "7a91b63c-8d34-4936-87fa-fa9a8ffb7e41",
+          "httpRequestId": "c7d8ce54-2e31-45eb-a5f2-f249a6cf8c62"
+        },
+        "item": {
+          "id": "0b4a954b-2b28-4dfe-abca-f5df0b306849",
+          "name": "닉네임 중복 체크 - 이미 있음(수현)",
+          "request": {
+            "url": {
+              "path": [
+                "members",
+                "nickname",
+                "%EC%88%98%ED%98%84"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "method": "GET"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "06b9fb9f-c161-483c-9cb7-3433cdfdb31b",
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => pm.response.to.have.status(200));",
+                  "pm.test('available false', () => pm.expect(pm.response.json()).to.eql({ available: false }));"
+                ],
+                "_lastExecutionId": "998e73f5-e8ce-4e2e-8abe-20ab16966d0e"
+              }
+            }
+          ]
+        },
+        "request": {
+          "url": {
+            "protocol": "http",
+            "port": "3000",
+            "path": [
+              "members",
+              "nickname",
+              "%EC%88%98%ED%98%84"
+            ],
+            "host": [
+              "localhost"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "User-Agent",
+              "value": "PostmanRuntime/7.39.1",
+              "system": true
+            },
+            {
+              "key": "Accept",
+              "value": "*/*",
+              "system": true
+            },
+            {
+              "key": "Cache-Control",
+              "value": "no-cache",
+              "system": true
+            },
+            {
+              "key": "Postman-Token",
+              "value": "566578fc-0f7f-426e-b00b-29e07610e367",
+              "system": true
+            },
+            {
+              "key": "Host",
+              "value": "localhost:3000",
+              "system": true
+            },
+            {
+              "key": "Accept-Encoding",
+              "value": "gzip, deflate, br",
+              "system": true
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive",
+              "system": true
+            }
+          ],
+          "method": "GET"
+        },
+        "response": {
+          "id": "86cba142-0f28-4abe-95ec-e4cbc3dc7666",
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "X-Powered-By",
+              "value": "Express"
+            },
+            {
+              "key": "Vary",
+              "value": "Origin"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "Content-Length",
+              "value": "19"
+            },
+            {
+              "key": "ETag",
+              "value": "W/\"13-vcCiU2TJw/EWt4qzlkcCHduWaTQ\""
+            },
+            {
+              "key": "Date",
+              "value": "Wed, 28 Oct 2026 14:16:17 GMT"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "Keep-Alive",
+              "value": "timeout=5"
+            }
+          ],
+          "stream": {
+            "type": "Buffer",
+            "data": [
+              123,
+              34,
+              97,
+              118,
+              97,
+              105,
+              108,
+              97,
+              98,
+              108,
+              101,
+              34,
+              58,
+              102,
+              97,
+              108,
+              115,
+              101,
+              125
+            ]
+          },
+          "cookie": [],
+          "responseTime": 11,
+          "responseSize": 19
+        },
+        "id": "0b4a954b-2b28-4dfe-abca-f5df0b306849",
+        "assertions": [
+          {
+            "assertion": "200",
+            "skipped": false
+          },
+          {
+            "assertion": "available false",
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "cursor": {
+          "ref": "0fc9e144-8f17-4018-bb3a-e711c185f95b",
+          "length": 11,
+          "cycles": 1,
+          "position": 1,
+          "iteration": 0,
+          "httpRequestId": "727465c1-a94f-424e-a11b-bf6b3ddceeaa"
+        },
+        "item": {
+          "id": "a4b7d4f5-1166-4dfd-a045-31d2fade53e1",
+          "name": "닉네임 중복 체크 - 사용 가능(케빈)",
+          "request": {
+            "url": {
+              "path": [
+                "members",
+                "nickname",
+                "%EC%BC%80%EB%B9%88"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "method": "GET"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "9fcb1b73-5937-4dab-993d-fd26d83e60aa",
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('available true', () => pm.expect(pm.response.json()).to.eql({ available: true }));"
+                ],
+                "_lastExecutionId": "a508b06c-4b57-4b92-a399-410a3f7f4cca"
+              }
+            }
+          ]
+        },
+        "request": {
+          "url": {
+            "protocol": "http",
+            "port": "3000",
+            "path": [
+              "members",
+              "nickname",
+              "%EC%BC%80%EB%B9%88"
+            ],
+            "host": [
+              "localhost"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "User-Agent",
+              "value": "PostmanRuntime/7.39.1",
+              "system": true
+            },
+            {
+              "key": "Accept",
+              "value": "*/*",
+              "system": true
+            },
+            {
+              "key": "Cache-Control",
+              "value": "no-cache",
+              "system": true
+            },
+            {
+              "key": "Postman-Token",
+              "value": "cf07b784-a251-439a-9b2c-57281b09f1e7",
+              "system": true
+            },
+            {
+              "key": "Host",
+              "value": "localhost:3000",
+              "system": true
+            },
+            {
+              "key": "Accept-Encoding",
+              "value": "gzip, deflate, br",
+              "system": true
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive",
+              "system": true
+            }
+          ],
+          "method": "GET"
+        },
+        "response": {
+          "id": "62463dd6-89b8-492c-84af-388a4f1e4dc2",
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "X-Powered-By",
+              "value": "Express"
+            },
+            {
+              "key": "Vary",
+              "value": "Origin"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "Content-Length",
+              "value": "18"
+            },
+            {
+              "key": "ETag",
+              "value": "W/\"12-Aimy5TBnYW7WAzHpRLoSkMxmC1Y\""
+            },
+            {
+              "key": "Date",
+              "value": "Wed, 28 Oct 2026 14:16:17 GMT"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "Keep-Alive",
+              "value": "timeout=5"
+            }
+          ],
+          "stream": {
+            "type": "Buffer",
+            "data": [
+              123,
+              34,
+              97,
+              118,
+              97,
+              105,
+              108,
+              97,
+              98,
+              108,
+              101,
+              34,
+              58,
+              116,
+              114,
+              117,
+              101,
+              125
+            ]
+          },
+          "cookie": [],
+          "responseTime": 2,
+          "responseSize": 18
+        },
+        "id": "a4b7d4f5-1166-4dfd-a045-31d2fade53e1",
+        "assertions": [
+          {
+            "assertion": "available true",
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "cursor": {
+          "ref": "c8700249-3a48-4a8a-a02b-8d925e05d282",
+          "length": 11,
+          "cycles": 1,
+          "position": 2,
+          "iteration": 0,
+          "httpRequestId": "f5760e62-921c-4c4a-8668-73f00fce7910"
+        },
+        "item": {
+          "id": "e8161a9d-7cae-43f6-a5a3-0f3c63a4deb4",
+          "name": "이메일 중복 체크 - 이미 있음",
+          "request": {
+            "url": {
+              "path": [
+                "members",
+                "email",
+                "noco@umc.com"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "method": "GET"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "ea07da08-4277-450c-b177-2f2a41756781",
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('available false', () => pm.expect(pm.response.json()).to.eql({ available: false }));"
+                ],
+                "_lastExecutionId": "3669d8e1-7858-48fc-8de2-dbdb2be88935"
+              }
+            }
+          ]
+        },
+        "request": {
+          "url": {
+            "protocol": "http",
+            "port": "3000",
+            "path": [
+              "members",
+              "email",
+              "noco@umc.com"
+            ],
+            "host": [
+              "localhost"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "User-Agent",
+              "value": "PostmanRuntime/7.39.1",
+              "system": true
+            },
+            {
+              "key": "Accept",
+              "value": "*/*",
+              "system": true
+            },
+            {
+              "key": "Cache-Control",
+              "value": "no-cache",
+              "system": true
+            },
+            {
+              "key": "Postman-Token",
+              "value": "20842745-1a8a-4b9e-9a80-55321931a3fb",
+              "system": true
+            },
+            {
+              "key": "Host",
+              "value": "localhost:3000",
+              "system": true
+            },
+            {
+              "key": "Accept-Encoding",
+              "value": "gzip, deflate, br",
+              "system": true
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive",
+              "system": true
+            }
+          ],
+          "method": "GET"
+        },
+        "response": {
+          "id": "51ca2300-ebe7-486d-8f84-95fbb94478bb",
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "X-Powered-By",
+              "value": "Express"
+            },
+            {
+              "key": "Vary",
+              "value": "Origin"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "Content-Length",
+              "value": "19"
+            },
+            {
+              "key": "ETag",
+              "value": "W/\"13-vcCiU2TJw/EWt4qzlkcCHduWaTQ\""
+            },
+            {
+              "key": "Date",
+              "value": "Wed, 28 Oct 2026 14:16:17 GMT"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "Keep-Alive",
+              "value": "timeout=5"
+            }
+          ],
+          "stream": {
+            "type": "Buffer",
+            "data": [
+              123,
+              34,
+              97,
+              118,
+              97,
+              105,
+              108,
+              97,
+              98,
+              108,
+              101,
+              34,
+              58,
+              102,
+              97,
+              108,
+              115,
+              101,
+              125
+            ]
+          },
+          "cookie": [],
+          "responseTime": 2,
+          "responseSize": 19
+        },
+        "id": "e8161a9d-7cae-43f6-a5a3-0f3c63a4deb4",
+        "assertions": [
+          {
+            "assertion": "available false",
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "cursor": {
+          "ref": "410aa2a2-ae53-49f9-992d-457a288e47fb",
+          "length": 11,
+          "cycles": 1,
+          "position": 3,
+          "iteration": 0,
+          "httpRequestId": "c238f581-49d6-4f86-857f-1e71407d2b0d"
+        },
+        "item": {
+          "id": "85ec5702-ac1b-4b33-a9fd-5714006c3b70",
+          "name": "이메일 중복 체크 - 사용 가능",
+          "request": {
+            "url": {
+              "path": [
+                "members",
+                "email",
+                "kevin@umc.com"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "method": "GET"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "4be8828f-d737-493c-aac7-e9a63c691078",
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('available true', () => pm.expect(pm.response.json()).to.eql({ available: true }));"
+                ],
+                "_lastExecutionId": "48f82b41-aa8f-4b7e-a87e-179885b9e0c3"
+              }
+            }
+          ]
+        },
+        "request": {
+          "url": {
+            "protocol": "http",
+            "port": "3000",
+            "path": [
+              "members",
+              "email",
+              "kevin@umc.com"
+            ],
+            "host": [
+              "localhost"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "User-Agent",
+              "value": "PostmanRuntime/7.39.1",
+              "system": true
+            },
+            {
+              "key": "Accept",
+              "value": "*/*",
+              "system": true
+            },
+            {
+              "key": "Cache-Control",
+              "value": "no-cache",
+              "system": true
+            },
+            {
+              "key": "Postman-Token",
+              "value": "1c78aa46-1171-4336-8a4e-8e63525f49d9",
+              "system": true
+            },
+            {
+              "key": "Host",
+              "value": "localhost:3000",
+              "system": true
+            },
+            {
+              "key": "Accept-Encoding",
+              "value": "gzip, deflate, br",
+              "system": true
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive",
+              "system": true
+            }
+          ],
+          "method": "GET"
+        },
+        "response": {
+          "id": "c4ffc993-b970-40de-9cc5-f0a3f68b595e",
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "X-Powered-By",
+              "value": "Express"
+            },
+            {
+              "key": "Vary",
+              "value": "Origin"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "Content-Length",
+              "value": "18"
+            },
+            {
+              "key": "ETag",
+              "value": "W/\"12-Aimy5TBnYW7WAzHpRLoSkMxmC1Y\""
+            },
+            {
+              "key": "Date",
+              "value": "Wed, 28 Oct 2026 14:16:17 GMT"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "Keep-Alive",
+              "value": "timeout=5"
+            }
+          ],
+          "stream": {
+            "type": "Buffer",
+            "data": [
+              123,
+              34,
+              97,
+              118,
+              97,
+              105,
+              108,
+              97,
+              98,
+              108,
+              101,
+              34,
+              58,
+              116,
+              114,
+              117,
+              101,
+              125
+            ]
+          },
+          "cookie": [],
+          "responseTime": 2,
+          "responseSize": 18
+        },
+        "id": "85ec5702-ac1b-4b33-a9fd-5714006c3b70",
+        "assertions": [
+          {
+            "assertion": "available true",
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "cursor": {
+          "ref": "c8ee9a9e-e896-43f6-89bd-56c349df14d7",
+          "length": 11,
+          "cycles": 1,
+          "position": 4,
+          "iteration": 0,
+          "httpRequestId": "4e91a718-bb7f-4d53-aefd-d975e361f436"
+        },
+        "item": {
+          "id": "23fc8df2-87e5-48a0-b77b-fea0f7fbb1e1",
+          "name": "유저별 평점 조회 - 1번 회원 최신순",
+          "request": {
+            "url": {
+              "path": [
+                "members",
+                "1",
+                "ratings"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "method": "GET"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "d5b3dac8-d5b1-4313-b2db-8ba77527e085",
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('2건, ratingId 내림차순', () => pm.expect(body.map(r => r.ratingId)).to.eql([2, 1]));",
+                  "pm.test('명세 6개 필드만', () => pm.expect(Object.keys(body[0])).to.eql(['ratingId','movieId','score','comment','createdAt','updatedAt']));"
+                ],
+                "_lastExecutionId": "92d2d1b7-c729-4e20-98bf-92f8c614e500"
+              }
+            }
+          ]
+        },
+        "request": {
+          "url": {
+            "protocol": "http",
+            "port": "3000",
+            "path": [
+              "members",
+              "1",
+              "ratings"
+            ],
+            "host": [
+              "localhost"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "User-Agent",
+              "value": "PostmanRuntime/7.39.1",
+              "system": true
+            },
+            {
+              "key": "Accept",
+              "value": "*/*",
+              "system": true
+            },
+            {
+              "key": "Cache-Control",
+              "value": "no-cache",
+              "system": true
+            },
+            {
+              "key": "Postman-Token",
+              "value": "5c6df54c-98b8-417f-a17c-2dfe97b9062c",
+              "system": true
+            },
+            {
+              "key": "Host",
+              "value": "localhost:3000",
+              "system": true
+            },
+            {
+              "key": "Accept-Encoding",
+              "value": "gzip, deflate, br",
+              "system": true
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive",
+              "system": true
+            }
+          ],
+          "method": "GET"
+        },
+        "response": {
+          "id": "dbbce212-a83e-4a4e-a021-6960d714f515",
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "X-Powered-By",
+              "value": "Express"
+            },
+            {
+              "key": "Vary",
+              "value": "Origin"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "Content-Length",
+              "value": "298"
+            },
+            {
+              "key": "ETag",
+              "value": "W/\"12a-ZpDsMzzzAO2MXk9ofR9mIav24Ss\""
+            },
+            {
+              "key": "Date",
+              "value": "Wed, 28 Oct 2026 14:16:17 GMT"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "Keep-Alive",
+              "value": "timeout=5"
+            }
+          ],
+          "stream": {
+            "type": "Buffer",
+            "data": [
+              91,
+              123,
+              34,
+              114,
+              97,
+              116,
+              105,
+              110,
+              103,
+              73,
+              100,
+              34,
+              58,
+              50,
+              44,
+              34,
+              109,
+              111,
+              118,
+              105,
+              101,
+              73,
+              100,
+              34,
+              58,
+              49,
+              53,
+              53,
+              44,
+              34,
+              115,
+              99,
+              111,
+              114,
+              101,
+              34,
+              58,
+              52,
+              44,
+              34,
+              99,
+              111,
+              109,
+              109,
+              101,
+              110,
+              116,
+              34,
+              58,
+              34,
+              235,
+              139,
+              164,
+              236,
+              139,
+              156,
+              32,
+              235,
+              180,
+              144,
+              235,
+              143,
+              132,
+              32,
+              235,
+              170,
+              133,
+              236,
+              158,
+              145,
+              34,
+              44,
+              34,
+              99,
+              114,
+              101,
+              97,
+              116,
+              101,
+              100,
+              65,
+              116,
+              34,
+              58,
+              34,
+              50,
+              48,
+              50,
+              54,
+              45,
+              49,
+              48,
+              45,
+              50,
+              56,
+              84,
+              49,
+              51,
+              58,
+              52,
+              54,
+              58,
+              48,
+              49,
+              46,
+              48,
+              48,
+              48,
+              90,
+              34,
+              44,
+              34,
+              117,
+              112,
+              100,
+              97,
+              116,
+              101,
+              100,
+              65,
+              116,
+              34,
+              58,
+              34,
+              50,
+              48,
+              50,
+              54,
+              45,
+              49,
+              48,
+              45,
+              50,
+              56,
+              84,
+              49,
+              51,
+              58,
+              52,
+              54,
+              58,
+              48,
+              49,
+              46,
+              48,
+              48,
+              48,
+              90,
+              34,
+              125,
+              44,
+              123,
+              34,
+              114,
+              97,
+              116,
+              105,
+              110,
+              103,
+              73,
+              100,
+              34,
+              58,
+              49,
+              44,
+              34,
+              109,
+              111,
+              118,
+              105,
+              101,
+              73,
+              100,
+              34,
+              58,
+              53,
+              53,
+              48,
+              44,
+              34,
+              115,
+              99,
+              111,
+              114,
+              101,
+              34,
+              58,
+              53,
+              44,
+              34,
+              99,
+              111,
+              109,
+              109,
+              101,
+              110,
+              116,
+              34,
+              58,
+              34,
+              236,
+              181,
+              156,
+              234,
+              179,
+              160,
+              236,
+              157,
+              152,
+              32,
+              236,
+              152,
+              129,
+              237,
+              153,
+              148,
+              33,
+              34,
+              44,
+              34,
+              99,
+              114,
+              101,
+              97,
+              116,
+              101,
+              100,
+              65,
+              116,
+              34,
+              58,
+              34,
+              50,
+              48,
+              50,
+              54,
+              45,
+              49,
+              48,
+              45,
+              50,
+              56,
+              84,
+              49,
+              51,
+              58,
+              52,
+              54,
+              58,
+              48,
+              49,
+              46,
+              48,
+              48,
+              48,
+              90,
+              34,
+              44,
+              34,
+              117,
+              112,
+              100,
+              97,
+              116,
+              101,
+              100,
+              65,
+              116,
+              34,
+              58,
+              34,
+              50,
+              48,
+              50,
+              54,
+              45,
+              49,
+              48,
+              45,
+              50,
+              56,
+              84,
+              49,
+              51,
+              58,
+              52,
+              54,
+              58,
+              48,
+              49,
+              46,
+              48,
+              48,
+              48,
+              90,
+              34,
+              125,
+              93
+            ]
+          },
+          "cookie": [],
+          "responseTime": 2,
+          "responseSize": 298
+        },
+        "id": "23fc8df2-87e5-48a0-b77b-fea0f7fbb1e1",
+        "assertions": [
+          {
+            "assertion": "2건, ratingId 내림차순",
+            "skipped": false
+          },
+          {
+            "assertion": "명세 6개 필드만",
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "cursor": {
+          "ref": "34200ae6-d0a3-4748-8ebc-9151518c5db0",
+          "length": 11,
+          "cycles": 1,
+          "position": 5,
+          "iteration": 0,
+          "httpRequestId": "0ac07591-d222-445d-a9e7-b47f754f285b"
+        },
+        "item": {
+          "id": "bcf34be5-e83f-4457-a609-8e73318108b9",
+          "name": "유저별 평점 조회 - 없는 회원 404",
+          "request": {
+            "url": {
+              "path": [
+                "members",
+                "999",
+                "ratings"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "method": "GET"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "ca7396b2-30f9-4286-a3e5-5ec8c5400f19",
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404', () => pm.response.to.have.status(404));"
+                ],
+                "_lastExecutionId": "7c1d8d13-0c72-47fa-91f8-94cc1d4e8089"
+              }
+            }
+          ]
+        },
+        "request": {
+          "url": {
+            "protocol": "http",
+            "port": "3000",
+            "path": [
+              "members",
+              "999",
+              "ratings"
+            ],
+            "host": [
+              "localhost"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "User-Agent",
+              "value": "PostmanRuntime/7.39.1",
+              "system": true
+            },
+            {
+              "key": "Accept",
+              "value": "*/*",
+              "system": true
+            },
+            {
+              "key": "Cache-Control",
+              "value": "no-cache",
+              "system": true
+            },
+            {
+              "key": "Postman-Token",
+              "value": "eb42d7ae-8ce8-4bf9-882f-0efda7442e5f",
+              "system": true
+            },
+            {
+              "key": "Host",
+              "value": "localhost:3000",
+              "system": true
+            },
+            {
+              "key": "Accept-Encoding",
+              "value": "gzip, deflate, br",
+              "system": true
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive",
+              "system": true
+            }
+          ],
+          "method": "GET"
+        },
+        "response": {
+          "id": "98f3ee40-cc69-4ffb-a216-cf03b8312b40",
+          "status": "Not Found",
+          "code": 404,
+          "header": [
+            {
+              "key": "X-Powered-By",
+              "value": "Express"
+            },
+            {
+              "key": "Vary",
+              "value": "Origin"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "Content-Length",
+              "value": "87"
+            },
+            {
+              "key": "ETag",
+              "value": "W/\"57-O0XEN/Lpk2VxSduW4LmPvS0nOhU\""
+            },
+            {
+              "key": "Date",
+              "value": "Wed, 28 Oct 2026 14:16:17 GMT"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "Keep-Alive",
+              "value": "timeout=5"
+            }
+          ],
+          "stream": {
+            "type": "Buffer",
+            "data": [
+              123,
+              34,
+              109,
+              101,
+              115,
+              115,
+              97,
+              103,
+              101,
+              34,
+              58,
+              34,
+              236,
+              161,
+              180,
+              236,
+              158,
+              172,
+              237,
+              149,
+              152,
+              236,
+              167,
+              128,
+              32,
+              236,
+              149,
+              138,
+              235,
+              138,
+              148,
+              32,
+              236,
+              156,
+              160,
+              236,
+              160,
+              128,
+              236,
+              158,
+              133,
+              235,
+              139,
+              136,
+              235,
+              139,
+              164,
+              46,
+              34,
+              44,
+              34,
+              101,
+              114,
+              114,
+              111,
+              114,
+              34,
+              58,
+              34,
+              78,
+              111,
+              116,
+              32,
+              70,
+              111,
+              117,
+              110,
+              100,
+              34,
+              44,
+              34,
+              115,
+              116,
+              97,
+              116,
+              117,
+              115,
+              67,
+              111,
+              100,
+              101,
+              34,
+              58,
+              52,
+              48,
+              52,
+              125
+            ]
+          },
+          "cookie": [],
+          "responseTime": 2,
+          "responseSize": 87
+        },
+        "id": "bcf34be5-e83f-4457-a609-8e73318108b9",
+        "assertions": [
+          {
+            "assertion": "404",
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "cursor": {
+          "ref": "731e8468-b682-487d-bd6a-d93d199f6a25",
+          "length": 11,
+          "cycles": 1,
+          "position": 6,
+          "iteration": 0,
+          "httpRequestId": "e7fe1852-ceb7-4ed8-bea7-790acb3d38f5"
+        },
+        "item": {
+          "id": "38dda5d1-dba9-4b82-8a46-1b0391bd693c",
+          "name": "(선택) 닉네임 1자 → 400",
+          "request": {
+            "url": {
+              "path": [
+                "members",
+                "nickname",
+                "a"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "method": "GET"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "757f0dfc-91cd-420d-8124-e32a5aae14cb",
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400', () => pm.response.to.have.status(400));"
+                ],
+                "_lastExecutionId": "9d2ca6a6-f7aa-45ef-a6ba-94cbbc50c711"
+              }
+            }
+          ]
+        },
+        "request": {
+          "url": {
+            "protocol": "http",
+            "port": "3000",
+            "path": [
+              "members",
+              "nickname",
+              "a"
+            ],
+            "host": [
+              "localhost"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "User-Agent",
+              "value": "PostmanRuntime/7.39.1",
+              "system": true
+            },
+            {
+              "key": "Accept",
+              "value": "*/*",
+              "system": true
+            },
+            {
+              "key": "Cache-Control",
+              "value": "no-cache",
+              "system": true
+            },
+            {
+              "key": "Postman-Token",
+              "value": "f1b48b79-28c1-4073-b9a4-2141cc682ebc",
+              "system": true
+            },
+            {
+              "key": "Host",
+              "value": "localhost:3000",
+              "system": true
+            },
+            {
+              "key": "Accept-Encoding",
+              "value": "gzip, deflate, br",
+              "system": true
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive",
+              "system": true
+            }
+          ],
+          "method": "GET"
+        },
+        "response": {
+          "id": "7ae4d162-d740-405b-8bac-1e47ce27ed2d",
+          "status": "Bad Request",
+          "code": 400,
+          "header": [
+            {
+              "key": "X-Powered-By",
+              "value": "Express"
+            },
+            {
+              "key": "Vary",
+              "value": "Origin"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "Content-Length",
+              "value": "99"
+            },
+            {
+              "key": "ETag",
+              "value": "W/\"63-gw14elctkzQgT2JeosU7pLzji8g\""
+            },
+            {
+              "key": "Date",
+              "value": "Wed, 28 Oct 2026 14:16:17 GMT"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "Keep-Alive",
+              "value": "timeout=5"
+            }
+          ],
+          "stream": {
+            "type": "Buffer",
+            "data": [
+              123,
+              34,
+              109,
+              101,
+              115,
+              115,
+              97,
+              103,
+              101,
+              34,
+              58,
+              91,
+              34,
+              235,
+              139,
+              137,
+              235,
+              132,
+              164,
+              236,
+              158,
+              132,
+              236,
+              157,
+              128,
+              32,
+              50,
+              126,
+              49,
+              50,
+              236,
+              158,
+              144,
+              235,
+              161,
+              156,
+              32,
+              236,
+              158,
+              133,
+              235,
+              160,
+              165,
+              237,
+              149,
+              180,
+              32,
+              236,
+              163,
+              188,
+              236,
+              132,
+              184,
+              236,
+              154,
+              148,
+              46,
+              34,
+              93,
+              44,
+              34,
+              101,
+              114,
+              114,
+              111,
+              114,
+              34,
+              58,
+              34,
+              66,
+              97,
+              100,
+              32,
+              82,
+              101,
+              113,
+              117,
+              101,
+              115,
+              116,
+              34,
+              44,
+              34,
+              115,
+              116,
+              97,
+              116,
+              117,
+              115,
+              67,
+              111,
+              100,
+              101,
+              34,
+              58,
+              52,
+              48,
+              48,
+              125
+            ]
+          },
+          "cookie": [],
+          "responseTime": 1,
+          "responseSize": 99
+        },
+        "id": "38dda5d1-dba9-4b82-8a46-1b0391bd693c",
+        "assertions": [
+          {
+            "assertion": "400",
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "cursor": {
+          "ref": "ff92285a-d22e-46a3-a02a-49f78454f515",
+          "length": 11,
+          "cycles": 1,
+          "position": 7,
+          "iteration": 0,
+          "httpRequestId": "6a5e7b59-ae21-4885-8a89-4485e9781e86"
+        },
+        "item": {
+          "id": "0f1d0b71-c429-45a0-bbc0-4b1182113618",
+          "name": "(선택) 이메일 형식 오류 → 400",
+          "request": {
+            "url": {
+              "path": [
+                "members",
+                "email",
+                "noco-umc.com"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "method": "GET"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "f4331872-fd11-40c0-b5f6-be8953195b3a",
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400', () => pm.response.to.have.status(400));"
+                ],
+                "_lastExecutionId": "f6f40db2-4612-4431-b04e-1fd17b571468"
+              }
+            }
+          ]
+        },
+        "request": {
+          "url": {
+            "protocol": "http",
+            "port": "3000",
+            "path": [
+              "members",
+              "email",
+              "noco-umc.com"
+            ],
+            "host": [
+              "localhost"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "User-Agent",
+              "value": "PostmanRuntime/7.39.1",
+              "system": true
+            },
+            {
+              "key": "Accept",
+              "value": "*/*",
+              "system": true
+            },
+            {
+              "key": "Cache-Control",
+              "value": "no-cache",
+              "system": true
+            },
+            {
+              "key": "Postman-Token",
+              "value": "cd47939c-9729-4382-8d95-b246647a6221",
+              "system": true
+            },
+            {
+              "key": "Host",
+              "value": "localhost:3000",
+              "system": true
+            },
+            {
+              "key": "Accept-Encoding",
+              "value": "gzip, deflate, br",
+              "system": true
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive",
+              "system": true
+            }
+          ],
+          "method": "GET"
+        },
+        "response": {
+          "id": "2ee7601c-d559-4b9f-94ee-0f6c8ef39b2a",
+          "status": "Bad Request",
+          "code": 400,
+          "header": [
+            {
+              "key": "X-Powered-By",
+              "value": "Express"
+            },
+            {
+              "key": "Vary",
+              "value": "Origin"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "Content-Length",
+              "value": "101"
+            },
+            {
+              "key": "ETag",
+              "value": "W/\"65-e3f18NZcEGhRarrqxxHJFewc2UA\""
+            },
+            {
+              "key": "Date",
+              "value": "Wed, 28 Oct 2026 14:16:17 GMT"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "Keep-Alive",
+              "value": "timeout=5"
+            }
+          ],
+          "stream": {
+            "type": "Buffer",
+            "data": [
+              123,
+              34,
+              109,
+              101,
+              115,
+              115,
+              97,
+              103,
+              101,
+              34,
+              58,
+              91,
+              34,
+              236,
+              157,
+              180,
+              235,
+              169,
+              148,
+              236,
+              157,
+              188,
+              32,
+              237,
+              152,
+              149,
+              236,
+              139,
+              157,
+              236,
+              157,
+              180,
+              32,
+              236,
+              152,
+              172,
+              235,
+              176,
+              148,
+              235,
+              165,
+              180,
+              236,
+              167,
+              128,
+              32,
+              236,
+              149,
+              138,
+              236,
+              138,
+              181,
+              235,
+              139,
+              136,
+              235,
+              139,
+              164,
+              46,
+              34,
+              93,
+              44,
+              34,
+              101,
+              114,
+              114,
+              111,
+              114,
+              34,
+              58,
+              34,
+              66,
+              97,
+              100,
+              32,
+              82,
+              101,
+              113,
+              117,
+              101,
+              115,
+              116,
+              34,
+              44,
+              34,
+              115,
+              116,
+              97,
+              116,
+              117,
+              115,
+              67,
+              111,
+              100,
+              101,
+              34,
+              58,
+              52,
+              48,
+              48,
+              125
+            ]
+          },
+          "cookie": [],
+          "responseTime": 1,
+          "responseSize": 101
+        },
+        "id": "0f1d0b71-c429-45a0-bbc0-4b1182113618",
+        "assertions": [
+          {
+            "assertion": "400",
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "cursor": {
+          "ref": "e1734dd1-77c0-41da-a258-b989b54a2e63",
+          "length": 11,
+          "cycles": 1,
+          "position": 8,
+          "iteration": 0,
+          "httpRequestId": "fe48c21a-7b10-4035-913f-84047b00739c"
+        },
+        "item": {
+          "id": "01584df3-295c-4c51-b6c1-0aa2c655aa51",
+          "name": "(선택) 페이지네이션 page=1&size=1",
+          "request": {
+            "url": {
+              "path": [
+                "members",
+                "1",
+                "ratings"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "size",
+                  "value": "1"
+                }
+              ],
+              "variable": []
+            },
+            "method": "GET"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "bb636b35-a492-44a7-9f03-b6857a40c8a5",
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('두 번째 페이지는 ratingId 1', () => pm.expect(pm.response.json().map(r => r.ratingId)).to.eql([1]));"
+                ],
+                "_lastExecutionId": "ca714201-5e81-4a78-9a21-f357d104618d"
+              }
+            }
+          ]
+        },
+        "request": {
+          "url": {
+            "protocol": "http",
+            "port": "3000",
+            "path": [
+              "members",
+              "1",
+              "ratings"
+            ],
+            "host": [
+              "localhost"
+            ],
+            "query": [
+              {
+                "key": "page",
+                "value": "1"
+              },
+              {
+                "key": "size",
+                "value": "1"
+              }
+            ],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "User-Agent",
+              "value": "PostmanRuntime/7.39.1",
+              "system": true
+            },
+            {
+              "key": "Accept",
+              "value": "*/*",
+              "system": true
+            },
+            {
+              "key": "Cache-Control",
+              "value": "no-cache",
+              "system": true
+            },
+            {
+              "key": "Postman-Token",
+              "value": "384d0cad-e655-4c1a-a2c6-311391fee427",
+              "system": true
+            },
+            {
+              "key": "Host",
+              "value": "localhost:3000",
+              "system": true
+            },
+            {
+              "key": "Accept-Encoding",
+              "value": "gzip, deflate, br",
+              "system": true
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive",
+              "system": true
+            }
+          ],
+          "method": "GET"
+        },
+        "response": {
+          "id": "1cd0a787-fc78-4bf5-a71b-65f09f5e2a7b",
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "X-Powered-By",
+              "value": "Express"
+            },
+            {
+              "key": "Vary",
+              "value": "Origin"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "Content-Length",
+              "value": "148"
+            },
+            {
+              "key": "ETag",
+              "value": "W/\"94-uzdesknwX1gQbUMdT5ln0A2zeLU\""
+            },
+            {
+              "key": "Date",
+              "value": "Wed, 28 Oct 2026 14:16:17 GMT"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "Keep-Alive",
+              "value": "timeout=5"
+            }
+          ],
+          "stream": {
+            "type": "Buffer",
+            "data": [
+              91,
+              123,
+              34,
+              114,
+              97,
+              116,
+              105,
+              110,
+              103,
+              73,
+              100,
+              34,
+              58,
+              49,
+              44,
+              34,
+              109,
+              111,
+              118,
+              105,
+              101,
+              73,
+              100,
+              34,
+              58,
+              53,
+              53,
+              48,
+              44,
+              34,
+              115,
+              99,
+              111,
+              114,
+              101,
+              34,
+              58,
+              53,
+              44,
+              34,
+              99,
+              111,
+              109,
+              109,
+              101,
+              110,
+              116,
+              34,
+              58,
+              34,
+              236,
+              181,
+              156,
+              234,
+              179,
+              160,
+              236,
+              157,
+              152,
+              32,
+              236,
+              152,
+              129,
+              237,
+              153,
+              148,
+              33,
+              34,
+              44,
+              34,
+              99,
+              114,
+              101,
+              97,
+              116,
+              101,
+              100,
+              65,
+              116,
+              34,
+              58,
+              34,
+              50,
+              48,
+              50,
+              54,
+              45,
+              49,
+              48,
+              45,
+              50,
+              56,
+              84,
+              49,
+              51,
+              58,
+              52,
+              54,
+              58,
+              48,
+              49,
+              46,
+              48,
+              48,
+              48,
+              90,
+              34,
+              44,
+              34,
+              117,
+              112,
+              100,
+              97,
+              116,
+              101,
+              100,
+              65,
+              116,
+              34,
+              58,
+              34,
+              50,
+              48,
+              50,
+              54,
+              45,
+              49,
+              48,
+              45,
+              50,
+              56,
+              84,
+              49,
+              51,
+              58,
+              52,
+              54,
+              58,
+              48,
+              49,
+              46,
+              48,
+              48,
+              48,
+              90,
+              34,
+              125,
+              93
+            ]
+          },
+          "cookie": [],
+          "responseTime": 7,
+          "responseSize": 148
+        },
+        "id": "01584df3-295c-4c51-b6c1-0aa2c655aa51",
+        "assertions": [
+          {
+            "assertion": "두 번째 페이지는 ratingId 1",
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "cursor": {
+          "ref": "190ceb02-0a7e-4af3-9bbf-2a4384de5599",
+          "length": 11,
+          "cycles": 1,
+          "position": 9,
+          "iteration": 0,
+          "httpRequestId": "5daf00c5-d51f-4069-8354-6c16c9af5cc5"
+        },
+        "item": {
+          "id": "9c727ae3-6e55-4ced-b0e1-95b250bfd15d",
+          "name": "CORS - 허용 출처 5173",
+          "request": {
+            "url": {
+              "path": [
+                "members",
+                "nickname",
+                "noco"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Origin",
+                "value": "http://localhost:5173"
+              }
+            ],
+            "method": "GET"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "9e170381-9c63-4466-bd04-ef128c5b247f",
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Access-Control-Allow-Origin', () => pm.expect(pm.response.headers.get('Access-Control-Allow-Origin')).to.eql('http://localhost:5173'));"
+                ],
+                "_lastExecutionId": "244cb537-1a4d-4d04-9e46-7d161753db1f"
+              }
+            }
+          ]
+        },
+        "request": {
+          "url": {
+            "protocol": "http",
+            "port": "3000",
+            "path": [
+              "members",
+              "nickname",
+              "noco"
+            ],
+            "host": [
+              "localhost"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "Origin",
+              "value": "http://localhost:5173"
+            },
+            {
+              "key": "User-Agent",
+              "value": "PostmanRuntime/7.39.1",
+              "system": true
+            },
+            {
+              "key": "Accept",
+              "value": "*/*",
+              "system": true
+            },
+            {
+              "key": "Cache-Control",
+              "value": "no-cache",
+              "system": true
+            },
+            {
+              "key": "Postman-Token",
+              "value": "a1f3c553-a4a9-4124-9bd0-fb363b914d6b",
+              "system": true
+            },
+            {
+              "key": "Host",
+              "value": "localhost:3000",
+              "system": true
+            },
+            {
+              "key": "Accept-Encoding",
+              "value": "gzip, deflate, br",
+              "system": true
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive",
+              "system": true
+            }
+          ],
+          "method": "GET"
+        },
+        "response": {
+          "id": "3cea8446-bcaa-472e-88a3-b08962d0dc22",
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "X-Powered-By",
+              "value": "Express"
+            },
+            {
+              "key": "Access-Control-Allow-Origin",
+              "value": "http://localhost:5173"
+            },
+            {
+              "key": "Vary",
+              "value": "Origin"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "Content-Length",
+              "value": "18"
+            },
+            {
+              "key": "ETag",
+              "value": "W/\"12-Aimy5TBnYW7WAzHpRLoSkMxmC1Y\""
+            },
+            {
+              "key": "Date",
+              "value": "Wed, 28 Oct 2026 14:16:17 GMT"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "Keep-Alive",
+              "value": "timeout=5"
+            }
+          ],
+          "stream": {
+            "type": "Buffer",
+            "data": [
+              123,
+              34,
+              97,
+              118,
+              97,
+              105,
+              108,
+              97,
+              98,
+              108,
+              101,
+              34,
+              58,
+              116,
+              114,
+              117,
+              101,
+              125
+            ]
+          },
+          "cookie": [],
+          "responseTime": 1,
+          "responseSize": 18
+        },
+        "id": "9c727ae3-6e55-4ced-b0e1-95b250bfd15d",
+        "assertions": [
+          {
+            "assertion": "Access-Control-Allow-Origin",
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "cursor": {
+          "ref": "c517cb7d-c056-442e-8b5b-3065e2393602",
+          "length": 11,
+          "cycles": 1,
+          "position": 10,
+          "iteration": 0,
+          "httpRequestId": "34f8fe71-3d2c-43ff-90a9-927317c3ce16"
+        },
+        "item": {
+          "id": "d88b18dd-6308-4122-a028-d574b45617a4",
+          "name": "CORS - 허용 안 된 출처 (헤더 없음)",
+          "request": {
+            "url": {
+              "path": [
+                "members",
+                "nickname",
+                "noco"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Origin",
+                "value": "http://localhost:8081"
+              }
+            ],
+            "method": "GET"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "0f395cb7-da8e-4e65-8769-d96d709fb789",
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('서버는 200', () => pm.response.to.have.status(200));",
+                  "pm.test('허용 헤더 없음', () => pm.expect(pm.response.headers.has('Access-Control-Allow-Origin')).to.be.false);"
+                ],
+                "_lastExecutionId": "8e0e9332-63f1-4d8e-8ec3-96e19bbcbafd"
+              }
+            }
+          ]
+        },
+        "request": {
+          "url": {
+            "protocol": "http",
+            "port": "3000",
+            "path": [
+              "members",
+              "nickname",
+              "noco"
+            ],
+            "host": [
+              "localhost"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "Origin",
+              "value": "http://localhost:8081"
+            },
+            {
+              "key": "User-Agent",
+              "value": "PostmanRuntime/7.39.1",
+              "system": true
+            },
+            {
+              "key": "Accept",
+              "value": "*/*",
+              "system": true
+            },
+            {
+              "key": "Cache-Control",
+              "value": "no-cache",
+              "system": true
+            },
+            {
+              "key": "Postman-Token",
+              "value": "92670996-c850-4f26-acce-e8f6f132a8cd",
+              "system": true
+            },
+            {
+              "key": "Host",
+              "value": "localhost:3000",
+              "system": true
+            },
+            {
+              "key": "Accept-Encoding",
+              "value": "gzip, deflate, br",
+              "system": true
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive",
+              "system": true
+            }
+          ],
+          "method": "GET"
+        },
+        "response": {
+          "id": "4f52574c-d8fc-4da9-84c2-657db3cdf805",
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "X-Powered-By",
+              "value": "Express"
+            },
+            {
+              "key": "Vary",
+              "value": "Origin"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "Content-Length",
+              "value": "18"
+            },
+            {
+              "key": "ETag",
+              "value": "W/\"12-Aimy5TBnYW7WAzHpRLoSkMxmC1Y\""
+            },
+            {
+              "key": "Date",
+              "value": "Wed, 28 Oct 2026 14:16:17 GMT"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "Keep-Alive",
+              "value": "timeout=5"
+            }
+          ],
+          "stream": {
+            "type": "Buffer",
+            "data": [
+              123,
+              34,
+              97,
+              118,
+              97,
+              105,
+              108,
+              97,
+              98,
+              108,
+              101,
+              34,
+              58,
+              116,
+              114,
+              117,
+              101,
+              125
+            ]
+          },
+          "cookie": [],
+          "responseTime": 1,
+          "responseSize": 18
+        },
+        "id": "d88b18dd-6308-4122-a028-d574b45617a4",
+        "assertions": [
+          {
+            "assertion": "서버는 200",
+            "skipped": false
+          },
+          {
+            "assertion": "허용 헤더 없음",
+            "skipped": false
+          }
+        ]
+      }
+    ],
+    "transfers": {
+      "responseTotal": 843
+    },
+    "failures": [],
+    "error": null
+  }
+}
