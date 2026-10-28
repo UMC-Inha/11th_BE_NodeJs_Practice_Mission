@@ -6,7 +6,9 @@ import { AppService } from "./app.service";
 import { Member } from "./entity/member.entity";
 import { Rating } from "./entity/rating.entity";
 import { MemberController } from "./controller/member.controller";
+import { RatingController } from "./controller/rating.controller";
 import { MemberService } from "./service/member.service";
+import { RatingService } from "./service/rating.service";
 
 @Module({
   imports: [
@@ -23,7 +25,7 @@ import { MemberService } from "./service/member.service";
     }),
     TypeOrmModule.forFeature([Member, Rating]),
   ],
-  controllers: [AppController, MemberController],
-  providers: [AppService, MemberService],
+  controllers: [AppController, MemberController, RatingController],
+  providers: [AppService, MemberService, RatingService],
 })
 export class AppModule {}
