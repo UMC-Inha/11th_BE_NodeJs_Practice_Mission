@@ -3,13 +3,13 @@ import { BaseTimeEntity } from "./base-time.entity.js";
 
 @Entity("member")
 export class Member extends BaseTimeEntity {
-  @PrimaryGeneratedColumn({ name: "member_id" })
+  @PrimaryGeneratedColumn({ name: "member_id", type: "bigint" })
   memberId: number;
 
   @Column({ unique: true, length: 254 })
   email: string;
 
-  @Column({ length: 60 })
+  @Column({ length: 60, select: false })
   password: string;
 
   @Column({ unique: true, length: 50 })
