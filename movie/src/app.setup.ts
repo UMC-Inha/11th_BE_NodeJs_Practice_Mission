@@ -1,4 +1,5 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { AllExceptionsFilter } from './filter/all-exceptions.filter.js';
 
 export const DEFAULT_CORS_ORIGIN = 'http://localhost:5173';
 
@@ -32,6 +33,11 @@ export function configureApp(
       // page=0&size=10 처럼 문자열로 들어온 Query 를 DTO 타입(number)으로 바꾼다.
       transform: true,
       whitelist: true,
+      // DTO 에 없는 값(예: password 외에 role 을 몰래 보내기)은 걸러내는 데서 끝내지 않고 400 으로 막는다.
+      forbidNonWhitelisted: true,
     }),
   );
+
+  // 어떤 오류든 { isSuccess:false, code, message, result:null } 로 통일한다.
+  app.useGlobalFilters(new AllExceptionsFilter());
 }
