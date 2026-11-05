@@ -1,0 +1,6177 @@
+{
+  "collection": {
+    "item": [
+      {
+        "id": "fb096313-cac7-44a1-a5e6-669dc34a13ce",
+        "name": "회원가입 성공 - 201 (password 응답 없음)",
+        "request": {
+          "url": {
+            "path": [
+              "members"
+            ],
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "method": "POST",
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"email\": \"viewer{{suffix}}@umc.com\",\n  \"password\": \"Umc!1234\",\n  \"nickname\": \"뷰어{{suffix}}\"\n}",
+            "options": {
+              "raw": {
+                "language": "json"
+              }
+            }
+          }
+        },
+        "response": [],
+        "event": [
+          {
+            "listen": "prerequest",
+            "script": {
+              "id": "e320632e-0d3c-4d6b-8ffe-28e436518bfe",
+              "type": "text/javascript",
+              "exec": [
+                "pm.collectionVariables.set('suffix', String(Date.now()).slice(-6));"
+              ],
+              "_lastExecutionId": "bde95694-f088-42dc-b101-6e882660b7a1"
+            }
+          },
+          {
+            "listen": "test",
+            "script": {
+              "id": "dfd7921a-2126-4d70-9a8b-cb63b080c78c",
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('201', () => pm.response.to.have.status(201));",
+                "pm.test('응답 본문', () => { const b = pm.response.json(); pm.expect(b.isSuccess).to.eql(true); pm.expect(b.code).to.eql('COMMON201'); pm.expect(Object.keys(b.result)).to.eql(['memberId','email','nickname']); pm.collectionVariables.set('memberA', b.result.memberId); });",
+                "pm.test('password 문자열이 응답에 없다', () => pm.expect(pm.response.text()).to.not.include('password'));"
+              ],
+              "_lastExecutionId": "34781c93-595a-40d1-b9ee-dc9dda847a59"
+            }
+          }
+        ]
+      },
+      {
+        "id": "0a85d975-05e1-4972-abc0-39b4bb21503e",
+        "name": "회원가입 성공 - 다른 회원 B 201",
+        "request": {
+          "url": {
+            "path": [
+              "members"
+            ],
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "method": "POST",
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"email\": \"other{{suffix}}@umc.com\",\n  \"password\": \"Umc!1234\",\n  \"nickname\": \"타인{{suffix}}\"\n}",
+            "options": {
+              "raw": {
+                "language": "json"
+              }
+            }
+          }
+        },
+        "response": [],
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "id": "1e65d234-96ba-4b27-b2cc-05c96440b590",
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('201', () => pm.response.to.have.status(201));",
+                "pm.test('응답 본문', () => { const b = pm.response.json(); pm.collectionVariables.set('memberB', b.result.memberId); });"
+              ],
+              "_lastExecutionId": "9d64f784-ec14-4c53-a675-cb26e266918d"
+            }
+          }
+        ]
+      },
+      {
+        "id": "b47bd635-5245-4050-aedd-bb9d76da3070",
+        "name": "검증 실패 - 이메일 형식 400",
+        "request": {
+          "url": {
+            "path": [
+              "members"
+            ],
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "method": "POST",
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"email\": \"umc-example.com\",\n  \"password\": \"Umc!1234\",\n  \"nickname\": \"뷰어{{suffix}}\"\n}",
+            "options": {
+              "raw": {
+                "language": "json"
+              }
+            }
+          }
+        },
+        "response": [],
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "id": "847fdaa8-a5df-4104-a85e-cb8408b3765e",
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('400', () => pm.response.to.have.status(400));",
+                "pm.test('실패 틀 COMMON400', () => { const b = pm.response.json(); pm.expect(b.isSuccess).to.eql(false); pm.expect(b.code).to.eql('COMMON400'); pm.expect(b.result).to.eql(null); pm.expect(b.message).to.eql('올바른 이메일 형식이 아닙니다.'); });"
+              ],
+              "_lastExecutionId": "81699056-bd11-4710-adcc-db412b2893a8"
+            }
+          }
+        ]
+      },
+      {
+        "id": "951da9ba-d262-4a95-acb1-4a1cbf54b4c6",
+        "name": "검증 실패 - 비밀번호 규칙 400",
+        "request": {
+          "url": {
+            "path": [
+              "members"
+            ],
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "method": "POST",
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"email\": \"x{{suffix}}@umc.com\",\n  \"password\": \"umc1234\",\n  \"nickname\": \"검증{{suffix}}\"\n}",
+            "options": {
+              "raw": {
+                "language": "json"
+              }
+            }
+          }
+        },
+        "response": [],
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "id": "f7560325-3603-40b0-9579-d1e9cff2d5e3",
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('400', () => pm.response.to.have.status(400));",
+                "pm.test('실패 틀 COMMON400', () => { const b = pm.response.json(); pm.expect(b.isSuccess).to.eql(false); pm.expect(b.code).to.eql('COMMON400'); pm.expect(b.result).to.eql(null); });"
+              ],
+              "_lastExecutionId": "b4c8c6a1-b72f-43c9-9f10-3327dcedbb35"
+            }
+          }
+        ]
+      },
+      {
+        "id": "579f231e-852e-4b90-83cf-43512fd7c0e8",
+        "name": "이메일 중복 - 409 MEMBER4091",
+        "request": {
+          "url": {
+            "path": [
+              "members"
+            ],
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "method": "POST",
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"email\": \"viewer{{suffix}}@umc.com\",\n  \"password\": \"Umc!1234\",\n  \"nickname\": \"새닉{{suffix}}\"\n}",
+            "options": {
+              "raw": {
+                "language": "json"
+              }
+            }
+          }
+        },
+        "response": [],
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "id": "0c4b90a2-7864-4b3a-b36e-e89ab7f9af41",
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('409', () => pm.response.to.have.status(409));",
+                "pm.test('실패 틀 MEMBER4091', () => { const b = pm.response.json(); pm.expect(b.isSuccess).to.eql(false); pm.expect(b.code).to.eql('MEMBER4091'); pm.expect(b.result).to.eql(null); pm.expect(b.message).to.eql('이미 사용 중인 이메일입니다.'); });"
+              ],
+              "_lastExecutionId": "7cbd0924-0eed-4506-9742-b424d75bc88e"
+            }
+          }
+        ]
+      },
+      {
+        "id": "c3ecd22b-fb20-42c0-ab70-2c54d039ecab",
+        "name": "닉네임 중복 - 409 MEMBER4092",
+        "request": {
+          "url": {
+            "path": [
+              "members"
+            ],
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "method": "POST",
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"email\": \"new{{suffix}}@umc.com\",\n  \"password\": \"Umc!1234\",\n  \"nickname\": \"뷰어{{suffix}}\"\n}",
+            "options": {
+              "raw": {
+                "language": "json"
+              }
+            }
+          }
+        },
+        "response": [],
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "id": "50cd1941-90fa-4880-af71-bccce28527f2",
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('409', () => pm.response.to.have.status(409));",
+                "pm.test('실패 틀 MEMBER4092', () => { const b = pm.response.json(); pm.expect(b.isSuccess).to.eql(false); pm.expect(b.code).to.eql('MEMBER4092'); pm.expect(b.result).to.eql(null); pm.expect(b.message).to.eql('이미 사용 중인 닉네임입니다.'); });"
+              ],
+              "_lastExecutionId": "d0932e17-95cc-4deb-a006-be37d30d951d"
+            }
+          }
+        ]
+      },
+      {
+        "id": "317dbbdc-eae3-4fc0-89d1-9e352c2394e7",
+        "name": "평점 등록 - 201 (result = ratingId)",
+        "request": {
+          "url": {
+            "path": [
+              "members",
+              "{{memberA}}",
+              "ratings"
+            ],
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "method": "POST",
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"movieId\": 550,\n  \"score\": 5,\n  \"comment\": \"최고의 영화!\"\n}",
+            "options": {
+              "raw": {
+                "language": "json"
+              }
+            }
+          }
+        },
+        "response": [],
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "id": "a709e692-032a-4bcb-b73c-579b5f896215",
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('201', () => pm.response.to.have.status(201));",
+                "pm.test('응답 본문', () => { const b = pm.response.json(); pm.expect(b.code).to.eql('COMMON201'); pm.expect(b.result).to.be.a('number'); pm.collectionVariables.set('ratingId', b.result); });"
+              ],
+              "_lastExecutionId": "25c11fae-d2fb-4d5b-82d7-efd18784bbae"
+            }
+          }
+        ]
+      },
+      {
+        "id": "aced078f-fd5f-4d07-b61b-b26c09770958",
+        "name": "같은 영화 중복 등록 - 409 RATING4091",
+        "request": {
+          "url": {
+            "path": [
+              "members",
+              "{{memberA}}",
+              "ratings"
+            ],
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "method": "POST",
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"movieId\": 550,\n  \"score\": 3\n}",
+            "options": {
+              "raw": {
+                "language": "json"
+              }
+            }
+          }
+        },
+        "response": [],
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "id": "37223381-eaea-4146-a0ef-589dcd2604b0",
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('409', () => pm.response.to.have.status(409));",
+                "pm.test('실패 틀 RATING4091', () => { const b = pm.response.json(); pm.expect(b.isSuccess).to.eql(false); pm.expect(b.code).to.eql('RATING4091'); pm.expect(b.result).to.eql(null); pm.expect(b.message).to.eql('이미 이 영화에 평점을 남기셨습니다.'); });"
+              ],
+              "_lastExecutionId": "b1b0b07c-5d5c-4802-8ca6-147660af6ef4"
+            }
+          }
+        ]
+      },
+      {
+        "id": "a8a56905-84c5-4a12-837e-5a44c65e917a",
+        "name": "별점 범위 오류 - 400",
+        "request": {
+          "url": {
+            "path": [
+              "members",
+              "{{memberA}}",
+              "ratings"
+            ],
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "method": "POST",
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"movieId\": 155,\n  \"score\": 6\n}",
+            "options": {
+              "raw": {
+                "language": "json"
+              }
+            }
+          }
+        },
+        "response": [],
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "id": "166cf9c9-17c0-4ad6-bf24-5a969c02868c",
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('400', () => pm.response.to.have.status(400));",
+                "pm.test('실패 틀 COMMON400', () => { const b = pm.response.json(); pm.expect(b.isSuccess).to.eql(false); pm.expect(b.code).to.eql('COMMON400'); pm.expect(b.result).to.eql(null); pm.expect(b.message).to.eql('별점은 5점 이하여야 합니다.'); });"
+              ],
+              "_lastExecutionId": "a22df3fd-3ec7-4e33-8dd4-348483a6ed2e"
+            }
+          }
+        ]
+      },
+      {
+        "id": "3e76607e-0e39-4426-baf8-f784c8f9d520",
+        "name": "없는 회원에게 등록 - 404 MEMBER4041",
+        "request": {
+          "url": {
+            "path": [
+              "members",
+              "999999",
+              "ratings"
+            ],
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "method": "POST",
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"movieId\": 550,\n  \"score\": 5\n}",
+            "options": {
+              "raw": {
+                "language": "json"
+              }
+            }
+          }
+        },
+        "response": [],
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "id": "49a6c22c-bad0-46ed-bb0e-42c81ec5bdbb",
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('404', () => pm.response.to.have.status(404));",
+                "pm.test('실패 틀 MEMBER4041', () => { const b = pm.response.json(); pm.expect(b.isSuccess).to.eql(false); pm.expect(b.code).to.eql('MEMBER4041'); pm.expect(b.result).to.eql(null); });"
+              ],
+              "_lastExecutionId": "0ed1ff34-3213-4c6b-9076-005932ffe7b5"
+            }
+          }
+        ]
+      },
+      {
+        "id": "2b097957-5acd-414c-9ad3-33e1a1c5bb33",
+        "name": "평점 수정 - 200",
+        "request": {
+          "url": {
+            "path": [
+              "members",
+              "{{memberA}}",
+              "ratings",
+              "{{ratingId}}"
+            ],
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "method": "PATCH",
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"score\": 2,\n  \"comment\": \"다시 보니 별로\"\n}",
+            "options": {
+              "raw": {
+                "language": "json"
+              }
+            }
+          }
+        },
+        "response": [],
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "id": "69386927-63f9-4fca-ae65-ddb3e6f2d651",
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('200', () => pm.response.to.have.status(200));",
+                "pm.test('응답 본문', () => { const b = pm.response.json(); pm.expect(b).to.eql({ isSuccess: true, code: 'COMMON200', message: '평점 수정에 성공했습니다.', result: null }); });"
+              ],
+              "_lastExecutionId": "2da1b962-32a6-44c6-82d6-738455122f6b"
+            }
+          }
+        ]
+      },
+      {
+        "id": "405ca89d-6633-4ade-b80c-5b9b8779082d",
+        "name": "수정 결과 조회 (5주차 API)",
+        "request": {
+          "url": {
+            "path": [
+              "members",
+              "{{memberA}}",
+              "ratings"
+            ],
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "method": "GET"
+        },
+        "response": [],
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "id": "a5753186-f218-43d5-8ed5-e8fd176efec9",
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('200', () => pm.response.to.have.status(200));",
+                "pm.test('응답 본문', () => { const b = pm.response.json(); pm.expect(b).to.have.length(1); pm.expect(b[0].score).to.eql(2); pm.expect(b[0].comment).to.eql('다시 보니 별로'); });"
+              ],
+              "_lastExecutionId": "233292ad-974e-41e6-af3a-aa9ad5268dc9"
+            }
+          }
+        ]
+      },
+      {
+        "id": "ce79028c-dbad-47c8-bb3d-dfbd0dca6bcb",
+        "name": "다른 회원이 수정 - 403 RATING4031",
+        "request": {
+          "url": {
+            "path": [
+              "members",
+              "{{memberB}}",
+              "ratings",
+              "{{ratingId}}"
+            ],
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "method": "PATCH",
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"score\": 1\n}",
+            "options": {
+              "raw": {
+                "language": "json"
+              }
+            }
+          }
+        },
+        "response": [],
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "id": "a54b9fcc-2521-49ef-87f4-fcbf0bca4ee7",
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('403', () => pm.response.to.have.status(403));",
+                "pm.test('실패 틀 RATING4031', () => { const b = pm.response.json(); pm.expect(b.isSuccess).to.eql(false); pm.expect(b.code).to.eql('RATING4031'); pm.expect(b.result).to.eql(null); });"
+              ],
+              "_lastExecutionId": "198f8237-bad9-4c75-a293-8f723708b450"
+            }
+          }
+        ]
+      },
+      {
+        "id": "2101f417-6443-494e-baf9-55ddf0d071b7",
+        "name": "없는 ratingId 수정 - 404 RATING4041",
+        "request": {
+          "url": {
+            "path": [
+              "members",
+              "{{memberA}}",
+              "ratings",
+              "999999"
+            ],
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "method": "PATCH",
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"score\": 3\n}",
+            "options": {
+              "raw": {
+                "language": "json"
+              }
+            }
+          }
+        },
+        "response": [],
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "id": "a6c73dd2-7505-413b-b992-5d657481d77a",
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('404', () => pm.response.to.have.status(404));",
+                "pm.test('실패 틀 RATING4041', () => { const b = pm.response.json(); pm.expect(b.isSuccess).to.eql(false); pm.expect(b.code).to.eql('RATING4041'); pm.expect(b.result).to.eql(null); pm.expect(b.message).to.eql('존재하지 않는 평점입니다.'); });"
+              ],
+              "_lastExecutionId": "2670acf6-7408-4ad4-890e-42328827376b"
+            }
+          }
+        ]
+      },
+      {
+        "id": "2204aa7a-e925-4c74-8c04-41708c2e7bc5",
+        "name": "다른 회원이 삭제 - 403",
+        "request": {
+          "url": {
+            "path": [
+              "members",
+              "{{memberB}}",
+              "ratings",
+              "{{ratingId}}"
+            ],
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "method": "DELETE"
+        },
+        "response": [],
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "id": "530273db-0f31-48e0-9a40-b530a06e0132",
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('403', () => pm.response.to.have.status(403));",
+                "pm.test('실패 틀 RATING4031', () => { const b = pm.response.json(); pm.expect(b.isSuccess).to.eql(false); pm.expect(b.code).to.eql('RATING4031'); pm.expect(b.result).to.eql(null); });"
+              ],
+              "_lastExecutionId": "74452aac-3b7a-40e8-b91a-c62bf565afd8"
+            }
+          }
+        ]
+      },
+      {
+        "id": "0d295231-bfb4-4e19-8779-d3f08cacc57f",
+        "name": "평점 삭제 - 204 (본문 없음)",
+        "request": {
+          "url": {
+            "path": [
+              "members",
+              "{{memberA}}",
+              "ratings",
+              "{{ratingId}}"
+            ],
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "method": "DELETE"
+        },
+        "response": [],
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "id": "450d6074-196c-45b9-872b-904cacb24403",
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('204', () => pm.response.to.have.status(204));",
+                "pm.test('본문이 비어 있다', () => pm.expect(pm.response.text()).to.eql(''));"
+              ],
+              "_lastExecutionId": "5ce1e1be-8b36-44dc-93ec-4a083c490ccf"
+            }
+          }
+        ]
+      },
+      {
+        "id": "9ed07b35-e902-4918-997e-6613c00b744d",
+        "name": "삭제 후 조회 - 빈 배열",
+        "request": {
+          "url": {
+            "path": [
+              "members",
+              "{{memberA}}",
+              "ratings"
+            ],
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "method": "GET"
+        },
+        "response": [],
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "id": "b26e9cda-a15c-4db1-ba9e-76bda37183b9",
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('200', () => pm.response.to.have.status(200));",
+                "pm.test('응답 본문', () => { const b = pm.response.json(); pm.expect(b).to.eql([]); });"
+              ],
+              "_lastExecutionId": "285f1cc5-7bef-4efa-a7ed-fbcf731512c4"
+            }
+          }
+        ]
+      },
+      {
+        "id": "cffc4cf4-f065-4a2c-860e-452f38e80f84",
+        "name": "이미 삭제한 평점 다시 삭제 - 404",
+        "request": {
+          "url": {
+            "path": [
+              "members",
+              "{{memberA}}",
+              "ratings",
+              "{{ratingId}}"
+            ],
+            "host": [
+              "{{baseUrl}}"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "method": "DELETE"
+        },
+        "response": [],
+        "event": [
+          {
+            "listen": "test",
+            "script": {
+              "id": "2a9aaf62-3c17-4dd7-b352-5e3ef47c7ef6",
+              "type": "text/javascript",
+              "exec": [
+                "pm.test('404', () => pm.response.to.have.status(404));",
+                "pm.test('실패 틀 RATING4041', () => { const b = pm.response.json(); pm.expect(b.isSuccess).to.eql(false); pm.expect(b.code).to.eql('RATING4041'); pm.expect(b.result).to.eql(null); });"
+              ],
+              "_lastExecutionId": "6b35772a-ec96-4a3d-81a0-0f09027c80d8"
+            }
+          }
+        ]
+      }
+    ],
+    "event": [],
+    "variable": [
+      {
+        "type": "any",
+        "value": "http://localhost:3000",
+        "key": "baseUrl"
+      }
+    ],
+    "info": {
+      "_postman_id": "11143c80-26f9-4f27-bb2b-dc5e93c2c916",
+      "name": "UMC 6주차 회원가입·평점 쓰기 API (케빈)",
+      "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+      "description": {
+        "content": "회원가입 201/400/409, 평점 등록 201/400/404/409, 수정 200/403/404, 삭제 204/403/404. 5주차 조회 API로 결과 확인. sql/schema.sql + sql/seed.sql 기준이며 실행할 때마다 새 이메일·닉네임을 만든다.",
+        "type": "text/plain"
+      }
+    }
+  },
+  "environment": {
+    "id": "979223a4-0956-4ea7-99e3-2d2fae7deeae",
+    "values": [
+      {
+        "type": "any",
+        "value": "http://127.0.0.1:50295",
+        "key": "baseUrl"
+      }
+    ]
+  },
+  "globals": {
+    "id": "13c83f50-80c5-46ce-8608-f9b0611637e3",
+    "values": []
+  },
+  "run": {
+    "stats": {
+      "iterations": {
+        "total": 1,
+        "pending": 0,
+        "failed": 0
+      },
+      "items": {
+        "total": 18,
+        "pending": 0,
+        "failed": 0
+      },
+      "scripts": {
+        "total": 19,
+        "pending": 0,
+        "failed": 0
+      },
+      "prerequests": {
+        "total": 18,
+        "pending": 0,
+        "failed": 0
+      },
+      "requests": {
+        "total": 18,
+        "pending": 0,
+        "failed": 0
+      },
+      "tests": {
+        "total": 18,
+        "pending": 0,
+        "failed": 0
+      },
+      "assertions": {
+        "total": 37,
+        "pending": 0,
+        "failed": 0
+      },
+      "testScripts": {
+        "total": 18,
+        "pending": 0,
+        "failed": 0
+      },
+      "prerequestScripts": {
+        "total": 1,
+        "pending": 0,
+        "failed": 0
+      }
+    },
+    "timings": {
+      "responseAverage": 22.38888888888889,
+      "responseMin": 2,
+      "responseMax": 175,
+      "responseSd": 46.60011789313758,
+      "dnsAverage": 0,
+      "dnsMin": 0,
+      "dnsMax": 0,
+      "dnsSd": 0,
+      "firstByteAverage": 0,
+      "firstByteMin": 0,
+      "firstByteMax": 0,
+      "firstByteSd": 0,
+      "started": 1793884413698,
+      "completed": 1793884414387
+    },
+    "executions": [
+      {
+        "cursor": {
+          "position": 0,
+          "iteration": 0,
+          "length": 18,
+          "cycles": 1,
+          "empty": false,
+          "eof": false,
+          "bof": true,
+          "cr": false,
+          "ref": "9d31a5b9-65ab-4783-a261-30bcfd4e7e2c",
+          "httpRequestId": "023def60-4eb3-499a-bd27-5ae6deed7d37"
+        },
+        "item": {
+          "id": "fb096313-cac7-44a1-a5e6-669dc34a13ce",
+          "name": "회원가입 성공 - 201 (password 응답 없음)",
+          "request": {
+            "url": {
+              "path": [
+                "members"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"viewer{{suffix}}@umc.com\",\n  \"password\": \"Umc!1234\",\n  \"nickname\": \"뷰어{{suffix}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "id": "e320632e-0d3c-4d6b-8ffe-28e436518bfe",
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('suffix', String(Date.now()).slice(-6));"
+                ],
+                "_lastExecutionId": "bde95694-f088-42dc-b101-6e882660b7a1"
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "id": "dfd7921a-2126-4d70-9a8b-cb63b080c78c",
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201', () => pm.response.to.have.status(201));",
+                  "pm.test('응답 본문', () => { const b = pm.response.json(); pm.expect(b.isSuccess).to.eql(true); pm.expect(b.code).to.eql('COMMON201'); pm.expect(Object.keys(b.result)).to.eql(['memberId','email','nickname']); pm.collectionVariables.set('memberA', b.result.memberId); });",
+                  "pm.test('password 문자열이 응답에 없다', () => pm.expect(pm.response.text()).to.not.include('password'));"
+                ],
+                "_lastExecutionId": "34781c93-595a-40d1-b9ee-dc9dda847a59"
+              }
+            }
+          ]
+        },
+        "request": {
+          "url": {
+            "protocol": "http",
+            "port": "50295",
+            "path": [
+              "members"
+            ],
+            "host": [
+              "127",
+              "0",
+              "0",
+              "1"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "User-Agent",
+              "value": "PostmanRuntime/7.39.1",
+              "system": true
+            },
+            {
+              "key": "Accept",
+              "value": "*/*",
+              "system": true
+            },
+            {
+              "key": "Cache-Control",
+              "value": "no-cache",
+              "system": true
+            },
+            {
+              "key": "Postman-Token",
+              "value": "1c075c10-69f7-4d47-bed2-af82c71a0d0e",
+              "system": true
+            },
+            {
+              "key": "Host",
+              "value": "127.0.0.1:50295",
+              "system": true
+            },
+            {
+              "key": "Accept-Encoding",
+              "value": "gzip, deflate, br",
+              "system": true
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive",
+              "system": true
+            },
+            {
+              "key": "Content-Length",
+              "value": "93",
+              "system": true
+            }
+          ],
+          "method": "POST",
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"email\": \"viewer413717@umc.com\",\n  \"password\": \"Umc!1234\",\n  \"nickname\": \"뷰어413717\"\n}",
+            "options": {
+              "raw": {
+                "language": "json"
+              }
+            }
+          }
+        },
+        "response": {
+          "id": "f523abcc-120c-46ef-8b09-6a4154fd69ae",
+          "status": "Created",
+          "code": 201,
+          "header": [
+            {
+              "key": "X-Powered-By",
+              "value": "Express"
+            },
+            {
+              "key": "Vary",
+              "value": "Origin"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "Content-Length",
+              "value": "166"
+            },
+            {
+              "key": "ETag",
+              "value": "W/\"a6-dWt7TUZdjBpy9YndP1vlj9fEto0\""
+            },
+            {
+              "key": "Date",
+              "value": "Thu, 05 Nov 2026 13:13:33 GMT"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "Keep-Alive",
+              "value": "timeout=5"
+            }
+          ],
+          "stream": {
+            "type": "Buffer",
+            "data": [
+              123,
+              34,
+              105,
+              115,
+              83,
+              117,
+              99,
+              99,
+              101,
+              115,
+              115,
+              34,
+              58,
+              116,
+              114,
+              117,
+              101,
+              44,
+              34,
+              99,
+              111,
+              100,
+              101,
+              34,
+              58,
+              34,
+              67,
+              79,
+              77,
+              77,
+              79,
+              78,
+              50,
+              48,
+              49,
+              34,
+              44,
+              34,
+              109,
+              101,
+              115,
+              115,
+              97,
+              103,
+              101,
+              34,
+              58,
+              34,
+              237,
+              154,
+              140,
+              236,
+              155,
+              144,
+              234,
+              176,
+              128,
+              236,
+              158,
+              133,
+              236,
+              151,
+              144,
+              32,
+              236,
+              132,
+              177,
+              234,
+              179,
+              181,
+              237,
+              150,
+              136,
+              236,
+              138,
+              181,
+              235,
+              139,
+              136,
+              235,
+              139,
+              164,
+              46,
+              34,
+              44,
+              34,
+              114,
+              101,
+              115,
+              117,
+              108,
+              116,
+              34,
+              58,
+              123,
+              34,
+              109,
+              101,
+              109,
+              98,
+              101,
+              114,
+              73,
+              100,
+              34,
+              58,
+              51,
+              44,
+              34,
+              101,
+              109,
+              97,
+              105,
+              108,
+              34,
+              58,
+              34,
+              118,
+              105,
+              101,
+              119,
+              101,
+              114,
+              52,
+              49,
+              51,
+              55,
+              49,
+              55,
+              64,
+              117,
+              109,
+              99,
+              46,
+              99,
+              111,
+              109,
+              34,
+              44,
+              34,
+              110,
+              105,
+              99,
+              107,
+              110,
+              97,
+              109,
+              101,
+              34,
+              58,
+              34,
+              235,
+              183,
+              176,
+              236,
+              150,
+              180,
+              52,
+              49,
+              51,
+              55,
+              49,
+              55,
+              34,
+              125,
+              125
+            ]
+          },
+          "cookie": [],
+          "responseTime": 175,
+          "responseSize": 166
+        },
+        "id": "fb096313-cac7-44a1-a5e6-669dc34a13ce",
+        "assertions": [
+          {
+            "assertion": "201",
+            "skipped": false
+          },
+          {
+            "assertion": "응답 본문",
+            "skipped": false
+          },
+          {
+            "assertion": "password 문자열이 응답에 없다",
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "cursor": {
+          "ref": "929b47f1-b6a4-44dc-8a9f-41bd88b58823",
+          "length": 18,
+          "cycles": 1,
+          "position": 1,
+          "iteration": 0,
+          "httpRequestId": "b60bb4e1-fc52-41c8-98af-adbf3b994794"
+        },
+        "item": {
+          "id": "0a85d975-05e1-4972-abc0-39b4bb21503e",
+          "name": "회원가입 성공 - 다른 회원 B 201",
+          "request": {
+            "url": {
+              "path": [
+                "members"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"other{{suffix}}@umc.com\",\n  \"password\": \"Umc!1234\",\n  \"nickname\": \"타인{{suffix}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "1e65d234-96ba-4b27-b2cc-05c96440b590",
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201', () => pm.response.to.have.status(201));",
+                  "pm.test('응답 본문', () => { const b = pm.response.json(); pm.collectionVariables.set('memberB', b.result.memberId); });"
+                ],
+                "_lastExecutionId": "9d64f784-ec14-4c53-a675-cb26e266918d"
+              }
+            }
+          ]
+        },
+        "request": {
+          "url": {
+            "protocol": "http",
+            "port": "50295",
+            "path": [
+              "members"
+            ],
+            "host": [
+              "127",
+              "0",
+              "0",
+              "1"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "User-Agent",
+              "value": "PostmanRuntime/7.39.1",
+              "system": true
+            },
+            {
+              "key": "Accept",
+              "value": "*/*",
+              "system": true
+            },
+            {
+              "key": "Cache-Control",
+              "value": "no-cache",
+              "system": true
+            },
+            {
+              "key": "Postman-Token",
+              "value": "fe1c42f2-0c9c-4672-b302-52f1f07c7ff8",
+              "system": true
+            },
+            {
+              "key": "Host",
+              "value": "127.0.0.1:50295",
+              "system": true
+            },
+            {
+              "key": "Accept-Encoding",
+              "value": "gzip, deflate, br",
+              "system": true
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive",
+              "system": true
+            },
+            {
+              "key": "Content-Length",
+              "value": "92",
+              "system": true
+            }
+          ],
+          "method": "POST",
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"email\": \"other413717@umc.com\",\n  \"password\": \"Umc!1234\",\n  \"nickname\": \"타인413717\"\n}",
+            "options": {
+              "raw": {
+                "language": "json"
+              }
+            }
+          }
+        },
+        "response": {
+          "id": "4bd27408-96a3-4965-b6cc-353d8edcbce6",
+          "status": "Created",
+          "code": 201,
+          "header": [
+            {
+              "key": "X-Powered-By",
+              "value": "Express"
+            },
+            {
+              "key": "Vary",
+              "value": "Origin"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "Content-Length",
+              "value": "165"
+            },
+            {
+              "key": "ETag",
+              "value": "W/\"a5-09nVTUcNci1EbjWTck19JPDNaWY\""
+            },
+            {
+              "key": "Date",
+              "value": "Thu, 05 Nov 2026 13:13:34 GMT"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "Keep-Alive",
+              "value": "timeout=5"
+            }
+          ],
+          "stream": {
+            "type": "Buffer",
+            "data": [
+              123,
+              34,
+              105,
+              115,
+              83,
+              117,
+              99,
+              99,
+              101,
+              115,
+              115,
+              34,
+              58,
+              116,
+              114,
+              117,
+              101,
+              44,
+              34,
+              99,
+              111,
+              100,
+              101,
+              34,
+              58,
+              34,
+              67,
+              79,
+              77,
+              77,
+              79,
+              78,
+              50,
+              48,
+              49,
+              34,
+              44,
+              34,
+              109,
+              101,
+              115,
+              115,
+              97,
+              103,
+              101,
+              34,
+              58,
+              34,
+              237,
+              154,
+              140,
+              236,
+              155,
+              144,
+              234,
+              176,
+              128,
+              236,
+              158,
+              133,
+              236,
+              151,
+              144,
+              32,
+              236,
+              132,
+              177,
+              234,
+              179,
+              181,
+              237,
+              150,
+              136,
+              236,
+              138,
+              181,
+              235,
+              139,
+              136,
+              235,
+              139,
+              164,
+              46,
+              34,
+              44,
+              34,
+              114,
+              101,
+              115,
+              117,
+              108,
+              116,
+              34,
+              58,
+              123,
+              34,
+              109,
+              101,
+              109,
+              98,
+              101,
+              114,
+              73,
+              100,
+              34,
+              58,
+              52,
+              44,
+              34,
+              101,
+              109,
+              97,
+              105,
+              108,
+              34,
+              58,
+              34,
+              111,
+              116,
+              104,
+              101,
+              114,
+              52,
+              49,
+              51,
+              55,
+              49,
+              55,
+              64,
+              117,
+              109,
+              99,
+              46,
+              99,
+              111,
+              109,
+              34,
+              44,
+              34,
+              110,
+              105,
+              99,
+              107,
+              110,
+              97,
+              109,
+              101,
+              34,
+              58,
+              34,
+              237,
+              131,
+              128,
+              236,
+              157,
+              184,
+              52,
+              49,
+              51,
+              55,
+              49,
+              55,
+              34,
+              125,
+              125
+            ]
+          },
+          "cookie": [],
+          "responseTime": 128,
+          "responseSize": 165
+        },
+        "id": "0a85d975-05e1-4972-abc0-39b4bb21503e",
+        "assertions": [
+          {
+            "assertion": "201",
+            "skipped": false
+          },
+          {
+            "assertion": "응답 본문",
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "cursor": {
+          "ref": "45c554ac-51e6-4eac-ac35-cea646f605db",
+          "length": 18,
+          "cycles": 1,
+          "position": 2,
+          "iteration": 0,
+          "httpRequestId": "4a58f2df-181f-498a-ae96-685b3358956a"
+        },
+        "item": {
+          "id": "b47bd635-5245-4050-aedd-bb9d76da3070",
+          "name": "검증 실패 - 이메일 형식 400",
+          "request": {
+            "url": {
+              "path": [
+                "members"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"umc-example.com\",\n  \"password\": \"Umc!1234\",\n  \"nickname\": \"뷰어{{suffix}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "847fdaa8-a5df-4104-a85e-cb8408b3765e",
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400', () => pm.response.to.have.status(400));",
+                  "pm.test('실패 틀 COMMON400', () => { const b = pm.response.json(); pm.expect(b.isSuccess).to.eql(false); pm.expect(b.code).to.eql('COMMON400'); pm.expect(b.result).to.eql(null); pm.expect(b.message).to.eql('올바른 이메일 형식이 아닙니다.'); });"
+                ],
+                "_lastExecutionId": "81699056-bd11-4710-adcc-db412b2893a8"
+              }
+            }
+          ]
+        },
+        "request": {
+          "url": {
+            "protocol": "http",
+            "port": "50295",
+            "path": [
+              "members"
+            ],
+            "host": [
+              "127",
+              "0",
+              "0",
+              "1"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "User-Agent",
+              "value": "PostmanRuntime/7.39.1",
+              "system": true
+            },
+            {
+              "key": "Accept",
+              "value": "*/*",
+              "system": true
+            },
+            {
+              "key": "Cache-Control",
+              "value": "no-cache",
+              "system": true
+            },
+            {
+              "key": "Postman-Token",
+              "value": "dd5cf0f8-3ff1-4ffb-aad0-1b62b054db88",
+              "system": true
+            },
+            {
+              "key": "Host",
+              "value": "127.0.0.1:50295",
+              "system": true
+            },
+            {
+              "key": "Accept-Encoding",
+              "value": "gzip, deflate, br",
+              "system": true
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive",
+              "system": true
+            },
+            {
+              "key": "Content-Length",
+              "value": "88",
+              "system": true
+            }
+          ],
+          "method": "POST",
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"email\": \"umc-example.com\",\n  \"password\": \"Umc!1234\",\n  \"nickname\": \"뷰어413717\"\n}",
+            "options": {
+              "raw": {
+                "language": "json"
+              }
+            }
+          }
+        },
+        "response": {
+          "id": "1e0a6684-19e1-46cb-a9d3-09cd77102ccd",
+          "status": "Bad Request",
+          "code": 400,
+          "header": [
+            {
+              "key": "X-Powered-By",
+              "value": "Express"
+            },
+            {
+              "key": "Vary",
+              "value": "Origin"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "Content-Length",
+              "value": "108"
+            },
+            {
+              "key": "ETag",
+              "value": "W/\"6c-vUKJSWAVJ5d4S9PYXplBevSkbxo\""
+            },
+            {
+              "key": "Date",
+              "value": "Thu, 05 Nov 2026 13:13:34 GMT"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "Keep-Alive",
+              "value": "timeout=5"
+            }
+          ],
+          "stream": {
+            "type": "Buffer",
+            "data": [
+              123,
+              34,
+              105,
+              115,
+              83,
+              117,
+              99,
+              99,
+              101,
+              115,
+              115,
+              34,
+              58,
+              102,
+              97,
+              108,
+              115,
+              101,
+              44,
+              34,
+              99,
+              111,
+              100,
+              101,
+              34,
+              58,
+              34,
+              67,
+              79,
+              77,
+              77,
+              79,
+              78,
+              52,
+              48,
+              48,
+              34,
+              44,
+              34,
+              109,
+              101,
+              115,
+              115,
+              97,
+              103,
+              101,
+              34,
+              58,
+              34,
+              236,
+              152,
+              172,
+              235,
+              176,
+              148,
+              235,
+              165,
+              184,
+              32,
+              236,
+              157,
+              180,
+              235,
+              169,
+              148,
+              236,
+              157,
+              188,
+              32,
+              237,
+              152,
+              149,
+              236,
+              139,
+              157,
+              236,
+              157,
+              180,
+              32,
+              236,
+              149,
+              132,
+              235,
+              139,
+              153,
+              235,
+              139,
+              136,
+              235,
+              139,
+              164,
+              46,
+              34,
+              44,
+              34,
+              114,
+              101,
+              115,
+              117,
+              108,
+              116,
+              34,
+              58,
+              110,
+              117,
+              108,
+              108,
+              125
+            ]
+          },
+          "cookie": [],
+          "responseTime": 3,
+          "responseSize": 108
+        },
+        "id": "b47bd635-5245-4050-aedd-bb9d76da3070",
+        "assertions": [
+          {
+            "assertion": "400",
+            "skipped": false
+          },
+          {
+            "assertion": "실패 틀 COMMON400",
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "cursor": {
+          "ref": "266550bb-450f-4e85-a7a5-3294101adf2c",
+          "length": 18,
+          "cycles": 1,
+          "position": 3,
+          "iteration": 0,
+          "httpRequestId": "24c82024-4e68-4579-870d-f637221a5356"
+        },
+        "item": {
+          "id": "951da9ba-d262-4a95-acb1-4a1cbf54b4c6",
+          "name": "검증 실패 - 비밀번호 규칙 400",
+          "request": {
+            "url": {
+              "path": [
+                "members"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"x{{suffix}}@umc.com\",\n  \"password\": \"umc1234\",\n  \"nickname\": \"검증{{suffix}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "f7560325-3603-40b0-9579-d1e9cff2d5e3",
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400', () => pm.response.to.have.status(400));",
+                  "pm.test('실패 틀 COMMON400', () => { const b = pm.response.json(); pm.expect(b.isSuccess).to.eql(false); pm.expect(b.code).to.eql('COMMON400'); pm.expect(b.result).to.eql(null); });"
+                ],
+                "_lastExecutionId": "b4c8c6a1-b72f-43c9-9f10-3327dcedbb35"
+              }
+            }
+          ]
+        },
+        "request": {
+          "url": {
+            "protocol": "http",
+            "port": "50295",
+            "path": [
+              "members"
+            ],
+            "host": [
+              "127",
+              "0",
+              "0",
+              "1"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "User-Agent",
+              "value": "PostmanRuntime/7.39.1",
+              "system": true
+            },
+            {
+              "key": "Accept",
+              "value": "*/*",
+              "system": true
+            },
+            {
+              "key": "Cache-Control",
+              "value": "no-cache",
+              "system": true
+            },
+            {
+              "key": "Postman-Token",
+              "value": "388855a4-bcdb-4c45-af2c-a588b250a772",
+              "system": true
+            },
+            {
+              "key": "Host",
+              "value": "127.0.0.1:50295",
+              "system": true
+            },
+            {
+              "key": "Accept-Encoding",
+              "value": "gzip, deflate, br",
+              "system": true
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive",
+              "system": true
+            },
+            {
+              "key": "Content-Length",
+              "value": "87",
+              "system": true
+            }
+          ],
+          "method": "POST",
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"email\": \"x413717@umc.com\",\n  \"password\": \"umc1234\",\n  \"nickname\": \"검증413717\"\n}",
+            "options": {
+              "raw": {
+                "language": "json"
+              }
+            }
+          }
+        },
+        "response": {
+          "id": "ca61d439-860e-4e88-a387-a03e16269861",
+          "status": "Bad Request",
+          "code": 400,
+          "header": [
+            {
+              "key": "X-Powered-By",
+              "value": "Express"
+            },
+            {
+              "key": "Vary",
+              "value": "Origin"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "Content-Length",
+              "value": "165"
+            },
+            {
+              "key": "ETag",
+              "value": "W/\"a5-XTiTXyu/Q+LfyKFT7Xv3sKsmqtM\""
+            },
+            {
+              "key": "Date",
+              "value": "Thu, 05 Nov 2026 13:13:34 GMT"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "Keep-Alive",
+              "value": "timeout=5"
+            }
+          ],
+          "stream": {
+            "type": "Buffer",
+            "data": [
+              123,
+              34,
+              105,
+              115,
+              83,
+              117,
+              99,
+              99,
+              101,
+              115,
+              115,
+              34,
+              58,
+              102,
+              97,
+              108,
+              115,
+              101,
+              44,
+              34,
+              99,
+              111,
+              100,
+              101,
+              34,
+              58,
+              34,
+              67,
+              79,
+              77,
+              77,
+              79,
+              78,
+              52,
+              48,
+              48,
+              34,
+              44,
+              34,
+              109,
+              101,
+              115,
+              115,
+              97,
+              103,
+              101,
+              34,
+              58,
+              34,
+              235,
+              185,
+              132,
+              235,
+              176,
+              128,
+              235,
+              178,
+              136,
+              237,
+              152,
+              184,
+              235,
+              138,
+              148,
+              32,
+              235,
+              140,
+              128,
+              235,
+              172,
+              184,
+              236,
+              158,
+              144,
+              47,
+              236,
+              134,
+              140,
+              235,
+              172,
+              184,
+              236,
+              158,
+              144,
+              47,
+              236,
+              136,
+              171,
+              236,
+              158,
+              144,
+              47,
+              237,
+              138,
+              185,
+              236,
+              136,
+              152,
+              235,
+              172,
+              184,
+              236,
+              158,
+              144,
+              235,
+              165,
+              188,
+              32,
+              237,
+              143,
+              172,
+              237,
+              149,
+              168,
+              237,
+              149,
+              156,
+              32,
+              56,
+              236,
+              158,
+              144,
+              32,
+              236,
+              157,
+              180,
+              236,
+              131,
+              129,
+              236,
+              157,
+              180,
+              236,
+              150,
+              180,
+              236,
+              149,
+              188,
+              32,
+              237,
+              149,
+              169,
+              235,
+              139,
+              136,
+              235,
+              139,
+              164,
+              46,
+              34,
+              44,
+              34,
+              114,
+              101,
+              115,
+              117,
+              108,
+              116,
+              34,
+              58,
+              110,
+              117,
+              108,
+              108,
+              125
+            ]
+          },
+          "cookie": [],
+          "responseTime": 4,
+          "responseSize": 165
+        },
+        "id": "951da9ba-d262-4a95-acb1-4a1cbf54b4c6",
+        "assertions": [
+          {
+            "assertion": "400",
+            "skipped": false
+          },
+          {
+            "assertion": "실패 틀 COMMON400",
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "cursor": {
+          "ref": "19e63e9e-c483-43a7-bb75-edb8e32b38bc",
+          "length": 18,
+          "cycles": 1,
+          "position": 4,
+          "iteration": 0,
+          "httpRequestId": "ffa10360-aebb-4755-a331-412b423cfd98"
+        },
+        "item": {
+          "id": "579f231e-852e-4b90-83cf-43512fd7c0e8",
+          "name": "이메일 중복 - 409 MEMBER4091",
+          "request": {
+            "url": {
+              "path": [
+                "members"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"viewer{{suffix}}@umc.com\",\n  \"password\": \"Umc!1234\",\n  \"nickname\": \"새닉{{suffix}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "0c4b90a2-7864-4b3a-b36e-e89ab7f9af41",
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('409', () => pm.response.to.have.status(409));",
+                  "pm.test('실패 틀 MEMBER4091', () => { const b = pm.response.json(); pm.expect(b.isSuccess).to.eql(false); pm.expect(b.code).to.eql('MEMBER4091'); pm.expect(b.result).to.eql(null); pm.expect(b.message).to.eql('이미 사용 중인 이메일입니다.'); });"
+                ],
+                "_lastExecutionId": "7cbd0924-0eed-4506-9742-b424d75bc88e"
+              }
+            }
+          ]
+        },
+        "request": {
+          "url": {
+            "protocol": "http",
+            "port": "50295",
+            "path": [
+              "members"
+            ],
+            "host": [
+              "127",
+              "0",
+              "0",
+              "1"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "User-Agent",
+              "value": "PostmanRuntime/7.39.1",
+              "system": true
+            },
+            {
+              "key": "Accept",
+              "value": "*/*",
+              "system": true
+            },
+            {
+              "key": "Cache-Control",
+              "value": "no-cache",
+              "system": true
+            },
+            {
+              "key": "Postman-Token",
+              "value": "2690d1ab-b56c-440f-a474-4ceacc32cdc5",
+              "system": true
+            },
+            {
+              "key": "Host",
+              "value": "127.0.0.1:50295",
+              "system": true
+            },
+            {
+              "key": "Accept-Encoding",
+              "value": "gzip, deflate, br",
+              "system": true
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive",
+              "system": true
+            },
+            {
+              "key": "Content-Length",
+              "value": "93",
+              "system": true
+            }
+          ],
+          "method": "POST",
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"email\": \"viewer413717@umc.com\",\n  \"password\": \"Umc!1234\",\n  \"nickname\": \"새닉413717\"\n}",
+            "options": {
+              "raw": {
+                "language": "json"
+              }
+            }
+          }
+        },
+        "response": {
+          "id": "65a1c9a7-eb30-4fc1-9017-cca20cb949db",
+          "status": "Conflict",
+          "code": 409,
+          "header": [
+            {
+              "key": "X-Powered-By",
+              "value": "Express"
+            },
+            {
+              "key": "Vary",
+              "value": "Origin"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "Content-Length",
+              "value": "106"
+            },
+            {
+              "key": "ETag",
+              "value": "W/\"6a-3R/wFtkMcpb2Jkwd6JRyW7MV5EQ\""
+            },
+            {
+              "key": "Date",
+              "value": "Thu, 05 Nov 2026 13:13:34 GMT"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "Keep-Alive",
+              "value": "timeout=5"
+            }
+          ],
+          "stream": {
+            "type": "Buffer",
+            "data": [
+              123,
+              34,
+              105,
+              115,
+              83,
+              117,
+              99,
+              99,
+              101,
+              115,
+              115,
+              34,
+              58,
+              102,
+              97,
+              108,
+              115,
+              101,
+              44,
+              34,
+              99,
+              111,
+              100,
+              101,
+              34,
+              58,
+              34,
+              77,
+              69,
+              77,
+              66,
+              69,
+              82,
+              52,
+              48,
+              57,
+              49,
+              34,
+              44,
+              34,
+              109,
+              101,
+              115,
+              115,
+              97,
+              103,
+              101,
+              34,
+              58,
+              34,
+              236,
+              157,
+              180,
+              235,
+              175,
+              184,
+              32,
+              236,
+              130,
+              172,
+              236,
+              154,
+              169,
+              32,
+              236,
+              164,
+              145,
+              236,
+              157,
+              184,
+              32,
+              236,
+              157,
+              180,
+              235,
+              169,
+              148,
+              236,
+              157,
+              188,
+              236,
+              158,
+              133,
+              235,
+              139,
+              136,
+              235,
+              139,
+              164,
+              46,
+              34,
+              44,
+              34,
+              114,
+              101,
+              115,
+              117,
+              108,
+              116,
+              34,
+              58,
+              110,
+              117,
+              108,
+              108,
+              125
+            ]
+          },
+          "cookie": [],
+          "responseTime": 4,
+          "responseSize": 106
+        },
+        "id": "579f231e-852e-4b90-83cf-43512fd7c0e8",
+        "assertions": [
+          {
+            "assertion": "409",
+            "skipped": false
+          },
+          {
+            "assertion": "실패 틀 MEMBER4091",
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "cursor": {
+          "ref": "62c56a8f-e247-4211-ba9d-9908a3f0a74f",
+          "length": 18,
+          "cycles": 1,
+          "position": 5,
+          "iteration": 0,
+          "httpRequestId": "a115957b-0175-4ae2-a674-58d62dee11f3"
+        },
+        "item": {
+          "id": "c3ecd22b-fb20-42c0-ab70-2c54d039ecab",
+          "name": "닉네임 중복 - 409 MEMBER4092",
+          "request": {
+            "url": {
+              "path": [
+                "members"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"new{{suffix}}@umc.com\",\n  \"password\": \"Umc!1234\",\n  \"nickname\": \"뷰어{{suffix}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "50cd1941-90fa-4880-af71-bccce28527f2",
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('409', () => pm.response.to.have.status(409));",
+                  "pm.test('실패 틀 MEMBER4092', () => { const b = pm.response.json(); pm.expect(b.isSuccess).to.eql(false); pm.expect(b.code).to.eql('MEMBER4092'); pm.expect(b.result).to.eql(null); pm.expect(b.message).to.eql('이미 사용 중인 닉네임입니다.'); });"
+                ],
+                "_lastExecutionId": "d0932e17-95cc-4deb-a006-be37d30d951d"
+              }
+            }
+          ]
+        },
+        "request": {
+          "url": {
+            "protocol": "http",
+            "port": "50295",
+            "path": [
+              "members"
+            ],
+            "host": [
+              "127",
+              "0",
+              "0",
+              "1"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "User-Agent",
+              "value": "PostmanRuntime/7.39.1",
+              "system": true
+            },
+            {
+              "key": "Accept",
+              "value": "*/*",
+              "system": true
+            },
+            {
+              "key": "Cache-Control",
+              "value": "no-cache",
+              "system": true
+            },
+            {
+              "key": "Postman-Token",
+              "value": "1b288ff8-3d0f-4e6a-b992-1bd9ab1c9d6b",
+              "system": true
+            },
+            {
+              "key": "Host",
+              "value": "127.0.0.1:50295",
+              "system": true
+            },
+            {
+              "key": "Accept-Encoding",
+              "value": "gzip, deflate, br",
+              "system": true
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive",
+              "system": true
+            },
+            {
+              "key": "Content-Length",
+              "value": "90",
+              "system": true
+            }
+          ],
+          "method": "POST",
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"email\": \"new413717@umc.com\",\n  \"password\": \"Umc!1234\",\n  \"nickname\": \"뷰어413717\"\n}",
+            "options": {
+              "raw": {
+                "language": "json"
+              }
+            }
+          }
+        },
+        "response": {
+          "id": "3edfe330-0c9b-4747-8d50-64e74b249690",
+          "status": "Conflict",
+          "code": 409,
+          "header": [
+            {
+              "key": "X-Powered-By",
+              "value": "Express"
+            },
+            {
+              "key": "Vary",
+              "value": "Origin"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "Content-Length",
+              "value": "106"
+            },
+            {
+              "key": "ETag",
+              "value": "W/\"6a-/hVbrUQi5zP6YySD0OYD699OHss\""
+            },
+            {
+              "key": "Date",
+              "value": "Thu, 05 Nov 2026 13:13:34 GMT"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "Keep-Alive",
+              "value": "timeout=5"
+            }
+          ],
+          "stream": {
+            "type": "Buffer",
+            "data": [
+              123,
+              34,
+              105,
+              115,
+              83,
+              117,
+              99,
+              99,
+              101,
+              115,
+              115,
+              34,
+              58,
+              102,
+              97,
+              108,
+              115,
+              101,
+              44,
+              34,
+              99,
+              111,
+              100,
+              101,
+              34,
+              58,
+              34,
+              77,
+              69,
+              77,
+              66,
+              69,
+              82,
+              52,
+              48,
+              57,
+              50,
+              34,
+              44,
+              34,
+              109,
+              101,
+              115,
+              115,
+              97,
+              103,
+              101,
+              34,
+              58,
+              34,
+              236,
+              157,
+              180,
+              235,
+              175,
+              184,
+              32,
+              236,
+              130,
+              172,
+              236,
+              154,
+              169,
+              32,
+              236,
+              164,
+              145,
+              236,
+              157,
+              184,
+              32,
+              235,
+              139,
+              137,
+              235,
+              132,
+              164,
+              236,
+              158,
+              132,
+              236,
+              158,
+              133,
+              235,
+              139,
+              136,
+              235,
+              139,
+              164,
+              46,
+              34,
+              44,
+              34,
+              114,
+              101,
+              115,
+              117,
+              108,
+              116,
+              34,
+              58,
+              110,
+              117,
+              108,
+              108,
+              125
+            ]
+          },
+          "cookie": [],
+          "responseTime": 4,
+          "responseSize": 106
+        },
+        "id": "c3ecd22b-fb20-42c0-ab70-2c54d039ecab",
+        "assertions": [
+          {
+            "assertion": "409",
+            "skipped": false
+          },
+          {
+            "assertion": "실패 틀 MEMBER4092",
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "cursor": {
+          "ref": "a3467f07-ef4a-4c68-b8a4-62692d8f085f",
+          "length": 18,
+          "cycles": 1,
+          "position": 6,
+          "iteration": 0,
+          "httpRequestId": "6e923c09-31b1-4d8e-a612-e2aa96788e84"
+        },
+        "item": {
+          "id": "317dbbdc-eae3-4fc0-89d1-9e352c2394e7",
+          "name": "평점 등록 - 201 (result = ratingId)",
+          "request": {
+            "url": {
+              "path": [
+                "members",
+                "{{memberA}}",
+                "ratings"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"movieId\": 550,\n  \"score\": 5,\n  \"comment\": \"최고의 영화!\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "a709e692-032a-4bcb-b73c-579b5f896215",
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('201', () => pm.response.to.have.status(201));",
+                  "pm.test('응답 본문', () => { const b = pm.response.json(); pm.expect(b.code).to.eql('COMMON201'); pm.expect(b.result).to.be.a('number'); pm.collectionVariables.set('ratingId', b.result); });"
+                ],
+                "_lastExecutionId": "25c11fae-d2fb-4d5b-82d7-efd18784bbae"
+              }
+            }
+          ]
+        },
+        "request": {
+          "url": {
+            "protocol": "http",
+            "port": "50295",
+            "path": [
+              "members",
+              "3",
+              "ratings"
+            ],
+            "host": [
+              "127",
+              "0",
+              "0",
+              "1"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "User-Agent",
+              "value": "PostmanRuntime/7.39.1",
+              "system": true
+            },
+            {
+              "key": "Accept",
+              "value": "*/*",
+              "system": true
+            },
+            {
+              "key": "Cache-Control",
+              "value": "no-cache",
+              "system": true
+            },
+            {
+              "key": "Postman-Token",
+              "value": "1941a0cf-0be3-423b-a78c-609524d23a8a",
+              "system": true
+            },
+            {
+              "key": "Host",
+              "value": "127.0.0.1:50295",
+              "system": true
+            },
+            {
+              "key": "Accept-Encoding",
+              "value": "gzip, deflate, br",
+              "system": true
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive",
+              "system": true
+            },
+            {
+              "key": "Content-Length",
+              "value": "68",
+              "system": true
+            }
+          ],
+          "method": "POST",
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"movieId\": 550,\n  \"score\": 5,\n  \"comment\": \"최고의 영화!\"\n}",
+            "options": {
+              "raw": {
+                "language": "json"
+              }
+            }
+          }
+        },
+        "response": {
+          "id": "e38c2bcf-fc6f-4e6c-8d0c-c69a0a8b089f",
+          "status": "Created",
+          "code": 201,
+          "header": [
+            {
+              "key": "X-Powered-By",
+              "value": "Express"
+            },
+            {
+              "key": "Vary",
+              "value": "Origin"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "Content-Length",
+              "value": "97"
+            },
+            {
+              "key": "ETag",
+              "value": "W/\"61-0Fu3k+JxPtnezOPbqFmMkliEMdA\""
+            },
+            {
+              "key": "Date",
+              "value": "Thu, 05 Nov 2026 13:13:34 GMT"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "Keep-Alive",
+              "value": "timeout=5"
+            }
+          ],
+          "stream": {
+            "type": "Buffer",
+            "data": [
+              123,
+              34,
+              105,
+              115,
+              83,
+              117,
+              99,
+              99,
+              101,
+              115,
+              115,
+              34,
+              58,
+              116,
+              114,
+              117,
+              101,
+              44,
+              34,
+              99,
+              111,
+              100,
+              101,
+              34,
+              58,
+              34,
+              67,
+              79,
+              77,
+              77,
+              79,
+              78,
+              50,
+              48,
+              49,
+              34,
+              44,
+              34,
+              109,
+              101,
+              115,
+              115,
+              97,
+              103,
+              101,
+              34,
+              58,
+              34,
+              237,
+              143,
+              137,
+              236,
+              160,
+              144,
+              32,
+              235,
+              147,
+              177,
+              235,
+              161,
+              157,
+              236,
+              151,
+              144,
+              32,
+              236,
+              132,
+              177,
+              234,
+              179,
+              181,
+              237,
+              150,
+              136,
+              236,
+              138,
+              181,
+              235,
+              139,
+              136,
+              235,
+              139,
+              164,
+              46,
+              34,
+              44,
+              34,
+              114,
+              101,
+              115,
+              117,
+              108,
+              116,
+              34,
+              58,
+              52,
+              125
+            ]
+          },
+          "cookie": [],
+          "responseTime": 23,
+          "responseSize": 97
+        },
+        "id": "317dbbdc-eae3-4fc0-89d1-9e352c2394e7",
+        "assertions": [
+          {
+            "assertion": "201",
+            "skipped": false
+          },
+          {
+            "assertion": "응답 본문",
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "cursor": {
+          "ref": "5105bc3e-6fc6-43c3-84c3-cdff384060ea",
+          "length": 18,
+          "cycles": 1,
+          "position": 7,
+          "iteration": 0,
+          "httpRequestId": "22f765d8-3bed-49f6-9477-8d3d5fa911fe"
+        },
+        "item": {
+          "id": "aced078f-fd5f-4d07-b61b-b26c09770958",
+          "name": "같은 영화 중복 등록 - 409 RATING4091",
+          "request": {
+            "url": {
+              "path": [
+                "members",
+                "{{memberA}}",
+                "ratings"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"movieId\": 550,\n  \"score\": 3\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "37223381-eaea-4146-a0ef-589dcd2604b0",
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('409', () => pm.response.to.have.status(409));",
+                  "pm.test('실패 틀 RATING4091', () => { const b = pm.response.json(); pm.expect(b.isSuccess).to.eql(false); pm.expect(b.code).to.eql('RATING4091'); pm.expect(b.result).to.eql(null); pm.expect(b.message).to.eql('이미 이 영화에 평점을 남기셨습니다.'); });"
+                ],
+                "_lastExecutionId": "b1b0b07c-5d5c-4802-8ca6-147660af6ef4"
+              }
+            }
+          ]
+        },
+        "request": {
+          "url": {
+            "protocol": "http",
+            "port": "50295",
+            "path": [
+              "members",
+              "3",
+              "ratings"
+            ],
+            "host": [
+              "127",
+              "0",
+              "0",
+              "1"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "User-Agent",
+              "value": "PostmanRuntime/7.39.1",
+              "system": true
+            },
+            {
+              "key": "Accept",
+              "value": "*/*",
+              "system": true
+            },
+            {
+              "key": "Cache-Control",
+              "value": "no-cache",
+              "system": true
+            },
+            {
+              "key": "Postman-Token",
+              "value": "13a718db-b496-4024-b956-433fbb7ef437",
+              "system": true
+            },
+            {
+              "key": "Host",
+              "value": "127.0.0.1:50295",
+              "system": true
+            },
+            {
+              "key": "Accept-Encoding",
+              "value": "gzip, deflate, br",
+              "system": true
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive",
+              "system": true
+            },
+            {
+              "key": "Content-Length",
+              "value": "34",
+              "system": true
+            }
+          ],
+          "method": "POST",
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"movieId\": 550,\n  \"score\": 3\n}",
+            "options": {
+              "raw": {
+                "language": "json"
+              }
+            }
+          }
+        },
+        "response": {
+          "id": "5eea9c93-c447-4aae-ad13-2aef1b8be176",
+          "status": "Conflict",
+          "code": 409,
+          "header": [
+            {
+              "key": "X-Powered-By",
+              "value": "Express"
+            },
+            {
+              "key": "Vary",
+              "value": "Origin"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "Content-Length",
+              "value": "116"
+            },
+            {
+              "key": "ETag",
+              "value": "W/\"74-WaLgUMePrnlhMGG5bJhqSwmM/vw\""
+            },
+            {
+              "key": "Date",
+              "value": "Thu, 05 Nov 2026 13:13:34 GMT"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "Keep-Alive",
+              "value": "timeout=5"
+            }
+          ],
+          "stream": {
+            "type": "Buffer",
+            "data": [
+              123,
+              34,
+              105,
+              115,
+              83,
+              117,
+              99,
+              99,
+              101,
+              115,
+              115,
+              34,
+              58,
+              102,
+              97,
+              108,
+              115,
+              101,
+              44,
+              34,
+              99,
+              111,
+              100,
+              101,
+              34,
+              58,
+              34,
+              82,
+              65,
+              84,
+              73,
+              78,
+              71,
+              52,
+              48,
+              57,
+              49,
+              34,
+              44,
+              34,
+              109,
+              101,
+              115,
+              115,
+              97,
+              103,
+              101,
+              34,
+              58,
+              34,
+              236,
+              157,
+              180,
+              235,
+              175,
+              184,
+              32,
+              236,
+              157,
+              180,
+              32,
+              236,
+              152,
+              129,
+              237,
+              153,
+              148,
+              236,
+              151,
+              144,
+              32,
+              237,
+              143,
+              137,
+              236,
+              160,
+              144,
+              236,
+              157,
+              132,
+              32,
+              235,
+              130,
+              168,
+              234,
+              184,
+              176,
+              236,
+              133,
+              168,
+              236,
+              138,
+              181,
+              235,
+              139,
+              136,
+              235,
+              139,
+              164,
+              46,
+              34,
+              44,
+              34,
+              114,
+              101,
+              115,
+              117,
+              108,
+              116,
+              34,
+              58,
+              110,
+              117,
+              108,
+              108,
+              125
+            ]
+          },
+          "cookie": [],
+          "responseTime": 4,
+          "responseSize": 116
+        },
+        "id": "aced078f-fd5f-4d07-b61b-b26c09770958",
+        "assertions": [
+          {
+            "assertion": "409",
+            "skipped": false
+          },
+          {
+            "assertion": "실패 틀 RATING4091",
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "cursor": {
+          "ref": "e0de2e89-195e-427d-952d-1fc3e99dd037",
+          "length": 18,
+          "cycles": 1,
+          "position": 8,
+          "iteration": 0,
+          "httpRequestId": "0373f97a-e9e6-41ab-9989-6cd6a006a243"
+        },
+        "item": {
+          "id": "a8a56905-84c5-4a12-837e-5a44c65e917a",
+          "name": "별점 범위 오류 - 400",
+          "request": {
+            "url": {
+              "path": [
+                "members",
+                "{{memberA}}",
+                "ratings"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"movieId\": 155,\n  \"score\": 6\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "166cf9c9-17c0-4ad6-bf24-5a969c02868c",
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('400', () => pm.response.to.have.status(400));",
+                  "pm.test('실패 틀 COMMON400', () => { const b = pm.response.json(); pm.expect(b.isSuccess).to.eql(false); pm.expect(b.code).to.eql('COMMON400'); pm.expect(b.result).to.eql(null); pm.expect(b.message).to.eql('별점은 5점 이하여야 합니다.'); });"
+                ],
+                "_lastExecutionId": "a22df3fd-3ec7-4e33-8dd4-348483a6ed2e"
+              }
+            }
+          ]
+        },
+        "request": {
+          "url": {
+            "protocol": "http",
+            "port": "50295",
+            "path": [
+              "members",
+              "3",
+              "ratings"
+            ],
+            "host": [
+              "127",
+              "0",
+              "0",
+              "1"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "User-Agent",
+              "value": "PostmanRuntime/7.39.1",
+              "system": true
+            },
+            {
+              "key": "Accept",
+              "value": "*/*",
+              "system": true
+            },
+            {
+              "key": "Cache-Control",
+              "value": "no-cache",
+              "system": true
+            },
+            {
+              "key": "Postman-Token",
+              "value": "95f775a1-239c-4aa8-a853-8d24ece70a92",
+              "system": true
+            },
+            {
+              "key": "Host",
+              "value": "127.0.0.1:50295",
+              "system": true
+            },
+            {
+              "key": "Accept-Encoding",
+              "value": "gzip, deflate, br",
+              "system": true
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive",
+              "system": true
+            },
+            {
+              "key": "Content-Length",
+              "value": "34",
+              "system": true
+            }
+          ],
+          "method": "POST",
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"movieId\": 155,\n  \"score\": 6\n}",
+            "options": {
+              "raw": {
+                "language": "json"
+              }
+            }
+          }
+        },
+        "response": {
+          "id": "3334c865-9f1b-4644-b8ed-0e4eca60bbf2",
+          "status": "Bad Request",
+          "code": 400,
+          "header": [
+            {
+              "key": "X-Powered-By",
+              "value": "Express"
+            },
+            {
+              "key": "Vary",
+              "value": "Origin"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "Content-Length",
+              "value": "103"
+            },
+            {
+              "key": "ETag",
+              "value": "W/\"67-5g5c9PAvhILGHXok6LKce3v91Fw\""
+            },
+            {
+              "key": "Date",
+              "value": "Thu, 05 Nov 2026 13:13:34 GMT"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "Keep-Alive",
+              "value": "timeout=5"
+            }
+          ],
+          "stream": {
+            "type": "Buffer",
+            "data": [
+              123,
+              34,
+              105,
+              115,
+              83,
+              117,
+              99,
+              99,
+              101,
+              115,
+              115,
+              34,
+              58,
+              102,
+              97,
+              108,
+              115,
+              101,
+              44,
+              34,
+              99,
+              111,
+              100,
+              101,
+              34,
+              58,
+              34,
+              67,
+              79,
+              77,
+              77,
+              79,
+              78,
+              52,
+              48,
+              48,
+              34,
+              44,
+              34,
+              109,
+              101,
+              115,
+              115,
+              97,
+              103,
+              101,
+              34,
+              58,
+              34,
+              235,
+              179,
+              132,
+              236,
+              160,
+              144,
+              236,
+              157,
+              128,
+              32,
+              53,
+              236,
+              160,
+              144,
+              32,
+              236,
+              157,
+              180,
+              237,
+              149,
+              152,
+              236,
+              151,
+              172,
+              236,
+              149,
+              188,
+              32,
+              237,
+              149,
+              169,
+              235,
+              139,
+              136,
+              235,
+              139,
+              164,
+              46,
+              34,
+              44,
+              34,
+              114,
+              101,
+              115,
+              117,
+              108,
+              116,
+              34,
+              58,
+              110,
+              117,
+              108,
+              108,
+              125
+            ]
+          },
+          "cookie": [],
+          "responseTime": 2,
+          "responseSize": 103
+        },
+        "id": "a8a56905-84c5-4a12-837e-5a44c65e917a",
+        "assertions": [
+          {
+            "assertion": "400",
+            "skipped": false
+          },
+          {
+            "assertion": "실패 틀 COMMON400",
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "cursor": {
+          "ref": "087b1e21-17fc-48f5-abaa-871602af0011",
+          "length": 18,
+          "cycles": 1,
+          "position": 9,
+          "iteration": 0,
+          "httpRequestId": "574631c0-e6f6-4504-a926-27783aedeb2a"
+        },
+        "item": {
+          "id": "3e76607e-0e39-4426-baf8-f784c8f9d520",
+          "name": "없는 회원에게 등록 - 404 MEMBER4041",
+          "request": {
+            "url": {
+              "path": [
+                "members",
+                "999999",
+                "ratings"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "POST",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"movieId\": 550,\n  \"score\": 5\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "49a6c22c-bad0-46ed-bb0e-42c81ec5bdbb",
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404', () => pm.response.to.have.status(404));",
+                  "pm.test('실패 틀 MEMBER4041', () => { const b = pm.response.json(); pm.expect(b.isSuccess).to.eql(false); pm.expect(b.code).to.eql('MEMBER4041'); pm.expect(b.result).to.eql(null); });"
+                ],
+                "_lastExecutionId": "0ed1ff34-3213-4c6b-9076-005932ffe7b5"
+              }
+            }
+          ]
+        },
+        "request": {
+          "url": {
+            "protocol": "http",
+            "port": "50295",
+            "path": [
+              "members",
+              "999999",
+              "ratings"
+            ],
+            "host": [
+              "127",
+              "0",
+              "0",
+              "1"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "User-Agent",
+              "value": "PostmanRuntime/7.39.1",
+              "system": true
+            },
+            {
+              "key": "Accept",
+              "value": "*/*",
+              "system": true
+            },
+            {
+              "key": "Cache-Control",
+              "value": "no-cache",
+              "system": true
+            },
+            {
+              "key": "Postman-Token",
+              "value": "573f5270-213d-491d-95f7-8171f189dc0a",
+              "system": true
+            },
+            {
+              "key": "Host",
+              "value": "127.0.0.1:50295",
+              "system": true
+            },
+            {
+              "key": "Accept-Encoding",
+              "value": "gzip, deflate, br",
+              "system": true
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive",
+              "system": true
+            },
+            {
+              "key": "Content-Length",
+              "value": "34",
+              "system": true
+            }
+          ],
+          "method": "POST",
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"movieId\": 550,\n  \"score\": 5\n}",
+            "options": {
+              "raw": {
+                "language": "json"
+              }
+            }
+          }
+        },
+        "response": {
+          "id": "96cb2599-b5c3-4dd7-b5da-0554a1fcb234",
+          "status": "Not Found",
+          "code": 404,
+          "header": [
+            {
+              "key": "X-Powered-By",
+              "value": "Express"
+            },
+            {
+              "key": "Vary",
+              "value": "Origin"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "Content-Length",
+              "value": "102"
+            },
+            {
+              "key": "ETag",
+              "value": "W/\"66-TNoy3LqO4yU3DeVvPYabWdRzI9Y\""
+            },
+            {
+              "key": "Date",
+              "value": "Thu, 05 Nov 2026 13:13:34 GMT"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "Keep-Alive",
+              "value": "timeout=5"
+            }
+          ],
+          "stream": {
+            "type": "Buffer",
+            "data": [
+              123,
+              34,
+              105,
+              115,
+              83,
+              117,
+              99,
+              99,
+              101,
+              115,
+              115,
+              34,
+              58,
+              102,
+              97,
+              108,
+              115,
+              101,
+              44,
+              34,
+              99,
+              111,
+              100,
+              101,
+              34,
+              58,
+              34,
+              77,
+              69,
+              77,
+              66,
+              69,
+              82,
+              52,
+              48,
+              52,
+              49,
+              34,
+              44,
+              34,
+              109,
+              101,
+              115,
+              115,
+              97,
+              103,
+              101,
+              34,
+              58,
+              34,
+              236,
+              161,
+              180,
+              236,
+              158,
+              172,
+              237,
+              149,
+              152,
+              236,
+              167,
+              128,
+              32,
+              236,
+              149,
+              138,
+              235,
+              138,
+              148,
+              32,
+              236,
+              156,
+              160,
+              236,
+              160,
+              128,
+              236,
+              158,
+              133,
+              235,
+              139,
+              136,
+              235,
+              139,
+              164,
+              46,
+              34,
+              44,
+              34,
+              114,
+              101,
+              115,
+              117,
+              108,
+              116,
+              34,
+              58,
+              110,
+              117,
+              108,
+              108,
+              125
+            ]
+          },
+          "cookie": [],
+          "responseTime": 8,
+          "responseSize": 102
+        },
+        "id": "3e76607e-0e39-4426-baf8-f784c8f9d520",
+        "assertions": [
+          {
+            "assertion": "404",
+            "skipped": false
+          },
+          {
+            "assertion": "실패 틀 MEMBER4041",
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "cursor": {
+          "ref": "e1d8ff1d-e755-44ef-8470-19c8ea4b2a2d",
+          "length": 18,
+          "cycles": 1,
+          "position": 10,
+          "iteration": 0,
+          "httpRequestId": "85e68bac-f480-4ccc-bb05-b69976a9057b"
+        },
+        "item": {
+          "id": "2b097957-5acd-414c-9ad3-33e1a1c5bb33",
+          "name": "평점 수정 - 200",
+          "request": {
+            "url": {
+              "path": [
+                "members",
+                "{{memberA}}",
+                "ratings",
+                "{{ratingId}}"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "PATCH",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"score\": 2,\n  \"comment\": \"다시 보니 별로\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "69386927-63f9-4fca-ae65-ddb3e6f2d651",
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => pm.response.to.have.status(200));",
+                  "pm.test('응답 본문', () => { const b = pm.response.json(); pm.expect(b).to.eql({ isSuccess: true, code: 'COMMON200', message: '평점 수정에 성공했습니다.', result: null }); });"
+                ],
+                "_lastExecutionId": "2da1b962-32a6-44c6-82d6-738455122f6b"
+              }
+            }
+          ]
+        },
+        "request": {
+          "url": {
+            "protocol": "http",
+            "port": "50295",
+            "path": [
+              "members",
+              "3",
+              "ratings",
+              "4"
+            ],
+            "host": [
+              "127",
+              "0",
+              "0",
+              "1"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "User-Agent",
+              "value": "PostmanRuntime/7.39.1",
+              "system": true
+            },
+            {
+              "key": "Accept",
+              "value": "*/*",
+              "system": true
+            },
+            {
+              "key": "Cache-Control",
+              "value": "no-cache",
+              "system": true
+            },
+            {
+              "key": "Postman-Token",
+              "value": "d8002094-1340-473f-9a7e-57851d5a1387",
+              "system": true
+            },
+            {
+              "key": "Host",
+              "value": "127.0.0.1:50295",
+              "system": true
+            },
+            {
+              "key": "Accept-Encoding",
+              "value": "gzip, deflate, br",
+              "system": true
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive",
+              "system": true
+            },
+            {
+              "key": "Content-Length",
+              "value": "53",
+              "system": true
+            }
+          ],
+          "method": "PATCH",
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"score\": 2,\n  \"comment\": \"다시 보니 별로\"\n}",
+            "options": {
+              "raw": {
+                "language": "json"
+              }
+            }
+          }
+        },
+        "response": {
+          "id": "cbfe6c60-9a26-47f5-beda-17d82a442952",
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "X-Powered-By",
+              "value": "Express"
+            },
+            {
+              "key": "Vary",
+              "value": "Origin"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "Content-Length",
+              "value": "100"
+            },
+            {
+              "key": "ETag",
+              "value": "W/\"64-buFvhdErGsTHXmA8iZuhDMYoNSg\""
+            },
+            {
+              "key": "Date",
+              "value": "Thu, 05 Nov 2026 13:13:34 GMT"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "Keep-Alive",
+              "value": "timeout=5"
+            }
+          ],
+          "stream": {
+            "type": "Buffer",
+            "data": [
+              123,
+              34,
+              105,
+              115,
+              83,
+              117,
+              99,
+              99,
+              101,
+              115,
+              115,
+              34,
+              58,
+              116,
+              114,
+              117,
+              101,
+              44,
+              34,
+              99,
+              111,
+              100,
+              101,
+              34,
+              58,
+              34,
+              67,
+              79,
+              77,
+              77,
+              79,
+              78,
+              50,
+              48,
+              48,
+              34,
+              44,
+              34,
+              109,
+              101,
+              115,
+              115,
+              97,
+              103,
+              101,
+              34,
+              58,
+              34,
+              237,
+              143,
+              137,
+              236,
+              160,
+              144,
+              32,
+              236,
+              136,
+              152,
+              236,
+              160,
+              149,
+              236,
+              151,
+              144,
+              32,
+              236,
+              132,
+              177,
+              234,
+              179,
+              181,
+              237,
+              150,
+              136,
+              236,
+              138,
+              181,
+              235,
+              139,
+              136,
+              235,
+              139,
+              164,
+              46,
+              34,
+              44,
+              34,
+              114,
+              101,
+              115,
+              117,
+              108,
+              116,
+              34,
+              58,
+              110,
+              117,
+              108,
+              108,
+              125
+            ]
+          },
+          "cookie": [],
+          "responseTime": 16,
+          "responseSize": 100
+        },
+        "id": "2b097957-5acd-414c-9ad3-33e1a1c5bb33",
+        "assertions": [
+          {
+            "assertion": "200",
+            "skipped": false
+          },
+          {
+            "assertion": "응답 본문",
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "cursor": {
+          "ref": "e4d5b27c-6b6e-4df4-b0ed-b6033f860cc6",
+          "length": 18,
+          "cycles": 1,
+          "position": 11,
+          "iteration": 0,
+          "httpRequestId": "e31c67ec-a1ed-4520-bb4c-a1bd7f9a56a3"
+        },
+        "item": {
+          "id": "405ca89d-6633-4ade-b80c-5b9b8779082d",
+          "name": "수정 결과 조회 (5주차 API)",
+          "request": {
+            "url": {
+              "path": [
+                "members",
+                "{{memberA}}",
+                "ratings"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "method": "GET"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "a5753186-f218-43d5-8ed5-e8fd176efec9",
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => pm.response.to.have.status(200));",
+                  "pm.test('응답 본문', () => { const b = pm.response.json(); pm.expect(b).to.have.length(1); pm.expect(b[0].score).to.eql(2); pm.expect(b[0].comment).to.eql('다시 보니 별로'); });"
+                ],
+                "_lastExecutionId": "233292ad-974e-41e6-af3a-aa9ad5268dc9"
+              }
+            }
+          ]
+        },
+        "request": {
+          "url": {
+            "protocol": "http",
+            "port": "50295",
+            "path": [
+              "members",
+              "3",
+              "ratings"
+            ],
+            "host": [
+              "127",
+              "0",
+              "0",
+              "1"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "User-Agent",
+              "value": "PostmanRuntime/7.39.1",
+              "system": true
+            },
+            {
+              "key": "Accept",
+              "value": "*/*",
+              "system": true
+            },
+            {
+              "key": "Cache-Control",
+              "value": "no-cache",
+              "system": true
+            },
+            {
+              "key": "Postman-Token",
+              "value": "6a977440-0b3f-4dee-a2f3-69badfac67a6",
+              "system": true
+            },
+            {
+              "key": "Host",
+              "value": "127.0.0.1:50295",
+              "system": true
+            },
+            {
+              "key": "Accept-Encoding",
+              "value": "gzip, deflate, br",
+              "system": true
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive",
+              "system": true
+            }
+          ],
+          "method": "GET"
+        },
+        "response": {
+          "id": "c1a7449a-5cfd-4056-ba84-07aae2497b89",
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "X-Powered-By",
+              "value": "Express"
+            },
+            {
+              "key": "Vary",
+              "value": "Origin"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "Content-Length",
+              "value": "151"
+            },
+            {
+              "key": "ETag",
+              "value": "W/\"97-/J4Qopukt5n1RLLAghOir/se1ek\""
+            },
+            {
+              "key": "Date",
+              "value": "Thu, 05 Nov 2026 13:13:34 GMT"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "Keep-Alive",
+              "value": "timeout=5"
+            }
+          ],
+          "stream": {
+            "type": "Buffer",
+            "data": [
+              91,
+              123,
+              34,
+              114,
+              97,
+              116,
+              105,
+              110,
+              103,
+              73,
+              100,
+              34,
+              58,
+              52,
+              44,
+              34,
+              109,
+              111,
+              118,
+              105,
+              101,
+              73,
+              100,
+              34,
+              58,
+              53,
+              53,
+              48,
+              44,
+              34,
+              115,
+              99,
+              111,
+              114,
+              101,
+              34,
+              58,
+              50,
+              44,
+              34,
+              99,
+              111,
+              109,
+              109,
+              101,
+              110,
+              116,
+              34,
+              58,
+              34,
+              235,
+              139,
+              164,
+              236,
+              139,
+              156,
+              32,
+              235,
+              179,
+              180,
+              235,
+              139,
+              136,
+              32,
+              235,
+              179,
+              132,
+              235,
+              161,
+              156,
+              34,
+              44,
+              34,
+              99,
+              114,
+              101,
+              97,
+              116,
+              101,
+              100,
+              65,
+              116,
+              34,
+              58,
+              34,
+              50,
+              48,
+              50,
+              54,
+              45,
+              49,
+              49,
+              45,
+              48,
+              53,
+              84,
+              49,
+              51,
+              58,
+              49,
+              51,
+              58,
+              51,
+              52,
+              46,
+              48,
+              48,
+              48,
+              90,
+              34,
+              44,
+              34,
+              117,
+              112,
+              100,
+              97,
+              116,
+              101,
+              100,
+              65,
+              116,
+              34,
+              58,
+              34,
+              50,
+              48,
+              50,
+              54,
+              45,
+              49,
+              49,
+              45,
+              48,
+              53,
+              84,
+              49,
+              51,
+              58,
+              49,
+              51,
+              58,
+              51,
+              52,
+              46,
+              48,
+              48,
+              48,
+              90,
+              34,
+              125,
+              93
+            ]
+          },
+          "cookie": [],
+          "responseTime": 6,
+          "responseSize": 151
+        },
+        "id": "405ca89d-6633-4ade-b80c-5b9b8779082d",
+        "assertions": [
+          {
+            "assertion": "200",
+            "skipped": false
+          },
+          {
+            "assertion": "응답 본문",
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "cursor": {
+          "ref": "5c792307-364e-42ec-9a6e-61a17d999af0",
+          "length": 18,
+          "cycles": 1,
+          "position": 12,
+          "iteration": 0,
+          "httpRequestId": "396fcc85-b96d-4a23-9134-69c197d7d2b8"
+        },
+        "item": {
+          "id": "ce79028c-dbad-47c8-bb3d-dfbd0dca6bcb",
+          "name": "다른 회원이 수정 - 403 RATING4031",
+          "request": {
+            "url": {
+              "path": [
+                "members",
+                "{{memberB}}",
+                "ratings",
+                "{{ratingId}}"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "PATCH",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"score\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "a54b9fcc-2521-49ef-87f4-fcbf0bca4ee7",
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403', () => pm.response.to.have.status(403));",
+                  "pm.test('실패 틀 RATING4031', () => { const b = pm.response.json(); pm.expect(b.isSuccess).to.eql(false); pm.expect(b.code).to.eql('RATING4031'); pm.expect(b.result).to.eql(null); });"
+                ],
+                "_lastExecutionId": "198f8237-bad9-4c75-a293-8f723708b450"
+              }
+            }
+          ]
+        },
+        "request": {
+          "url": {
+            "protocol": "http",
+            "port": "50295",
+            "path": [
+              "members",
+              "4",
+              "ratings",
+              "4"
+            ],
+            "host": [
+              "127",
+              "0",
+              "0",
+              "1"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "User-Agent",
+              "value": "PostmanRuntime/7.39.1",
+              "system": true
+            },
+            {
+              "key": "Accept",
+              "value": "*/*",
+              "system": true
+            },
+            {
+              "key": "Cache-Control",
+              "value": "no-cache",
+              "system": true
+            },
+            {
+              "key": "Postman-Token",
+              "value": "2f37a1a3-88fb-4467-8f0e-9bb08212b4ed",
+              "system": true
+            },
+            {
+              "key": "Host",
+              "value": "127.0.0.1:50295",
+              "system": true
+            },
+            {
+              "key": "Accept-Encoding",
+              "value": "gzip, deflate, br",
+              "system": true
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive",
+              "system": true
+            },
+            {
+              "key": "Content-Length",
+              "value": "16",
+              "system": true
+            }
+          ],
+          "method": "PATCH",
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"score\": 1\n}",
+            "options": {
+              "raw": {
+                "language": "json"
+              }
+            }
+          }
+        },
+        "response": {
+          "id": "526853d7-766f-47ed-bf0d-dacd1cdd1e87",
+          "status": "Forbidden",
+          "code": 403,
+          "header": [
+            {
+              "key": "X-Powered-By",
+              "value": "Express"
+            },
+            {
+              "key": "Vary",
+              "value": "Origin"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "Content-Length",
+              "value": "139"
+            },
+            {
+              "key": "ETag",
+              "value": "W/\"8b-uXg5YlI4nr+LDYPDPWvNKe+wehc\""
+            },
+            {
+              "key": "Date",
+              "value": "Thu, 05 Nov 2026 13:13:34 GMT"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "Keep-Alive",
+              "value": "timeout=5"
+            }
+          ],
+          "stream": {
+            "type": "Buffer",
+            "data": [
+              123,
+              34,
+              105,
+              115,
+              83,
+              117,
+              99,
+              99,
+              101,
+              115,
+              115,
+              34,
+              58,
+              102,
+              97,
+              108,
+              115,
+              101,
+              44,
+              34,
+              99,
+              111,
+              100,
+              101,
+              34,
+              58,
+              34,
+              82,
+              65,
+              84,
+              73,
+              78,
+              71,
+              52,
+              48,
+              51,
+              49,
+              34,
+              44,
+              34,
+              109,
+              101,
+              115,
+              115,
+              97,
+              103,
+              101,
+              34,
+              58,
+              34,
+              235,
+              179,
+              184,
+              236,
+              157,
+              184,
+              236,
+              157,
+              180,
+              32,
+              236,
+              158,
+              145,
+              236,
+              132,
+              177,
+              237,
+              149,
+              156,
+              32,
+              237,
+              143,
+              137,
+              236,
+              160,
+              144,
+              235,
+              167,
+              140,
+              32,
+              236,
+              136,
+              152,
+              236,
+              160,
+              149,
+              237,
+              149,
+              152,
+              234,
+              177,
+              176,
+              235,
+              130,
+              152,
+              32,
+              236,
+              130,
+              173,
+              236,
+              160,
+              156,
+              237,
+              149,
+              160,
+              32,
+              236,
+              136,
+              152,
+              32,
+              236,
+              158,
+              136,
+              236,
+              138,
+              181,
+              235,
+              139,
+              136,
+              235,
+              139,
+              164,
+              46,
+              34,
+              44,
+              34,
+              114,
+              101,
+              115,
+              117,
+              108,
+              116,
+              34,
+              58,
+              110,
+              117,
+              108,
+              108,
+              125
+            ]
+          },
+          "cookie": [],
+          "responseTime": 4,
+          "responseSize": 139
+        },
+        "id": "ce79028c-dbad-47c8-bb3d-dfbd0dca6bcb",
+        "assertions": [
+          {
+            "assertion": "403",
+            "skipped": false
+          },
+          {
+            "assertion": "실패 틀 RATING4031",
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "cursor": {
+          "ref": "52bdcec0-c97c-4294-9e6e-8993a61ce3b8",
+          "length": 18,
+          "cycles": 1,
+          "position": 13,
+          "iteration": 0,
+          "httpRequestId": "8764b1ab-5f85-4d3f-b3c3-5be886881ef5"
+        },
+        "item": {
+          "id": "2101f417-6443-494e-baf9-55ddf0d071b7",
+          "name": "없는 ratingId 수정 - 404 RATING4041",
+          "request": {
+            "url": {
+              "path": [
+                "members",
+                "{{memberA}}",
+                "ratings",
+                "999999"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "method": "PATCH",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"score\": 3\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "a6c73dd2-7505-413b-b992-5d657481d77a",
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404', () => pm.response.to.have.status(404));",
+                  "pm.test('실패 틀 RATING4041', () => { const b = pm.response.json(); pm.expect(b.isSuccess).to.eql(false); pm.expect(b.code).to.eql('RATING4041'); pm.expect(b.result).to.eql(null); pm.expect(b.message).to.eql('존재하지 않는 평점입니다.'); });"
+                ],
+                "_lastExecutionId": "2670acf6-7408-4ad4-890e-42328827376b"
+              }
+            }
+          ]
+        },
+        "request": {
+          "url": {
+            "protocol": "http",
+            "port": "50295",
+            "path": [
+              "members",
+              "3",
+              "ratings",
+              "999999"
+            ],
+            "host": [
+              "127",
+              "0",
+              "0",
+              "1"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "key": "User-Agent",
+              "value": "PostmanRuntime/7.39.1",
+              "system": true
+            },
+            {
+              "key": "Accept",
+              "value": "*/*",
+              "system": true
+            },
+            {
+              "key": "Cache-Control",
+              "value": "no-cache",
+              "system": true
+            },
+            {
+              "key": "Postman-Token",
+              "value": "cd2e5a71-5b3d-495e-8d67-0642dbdaa65e",
+              "system": true
+            },
+            {
+              "key": "Host",
+              "value": "127.0.0.1:50295",
+              "system": true
+            },
+            {
+              "key": "Accept-Encoding",
+              "value": "gzip, deflate, br",
+              "system": true
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive",
+              "system": true
+            },
+            {
+              "key": "Content-Length",
+              "value": "16",
+              "system": true
+            }
+          ],
+          "method": "PATCH",
+          "body": {
+            "mode": "raw",
+            "raw": "{\n  \"score\": 3\n}",
+            "options": {
+              "raw": {
+                "language": "json"
+              }
+            }
+          }
+        },
+        "response": {
+          "id": "98ca3437-2221-406b-976a-1da749313911",
+          "status": "Not Found",
+          "code": 404,
+          "header": [
+            {
+              "key": "X-Powered-By",
+              "value": "Express"
+            },
+            {
+              "key": "Vary",
+              "value": "Origin"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "Content-Length",
+              "value": "102"
+            },
+            {
+              "key": "ETag",
+              "value": "W/\"66-yOiVOqNKabm6fn0qzn3I2U0S+Gk\""
+            },
+            {
+              "key": "Date",
+              "value": "Thu, 05 Nov 2026 13:13:34 GMT"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "Keep-Alive",
+              "value": "timeout=5"
+            }
+          ],
+          "stream": {
+            "type": "Buffer",
+            "data": [
+              123,
+              34,
+              105,
+              115,
+              83,
+              117,
+              99,
+              99,
+              101,
+              115,
+              115,
+              34,
+              58,
+              102,
+              97,
+              108,
+              115,
+              101,
+              44,
+              34,
+              99,
+              111,
+              100,
+              101,
+              34,
+              58,
+              34,
+              82,
+              65,
+              84,
+              73,
+              78,
+              71,
+              52,
+              48,
+              52,
+              49,
+              34,
+              44,
+              34,
+              109,
+              101,
+              115,
+              115,
+              97,
+              103,
+              101,
+              34,
+              58,
+              34,
+              236,
+              161,
+              180,
+              236,
+              158,
+              172,
+              237,
+              149,
+              152,
+              236,
+              167,
+              128,
+              32,
+              236,
+              149,
+              138,
+              235,
+              138,
+              148,
+              32,
+              237,
+              143,
+              137,
+              236,
+              160,
+              144,
+              236,
+              158,
+              133,
+              235,
+              139,
+              136,
+              235,
+              139,
+              164,
+              46,
+              34,
+              44,
+              34,
+              114,
+              101,
+              115,
+              117,
+              108,
+              116,
+              34,
+              58,
+              110,
+              117,
+              108,
+              108,
+              125
+            ]
+          },
+          "cookie": [],
+          "responseTime": 2,
+          "responseSize": 102
+        },
+        "id": "2101f417-6443-494e-baf9-55ddf0d071b7",
+        "assertions": [
+          {
+            "assertion": "404",
+            "skipped": false
+          },
+          {
+            "assertion": "실패 틀 RATING4041",
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "cursor": {
+          "ref": "57768c4c-4c8f-42ed-926a-b2509bf7a214",
+          "length": 18,
+          "cycles": 1,
+          "position": 14,
+          "iteration": 0,
+          "httpRequestId": "5821f096-ae2b-4e98-86f2-1bb43db65bbe"
+        },
+        "item": {
+          "id": "2204aa7a-e925-4c74-8c04-41708c2e7bc5",
+          "name": "다른 회원이 삭제 - 403",
+          "request": {
+            "url": {
+              "path": [
+                "members",
+                "{{memberB}}",
+                "ratings",
+                "{{ratingId}}"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "method": "DELETE"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "530273db-0f31-48e0-9a40-b530a06e0132",
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('403', () => pm.response.to.have.status(403));",
+                  "pm.test('실패 틀 RATING4031', () => { const b = pm.response.json(); pm.expect(b.isSuccess).to.eql(false); pm.expect(b.code).to.eql('RATING4031'); pm.expect(b.result).to.eql(null); });"
+                ],
+                "_lastExecutionId": "74452aac-3b7a-40e8-b91a-c62bf565afd8"
+              }
+            }
+          ]
+        },
+        "request": {
+          "url": {
+            "protocol": "http",
+            "port": "50295",
+            "path": [
+              "members",
+              "4",
+              "ratings",
+              "4"
+            ],
+            "host": [
+              "127",
+              "0",
+              "0",
+              "1"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "User-Agent",
+              "value": "PostmanRuntime/7.39.1",
+              "system": true
+            },
+            {
+              "key": "Accept",
+              "value": "*/*",
+              "system": true
+            },
+            {
+              "key": "Cache-Control",
+              "value": "no-cache",
+              "system": true
+            },
+            {
+              "key": "Postman-Token",
+              "value": "daed5084-142e-4e21-a1ec-85f4675bfbe9",
+              "system": true
+            },
+            {
+              "key": "Host",
+              "value": "127.0.0.1:50295",
+              "system": true
+            },
+            {
+              "key": "Accept-Encoding",
+              "value": "gzip, deflate, br",
+              "system": true
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive",
+              "system": true
+            }
+          ],
+          "method": "DELETE"
+        },
+        "response": {
+          "id": "5dcd3ff2-c791-406b-bd96-4cf9f44555c8",
+          "status": "Forbidden",
+          "code": 403,
+          "header": [
+            {
+              "key": "X-Powered-By",
+              "value": "Express"
+            },
+            {
+              "key": "Vary",
+              "value": "Origin"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "Content-Length",
+              "value": "139"
+            },
+            {
+              "key": "ETag",
+              "value": "W/\"8b-uXg5YlI4nr+LDYPDPWvNKe+wehc\""
+            },
+            {
+              "key": "Date",
+              "value": "Thu, 05 Nov 2026 13:13:34 GMT"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "Keep-Alive",
+              "value": "timeout=5"
+            }
+          ],
+          "stream": {
+            "type": "Buffer",
+            "data": [
+              123,
+              34,
+              105,
+              115,
+              83,
+              117,
+              99,
+              99,
+              101,
+              115,
+              115,
+              34,
+              58,
+              102,
+              97,
+              108,
+              115,
+              101,
+              44,
+              34,
+              99,
+              111,
+              100,
+              101,
+              34,
+              58,
+              34,
+              82,
+              65,
+              84,
+              73,
+              78,
+              71,
+              52,
+              48,
+              51,
+              49,
+              34,
+              44,
+              34,
+              109,
+              101,
+              115,
+              115,
+              97,
+              103,
+              101,
+              34,
+              58,
+              34,
+              235,
+              179,
+              184,
+              236,
+              157,
+              184,
+              236,
+              157,
+              180,
+              32,
+              236,
+              158,
+              145,
+              236,
+              132,
+              177,
+              237,
+              149,
+              156,
+              32,
+              237,
+              143,
+              137,
+              236,
+              160,
+              144,
+              235,
+              167,
+              140,
+              32,
+              236,
+              136,
+              152,
+              236,
+              160,
+              149,
+              237,
+              149,
+              152,
+              234,
+              177,
+              176,
+              235,
+              130,
+              152,
+              32,
+              236,
+              130,
+              173,
+              236,
+              160,
+              156,
+              237,
+              149,
+              160,
+              32,
+              236,
+              136,
+              152,
+              32,
+              236,
+              158,
+              136,
+              236,
+              138,
+              181,
+              235,
+              139,
+              136,
+              235,
+              139,
+              164,
+              46,
+              34,
+              44,
+              34,
+              114,
+              101,
+              115,
+              117,
+              108,
+              116,
+              34,
+              58,
+              110,
+              117,
+              108,
+              108,
+              125
+            ]
+          },
+          "cookie": [],
+          "responseTime": 6,
+          "responseSize": 139
+        },
+        "id": "2204aa7a-e925-4c74-8c04-41708c2e7bc5",
+        "assertions": [
+          {
+            "assertion": "403",
+            "skipped": false
+          },
+          {
+            "assertion": "실패 틀 RATING4031",
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "cursor": {
+          "ref": "a4be4ecb-1d74-43ac-b35d-36e5c5ab541c",
+          "length": 18,
+          "cycles": 1,
+          "position": 15,
+          "iteration": 0,
+          "httpRequestId": "01558d0a-beb0-4e6a-9826-2071a5352b4a"
+        },
+        "item": {
+          "id": "0d295231-bfb4-4e19-8779-d3f08cacc57f",
+          "name": "평점 삭제 - 204 (본문 없음)",
+          "request": {
+            "url": {
+              "path": [
+                "members",
+                "{{memberA}}",
+                "ratings",
+                "{{ratingId}}"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "method": "DELETE"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "450d6074-196c-45b9-872b-904cacb24403",
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('204', () => pm.response.to.have.status(204));",
+                  "pm.test('본문이 비어 있다', () => pm.expect(pm.response.text()).to.eql(''));"
+                ],
+                "_lastExecutionId": "5ce1e1be-8b36-44dc-93ec-4a083c490ccf"
+              }
+            }
+          ]
+        },
+        "request": {
+          "url": {
+            "protocol": "http",
+            "port": "50295",
+            "path": [
+              "members",
+              "3",
+              "ratings",
+              "4"
+            ],
+            "host": [
+              "127",
+              "0",
+              "0",
+              "1"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "User-Agent",
+              "value": "PostmanRuntime/7.39.1",
+              "system": true
+            },
+            {
+              "key": "Accept",
+              "value": "*/*",
+              "system": true
+            },
+            {
+              "key": "Cache-Control",
+              "value": "no-cache",
+              "system": true
+            },
+            {
+              "key": "Postman-Token",
+              "value": "c5d14a89-5744-47e5-9d33-da7496a24df1",
+              "system": true
+            },
+            {
+              "key": "Host",
+              "value": "127.0.0.1:50295",
+              "system": true
+            },
+            {
+              "key": "Accept-Encoding",
+              "value": "gzip, deflate, br",
+              "system": true
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive",
+              "system": true
+            }
+          ],
+          "method": "DELETE"
+        },
+        "response": {
+          "id": "941365d1-0002-46fe-b7c7-9f4b550d0ced",
+          "status": "No Content",
+          "code": 204,
+          "header": [
+            {
+              "key": "X-Powered-By",
+              "value": "Express"
+            },
+            {
+              "key": "Vary",
+              "value": "Origin"
+            },
+            {
+              "key": "Date",
+              "value": "Thu, 05 Nov 2026 13:13:34 GMT"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "Keep-Alive",
+              "value": "timeout=5"
+            }
+          ],
+          "stream": {
+            "type": "Buffer",
+            "data": []
+          },
+          "cookie": [],
+          "responseTime": 8,
+          "responseSize": 0
+        },
+        "id": "0d295231-bfb4-4e19-8779-d3f08cacc57f",
+        "assertions": [
+          {
+            "assertion": "204",
+            "skipped": false
+          },
+          {
+            "assertion": "본문이 비어 있다",
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "cursor": {
+          "ref": "1d4b5e35-6f6f-4d75-aaed-2cdf1431ff13",
+          "length": 18,
+          "cycles": 1,
+          "position": 16,
+          "iteration": 0,
+          "httpRequestId": "115fad0a-87d8-444e-9949-3937f5156389"
+        },
+        "item": {
+          "id": "9ed07b35-e902-4918-997e-6613c00b744d",
+          "name": "삭제 후 조회 - 빈 배열",
+          "request": {
+            "url": {
+              "path": [
+                "members",
+                "{{memberA}}",
+                "ratings"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "method": "GET"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "b26e9cda-a15c-4db1-ba9e-76bda37183b9",
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('200', () => pm.response.to.have.status(200));",
+                  "pm.test('응답 본문', () => { const b = pm.response.json(); pm.expect(b).to.eql([]); });"
+                ],
+                "_lastExecutionId": "285f1cc5-7bef-4efa-a7ed-fbcf731512c4"
+              }
+            }
+          ]
+        },
+        "request": {
+          "url": {
+            "protocol": "http",
+            "port": "50295",
+            "path": [
+              "members",
+              "3",
+              "ratings"
+            ],
+            "host": [
+              "127",
+              "0",
+              "0",
+              "1"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "User-Agent",
+              "value": "PostmanRuntime/7.39.1",
+              "system": true
+            },
+            {
+              "key": "Accept",
+              "value": "*/*",
+              "system": true
+            },
+            {
+              "key": "Cache-Control",
+              "value": "no-cache",
+              "system": true
+            },
+            {
+              "key": "Postman-Token",
+              "value": "5558f7c4-0f4f-41e8-b025-bc62ce22470f",
+              "system": true
+            },
+            {
+              "key": "Host",
+              "value": "127.0.0.1:50295",
+              "system": true
+            },
+            {
+              "key": "Accept-Encoding",
+              "value": "gzip, deflate, br",
+              "system": true
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive",
+              "system": true
+            }
+          ],
+          "method": "GET"
+        },
+        "response": {
+          "id": "d84596c0-0170-430f-b0c2-24f3034c648c",
+          "status": "OK",
+          "code": 200,
+          "header": [
+            {
+              "key": "X-Powered-By",
+              "value": "Express"
+            },
+            {
+              "key": "Vary",
+              "value": "Origin"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "Content-Length",
+              "value": "2"
+            },
+            {
+              "key": "ETag",
+              "value": "W/\"2-l9Fw4VUO7kr8CvBlt4zaMCqXZ0w\""
+            },
+            {
+              "key": "Date",
+              "value": "Thu, 05 Nov 2026 13:13:34 GMT"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "Keep-Alive",
+              "value": "timeout=5"
+            }
+          ],
+          "stream": {
+            "type": "Buffer",
+            "data": [
+              91,
+              93
+            ]
+          },
+          "cookie": [],
+          "responseTime": 4,
+          "responseSize": 2
+        },
+        "id": "9ed07b35-e902-4918-997e-6613c00b744d",
+        "assertions": [
+          {
+            "assertion": "200",
+            "skipped": false
+          },
+          {
+            "assertion": "응답 본문",
+            "skipped": false
+          }
+        ]
+      },
+      {
+        "cursor": {
+          "ref": "80521cc2-5685-4d2b-a91b-df723c5a960a",
+          "length": 18,
+          "cycles": 1,
+          "position": 17,
+          "iteration": 0,
+          "httpRequestId": "456423f4-1250-471c-986e-3a2d10bdb271"
+        },
+        "item": {
+          "id": "cffc4cf4-f065-4a2c-860e-452f38e80f84",
+          "name": "이미 삭제한 평점 다시 삭제 - 404",
+          "request": {
+            "url": {
+              "path": [
+                "members",
+                "{{memberA}}",
+                "ratings",
+                "{{ratingId}}"
+              ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "query": [],
+              "variable": []
+            },
+            "method": "DELETE"
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "id": "2a9aaf62-3c17-4dd7-b352-5e3ef47c7ef6",
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('404', () => pm.response.to.have.status(404));",
+                  "pm.test('실패 틀 RATING4041', () => { const b = pm.response.json(); pm.expect(b.isSuccess).to.eql(false); pm.expect(b.code).to.eql('RATING4041'); pm.expect(b.result).to.eql(null); });"
+                ],
+                "_lastExecutionId": "6b35772a-ec96-4a3d-81a0-0f09027c80d8"
+              }
+            }
+          ]
+        },
+        "request": {
+          "url": {
+            "protocol": "http",
+            "port": "50295",
+            "path": [
+              "members",
+              "3",
+              "ratings",
+              "4"
+            ],
+            "host": [
+              "127",
+              "0",
+              "0",
+              "1"
+            ],
+            "query": [],
+            "variable": []
+          },
+          "header": [
+            {
+              "key": "User-Agent",
+              "value": "PostmanRuntime/7.39.1",
+              "system": true
+            },
+            {
+              "key": "Accept",
+              "value": "*/*",
+              "system": true
+            },
+            {
+              "key": "Cache-Control",
+              "value": "no-cache",
+              "system": true
+            },
+            {
+              "key": "Postman-Token",
+              "value": "bec7500c-f0f7-45ba-97c7-1cc506da8224",
+              "system": true
+            },
+            {
+              "key": "Host",
+              "value": "127.0.0.1:50295",
+              "system": true
+            },
+            {
+              "key": "Accept-Encoding",
+              "value": "gzip, deflate, br",
+              "system": true
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive",
+              "system": true
+            }
+          ],
+          "method": "DELETE"
+        },
+        "response": {
+          "id": "b5008c3b-be21-47e8-8b40-c6ed2064a768",
+          "status": "Not Found",
+          "code": 404,
+          "header": [
+            {
+              "key": "X-Powered-By",
+              "value": "Express"
+            },
+            {
+              "key": "Vary",
+              "value": "Origin"
+            },
+            {
+              "key": "Content-Type",
+              "value": "application/json; charset=utf-8"
+            },
+            {
+              "key": "Content-Length",
+              "value": "102"
+            },
+            {
+              "key": "ETag",
+              "value": "W/\"66-yOiVOqNKabm6fn0qzn3I2U0S+Gk\""
+            },
+            {
+              "key": "Date",
+              "value": "Thu, 05 Nov 2026 13:13:34 GMT"
+            },
+            {
+              "key": "Connection",
+              "value": "keep-alive"
+            },
+            {
+              "key": "Keep-Alive",
+              "value": "timeout=5"
+            }
+          ],
+          "stream": {
+            "type": "Buffer",
+            "data": [
+              123,
+              34,
+              105,
+              115,
+              83,
+              117,
+              99,
+              99,
+              101,
+              115,
+              115,
+              34,
+              58,
+              102,
+              97,
+              108,
+              115,
+              101,
+              44,
+              34,
+              99,
+              111,
+              100,
+              101,
+              34,
+              58,
+              34,
+              82,
+              65,
+              84,
+              73,
+              78,
+              71,
+              52,
+              48,
+              52,
+              49,
+              34,
+              44,
+              34,
+              109,
+              101,
+              115,
+              115,
+              97,
+              103,
+              101,
+              34,
+              58,
+              34,
+              236,
+              161,
+              180,
+              236,
+              158,
+              172,
+              237,
+              149,
+              152,
+              236,
+              167,
+              128,
+              32,
+              236,
+              149,
+              138,
+              235,
+              138,
+              148,
+              32,
+              237,
+              143,
+              137,
+              236,
+              160,
+              144,
+              236,
+              158,
+              133,
+              235,
+              139,
+              136,
+              235,
+              139,
+              164,
+              46,
+              34,
+              44,
+              34,
+              114,
+              101,
+              115,
+              117,
+              108,
+              116,
+              34,
+              58,
+              110,
+              117,
+              108,
+              108,
+              125
+            ]
+          },
+          "cookie": [],
+          "responseTime": 2,
+          "responseSize": 102
+        },
+        "id": "cffc4cf4-f065-4a2c-860e-452f38e80f84",
+        "assertions": [
+          {
+            "assertion": "404",
+            "skipped": false
+          },
+          {
+            "assertion": "실패 틀 RATING4041",
+            "skipped": false
+          }
+        ]
+      }
+    ],
+    "transfers": {
+      "responseTotal": 1969
+    },
+    "failures": [],
+    "error": null
+  }
+}
