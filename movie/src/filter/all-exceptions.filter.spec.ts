@@ -8,7 +8,13 @@ import { QueryFailedError } from 'typeorm';
 import {
   ApiException,
   ErrorCode,
+  loginFailed,
   memberNotFound,
+  ratingForbidden,
+  ratingNotFound,
+  tokenExpired,
+  tokenInvalid,
+  tokenMissing,
 } from '../exception/api.exception.js';
 import {
   AllExceptionsFilter,
@@ -59,10 +65,31 @@ describe('AllExceptionsFilter', () => {
     expect(status).toBe(404);
     expect(body).toEqual({
       isSuccess: false,
-      code: 'MEMBER4041',
-      message: '존재하지 않는 유저입니다.',
+      code: 'MEMBER404_1',
+      message: '해당 회원을 찾을 수 없습니다.',
       result: null,
     });
+  });
+
+  it('인증·인가 실패(401·403)도 상태·code 그대로, 응답 틀은 같다', () => {
+    const cases: Array<[ApiException, number, string]> = [
+      [loginFailed(), 401, 'AUTH401_1'],
+      [tokenMissing(), 401, 'AUTH401_2'],
+      [tokenInvalid(), 401, 'AUTH401_3'],
+      [tokenExpired(), 401, 'AUTH401_4'],
+      [ratingForbidden(), 403, 'RATING403_1'],
+      [ratingNotFound(), 404, 'RATING404_1'],
+    ];
+    for (const [exception, status, code] of cases) {
+      const result = run(exception);
+      expect(result.status).toBe(status);
+      expect(result.body).toEqual({
+        isSuccess: false,
+        code,
+        message: exception.message,
+        result: null,
+      });
+    }
   });
 
   it('ValidationPipe 의 message 배열은 첫 번째 이유만, code 는 COMMON400', () => {
@@ -92,21 +119,23 @@ describe('AllExceptionsFilter', () => {
     expect(body.isSuccess).toBe(false);
   });
 
-  it('DB UNIQUE 위반(email) → 409 MEMBER4091, 같은 응답 틀', () => {
+  it('DB UNIQUE 위반(email) → 409 MEMBER409_2, 같은 응답 틀', () => {
     const { status, body } = run(duplicateEntry('member.email'));
     expect(status).toBe(409);
     expect(body).toEqual({
       isSuccess: false,
-      code: 'MEMBER4091',
+      code: 'MEMBER409_2',
       message: '이미 사용 중인 이메일입니다.',
       result: null,
     });
   });
 
-  it('DB UNIQUE 위반(nickname) → 409 MEMBER4092, 평점 UNIQUE → RATING4091', () => {
-    expect(run(duplicateEntry('member.nickname')).body.code).toBe('MEMBER4092');
+  it('DB UNIQUE 위반(nickname) → 409 MEMBER409_1, 평점 UNIQUE → RATING409_1', () => {
+    expect(run(duplicateEntry('member.nickname')).body.code).toBe(
+      'MEMBER409_1',
+    );
     expect(run(duplicateEntry('rating.uk_rating_member_movie')).body.code).toBe(
-      'RATING4091',
+      'RATING409_1',
     );
   });
 

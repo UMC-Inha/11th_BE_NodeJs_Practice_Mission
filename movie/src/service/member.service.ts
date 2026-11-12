@@ -1,13 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import bcrypt from 'bcrypt';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import { CheckResponseDto } from '../dto/check-response.dto.js';
 import { CreateMemberDto } from '../dto/create-member.dto.js';
+import { MemberInfoResponseDto } from '../dto/member-info-response.dto.js';
 import { MemberResponseDto } from '../dto/member-response.dto.js';
+import { MemberUpdateRequestDto } from '../dto/member-update-request.dto.js';
 import { Member } from '../entity/member.entity.js';
 import {
   emailDuplicated,
+  memberNotFound,
   nicknameDuplicated,
 } from '../exception/api.exception.js';
 
@@ -56,5 +59,39 @@ export class MemberService {
     );
 
     return MemberResponseDto.from(saved);
+  }
+
+  /** 토큰이 알려 준 회원 본인의 정보. password 는 DTO 에서 빠진다. */
+  async getMyInfo(memberId: number): Promise<MemberInfoResponseDto> {
+    const member = await this.memberRepository.findOneBy({ memberId });
+    if (!member) {
+      // 토큰은 멀쩡한데 그 사이 탈퇴(삭제)한 경우
+      throw memberNotFound();
+    }
+    return MemberInfoResponseDto.from(member);
+  }
+
+  /**
+   * 닉네임 변경. 내가 지금 쓰는 닉네임은 중복이 아니므로 "나를 제외한" 회원 중에서 찾는다.
+   * 동시에 같은 닉네임으로 바꾸는 요청은 DB UNIQUE 가 막고, 필터가 같은 409 로 바꿔 준다.
+   */
+  async updateMyInfo(
+    memberId: number,
+    dto: MemberUpdateRequestDto,
+  ): Promise<MemberInfoResponseDto> {
+    const member = await this.memberRepository.findOneBy({ memberId });
+    if (!member) {
+      throw memberNotFound();
+    }
+
+    const taken = await this.memberRepository.exists({
+      where: { nickname: dto.nickname, memberId: Not(memberId) },
+    });
+    if (taken) {
+      throw nicknameDuplicated();
+    }
+
+    member.nickname = dto.nickname;
+    return MemberInfoResponseDto.from(await this.memberRepository.save(member));
   }
 }

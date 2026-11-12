@@ -19,12 +19,17 @@
     "test:watch": "vitest",
     "test:cov": "vitest run --coverage",
     "test:debug": "vitest --inspect-brk --no-file-parallelism",
-    "test:e2e": "vitest run --config ./vitest.config.e2e.ts"
+    "test:e2e": "vitest run --config ./vitest.config.e2e.ts",
+    "verify:week05": "nest build && node --env-file=.env scripts/verify-week05.mjs",
+    "verify:week07": "nest build && node --env-file=.env scripts/verify-week07.mjs",
+    "newman:week07": "nest build && node --env-file=.env scripts/run-newman-week07.mjs",
+    "verify:expiry": "nest build && node --env-file=.env scripts/verify-expiry-week07.mjs"
   },
   "dependencies": {
     "@nestjs/common": "^12.0.1",
     "@nestjs/config": "^12.0.1",
     "@nestjs/core": "^12.0.1",
+    "@nestjs/jwt": "^12.0.4",
     "@nestjs/platform-express": "^12.0.1",
     "@nestjs/typeorm": "^12.0.2",
     "bcrypt": "^6.0.0",

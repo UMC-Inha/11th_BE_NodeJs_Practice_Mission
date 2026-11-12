@@ -1,10 +1,14 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { buildJwtOptions } from './config/jwt.config.js';
+import { AuthController } from './controller/auth.controller.js';
 import { MemberController } from './controller/member.controller.js';
 import { RatingController } from './controller/rating.controller.js';
 import { Member } from './entity/member.entity.js';
 import { Rating } from './entity/rating.entity.js';
+import { AuthService } from './service/auth.service.js';
 import { MemberService } from './service/member.service.js';
 import { RatingService } from './service/rating.service.js';
 
@@ -34,8 +38,20 @@ import { RatingService } from './service/rating.service.js';
       }),
     }),
     TypeOrmModule.forFeature([Member, Rating]),
+    // 토큰 발급(AuthService)과 검증(AuthGuard)이 같은 키·유효시간을 쓰도록 한 번만 설정한다.
+    // global: true 라 어느 곳에서든 JwtService 를 주입받을 수 있다.
+    // 키가 없거나 짧으면 여기서 오류가 나서 서버가 뜨지 않는다.
+    JwtModule.registerAsync({
+      global: true,
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) =>
+        buildJwtOptions({
+          JWT_SECRET: config.get<string>('JWT_SECRET'),
+          JWT_ACCESS_EXPIRATION: config.get<string>('JWT_ACCESS_EXPIRATION'),
+        }),
+    }),
   ],
-  controllers: [MemberController, RatingController],
-  providers: [MemberService, RatingService],
+  controllers: [AuthController, MemberController, RatingController],
+  providers: [AuthService, MemberService, RatingService],
 })
 export class AppModule {}

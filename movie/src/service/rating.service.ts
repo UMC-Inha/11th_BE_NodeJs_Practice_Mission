@@ -47,8 +47,11 @@ export class RatingService {
     return ratings.map((rating) => RatingResponseDto.from(rating));
   }
 
-  /** 새 평점을 저장하고 ratingId 를 돌려준다. */
-  async create(memberId: number, dto: CreateRatingDto): Promise<number> {
+  /** 새 평점을 저장하고 만들어진 평점을 돌려준다. memberId 는 토큰에서 나온 값이다. */
+  async create(
+    memberId: number,
+    dto: CreateRatingDto,
+  ): Promise<RatingResponseDto> {
     const member = await this.memberRepository.findOneBy({ memberId });
     if (!member) {
       throw memberNotFound();
@@ -72,27 +75,29 @@ export class RatingService {
       }),
     );
 
-    return saved.ratingId;
+    return RatingResponseDto.from(saved);
   }
 
+  /** 내 평점의 점수와 후기를 바꾸고, 바뀐 평점을 돌려준다. */
   async update(
-    ratingId: number,
     memberId: number,
+    ratingId: number,
     dto: UpdateRatingDto,
-  ): Promise<void> {
-    const rating = await this.findOwnedRating(ratingId, memberId);
+  ): Promise<RatingResponseDto> {
+    const rating = await this.findOwnedRating(memberId, ratingId);
 
     rating.score = dto.score;
     // PATCH 이므로 생략된 필드는 건드리지 않는다. 후기를 지우려면 null 을 보낸다.
+    // (워크북 예제는 dto.comment ?? null 이라 생략하면 기존 후기가 지워진다. 6주차에 이 쪽으로 바꿨고 그대로 둔다.)
     if (dto.comment !== undefined) {
       rating.comment = dto.comment;
     }
 
-    await this.ratingRepository.save(rating);
+    return RatingResponseDto.from(await this.ratingRepository.save(rating));
   }
 
-  async delete(ratingId: number, memberId: number): Promise<void> {
-    const rating = await this.findOwnedRating(ratingId, memberId);
+  async delete(memberId: number, ratingId: number): Promise<void> {
+    const rating = await this.findOwnedRating(memberId, ratingId);
 
     await this.ratingRepository.remove(rating);
   }
@@ -100,10 +105,12 @@ export class RatingService {
   /**
    * 평점을 찾고, 그 평점이 요청자의 것인지까지 확인한다.
    * 먼저 찾아보고(없으면 404), 찾았으면 주인을 본다(내 것이 아니면 403).
+   * 순서를 거꾸로 하면 있지도 않은 평점에 "권한이 없다"고 답하게 된다.
+   * 토큰 검사(401)는 AuthGuard 가 끝낸 뒤라서, 여기서는 "누구인지는 아는데 네 것이 아니다"만 본다.
    */
   private async findOwnedRating(
-    ratingId: number,
     memberId: number,
+    ratingId: number,
   ): Promise<Rating> {
     const rating = await this.ratingRepository.findOne({
       where: { ratingId },

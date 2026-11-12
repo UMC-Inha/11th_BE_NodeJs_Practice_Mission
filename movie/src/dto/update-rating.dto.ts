@@ -8,7 +8,7 @@ import {
 } from 'class-validator';
 
 /**
- * PATCH /members/{memberId}/ratings/{ratingId} 요청 Body.
+ * PATCH /ratings/{ratingId} 요청 Body.
  * movieId 는 바꿀 수 없다(다른 영화의 평점이 되려면 새로 등록한다).
  */
 export class UpdateRatingDto {

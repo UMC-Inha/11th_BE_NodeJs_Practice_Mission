@@ -2,6 +2,8 @@ import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import { CreateMemberDto } from './create-member.dto.js';
 import { CreateRatingDto } from './create-rating.dto.js';
+import { LoginRequestDto } from './login-request.dto.js';
+import { MemberUpdateRequestDto } from './member-update-request.dto.js';
 import { UpdateRatingDto } from './update-rating.dto.js';
 
 /** ValidationPipe({ transform: true }) 와 같은 순서(변환 → 검증)로 첫 번째 위반 메시지를 돌려준다. */
@@ -134,5 +136,78 @@ describe('CreateRatingDto / UpdateRatingDto', () => {
     expect(
       await firstError(UpdateRatingDto, { score: 3, comment: null }),
     ).toBeUndefined();
+  });
+});
+
+describe('LoginRequestDto', () => {
+  it('정상 값은 통과, 이메일 앞뒤 공백은 지우고 본다', async () => {
+    expect(
+      await firstError(LoginRequestDto, {
+        email: ' umc@example.com ',
+        password: 'x',
+      }),
+    ).toBeUndefined();
+    const dto = plainToInstance(LoginRequestDto, {
+      email: ' umc@example.com ',
+      password: ' keep spaces ',
+    });
+    expect(dto.email).toBe('umc@example.com');
+    // 비밀번호는 값 자체가 의미 있으므로 지우지 않는다
+    expect(dto.password).toBe(' keep spaces ');
+  });
+
+  it('로그인에서는 비밀번호 규칙(대소문자·숫자·특수문자)을 검사하지 않는다', async () => {
+    // 규칙이 바뀌기 전에 가입한 회원도 로그인은 할 수 있어야 한다
+    expect(
+      await firstError(LoginRequestDto, {
+        email: 'umc@example.com',
+        password: 'abc',
+      }),
+    ).toBeUndefined();
+  });
+
+  it('이메일 형식이 틀리거나 비어 있으면 거절', async () => {
+    expect(
+      await firstError(LoginRequestDto, { email: 'nope', password: 'x' }),
+    ).toBe('이메일 형식이 올바르지 않습니다.');
+    expect(
+      await firstError(LoginRequestDto, { email: '', password: 'x' }),
+    ).toBeDefined();
+  });
+
+  it('비밀번호가 비어 있거나 문자열이 아니면 거절', async () => {
+    expect(
+      await firstError(LoginRequestDto, { email: 'a@b.com', password: '' }),
+    ).toBe('비밀번호를 입력해주세요.');
+    expect(
+      await firstError(LoginRequestDto, { email: 'a@b.com', password: 123 }),
+    ).toBeDefined();
+    expect(
+      await firstError(LoginRequestDto, { email: 'a@b.com' }),
+    ).toBeDefined();
+  });
+});
+
+describe('MemberUpdateRequestDto', () => {
+  it('닉네임은 2~12자 (앞뒤 공백은 지우고 센다)', async () => {
+    expect(
+      await firstError(MemberUpdateRequestDto, { nickname: '영화광' }),
+    ).toBeUndefined();
+    expect(
+      await firstError(MemberUpdateRequestDto, { nickname: '가'.repeat(12) }),
+    ).toBeUndefined();
+    expect(await firstError(MemberUpdateRequestDto, { nickname: 'a' })).toBe(
+      '닉네임은 2자 이상 12자 이하여야 합니다.',
+    );
+    expect(
+      await firstError(MemberUpdateRequestDto, { nickname: '가'.repeat(13) }),
+    ).toBe('닉네임은 2자 이상 12자 이하여야 합니다.');
+    expect(
+      await firstError(MemberUpdateRequestDto, { nickname: '  a  ' }),
+    ).toBeDefined();
+    expect(
+      await firstError(MemberUpdateRequestDto, { nickname: '   ' }),
+    ).toBeDefined();
+    expect(await firstError(MemberUpdateRequestDto, {})).toBeDefined();
   });
 });

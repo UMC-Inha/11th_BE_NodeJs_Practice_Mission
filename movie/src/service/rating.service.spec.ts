@@ -57,7 +57,7 @@ describe('RatingService', () => {
     return { service, ratingRepository };
   }
 
-  it('없는 회원이면 404 MEMBER4041', async () => {
+  it('없는 회원이면 404 MEMBER404_1', async () => {
     const { service, ratingRepository } = setup(false);
     await expectApiError(
       service.getRatingsByMember(999),
@@ -118,7 +118,9 @@ describe('RatingService 쓰기 (등록·수정·삭제)', () => {
       create: vi.fn((data: Partial<Rating>) => data as Rating),
       save: vi.fn((data: Rating) =>
         Promise.resolve(
-          Object.assign({}, data, { ratingId: data.ratingId ?? 77 }),
+          Object.assign({ createdAt, updatedAt: createdAt }, data, {
+            ratingId: data.ratingId ?? 77,
+          }),
         ),
       ),
       remove: vi.fn().mockResolvedValue(undefined),
@@ -131,11 +133,18 @@ describe('RatingService 쓰기 (등록·수정·삭제)', () => {
   }
 
   describe('create', () => {
-    it('저장하고 새 ratingId 를 돌려준다, comment 를 생략하면 null', async () => {
+    it('저장하고 만들어진 평점을 돌려준다, comment 를 생략하면 null', async () => {
       const { service, ratingRepository } = setup({ member: member(1) });
-      await expect(service.create(1, { movieId: 550, score: 5 })).resolves.toBe(
-        77,
-      );
+      await expect(
+        service.create(1, { movieId: 550, score: 5 }),
+      ).resolves.toEqual({
+        ratingId: 77,
+        movieId: 550,
+        score: 5,
+        comment: null,
+        createdAt,
+        updatedAt: createdAt,
+      });
       expect(ratingRepository.create).toHaveBeenCalledWith({
         member: member(1),
         movieId: 550,
@@ -154,7 +163,7 @@ describe('RatingService 쓰기 (등록·수정·삭제)', () => {
       expect(ratingRepository.save).not.toHaveBeenCalled();
     });
 
-    it('같은 회원·같은 영화면 409 RATING4091 이고 저장하지 않는다', async () => {
+    it('같은 회원·같은 영화면 409 RATING409_1 이고 저장하지 않는다', async () => {
       const { service, ratingRepository } = setup({ member: member(1) });
       ratingRepository.exists.mockResolvedValue(true);
       await expectApiError(
@@ -169,16 +178,22 @@ describe('RatingService 쓰기 (등록·수정·삭제)', () => {
   describe('update', () => {
     it('내 평점이면 점수와 후기를 바꾼다', async () => {
       const { service, ratingRepository } = setup({ found: rating(5, 550) });
-      await service.update(5, 1, { score: 2, comment: '다시 보니 별로' });
+      const result = await service.update(1, 5, {
+        score: 2,
+        comment: '다시 보니 별로',
+      });
       expect(ratingRepository.save).toHaveBeenCalledWith(
         expect.objectContaining({ score: 2, comment: '다시 보니 별로' }),
       );
+      // 수정된 평점을 그대로 돌려준다(password 가 섞인 member 는 DTO 에서 빠진다)
+      expect(result).toMatchObject({ ratingId: 5, score: 2 });
+      expect(JSON.stringify(result)).not.toContain('password');
     });
 
     it('comment 를 생략하면 기존 후기를 그대로 두고, null 이면 지운다', async () => {
       const kept = Object.assign(rating(5, 550), { comment: '원래 후기' });
       const first = setup({ found: kept });
-      await first.service.update(5, 1, { score: 4 });
+      await first.service.update(1, 5, { score: 4 });
       expect(first.ratingRepository.save).toHaveBeenCalledWith(
         expect.objectContaining({ score: 4, comment: '원래 후기' }),
       );
@@ -186,27 +201,27 @@ describe('RatingService 쓰기 (등록·수정·삭제)', () => {
       const cleared = setup({
         found: Object.assign(rating(5, 550), { comment: '지울 후기' }),
       });
-      await cleared.service.update(5, 1, { score: 4, comment: null });
+      await cleared.service.update(1, 5, { score: 4, comment: null });
       expect(cleared.ratingRepository.save).toHaveBeenCalledWith(
         expect.objectContaining({ comment: null }),
       );
     });
 
-    it('없는 평점이면 404 RATING4041', async () => {
+    it('없는 평점이면 404 RATING404_1', async () => {
       const { service } = setup({ found: null });
       await expectApiError(
-        service.update(999, 1, { score: 3 }),
+        service.update(1, 999, { score: 3 }),
         404,
         ErrorCode.RATING_NOT_FOUND,
       );
     });
 
-    it('다른 회원의 평점이면 403 RATING4031 이고 바꾸지 않는다', async () => {
+    it('다른 회원의 평점이면 403 RATING403_1 이고 바꾸지 않는다', async () => {
       const { service, ratingRepository } = setup({
         found: rating(5, 550, 2),
       });
       await expectApiError(
-        service.update(5, 1, { score: 1 }),
+        service.update(1, 5, { score: 1 }),
         403,
         ErrorCode.RATING_FORBIDDEN,
       );
@@ -217,26 +232,76 @@ describe('RatingService 쓰기 (등록·수정·삭제)', () => {
   describe('delete', () => {
     it('내 평점이면 지운다', async () => {
       const { service, ratingRepository } = setup({ found: rating(5, 550) });
-      await service.delete(5, 1);
+      await service.delete(1, 5);
       expect(ratingRepository.remove).toHaveBeenCalledTimes(1);
     });
 
     it('없는 평점이면 404, 다른 회원의 평점이면 403 이고 지우지 않는다', async () => {
       const missing = setup({ found: null });
       await expectApiError(
-        missing.service.delete(999, 1),
+        missing.service.delete(1, 999),
         404,
         ErrorCode.RATING_NOT_FOUND,
       );
 
       const others = setup({ found: rating(5, 550, 2) });
       await expectApiError(
-        others.service.delete(5, 1),
+        others.service.delete(1, 5),
         403,
         ErrorCode.RATING_FORBIDDEN,
       );
       expect(missing.ratingRepository.remove).not.toHaveBeenCalled();
       expect(others.ratingRepository.remove).not.toHaveBeenCalled();
     });
+  });
+});
+
+describe('RatingService 소유권 확인 순서 (인가)', () => {
+  function setup(found: Rating | null) {
+    const ratingRepository = {
+      findOne: vi.fn().mockResolvedValue(found),
+      save: vi.fn(),
+      remove: vi.fn(),
+    };
+    const service = new RatingService(
+      ratingRepository as unknown as Repository<Rating>,
+      {} as unknown as Repository<Member>,
+    );
+    return { service, ratingRepository };
+  }
+
+  it('평점을 먼저 찾고(없으면 404) 그다음에 주인을 본다 — 없는 평점에 403 을 주지 않는다', async () => {
+    const { service } = setup(null);
+    await expectApiError(
+      service.update(2, 999, { score: 3 }),
+      404,
+      ErrorCode.RATING_NOT_FOUND,
+    );
+    await expectApiError(
+      service.delete(2, 999),
+      404,
+      ErrorCode.RATING_NOT_FOUND,
+    );
+  });
+
+  it('작성자를 함께 불러와서(relations.member) 토큰의 주인과 비교한다', async () => {
+    const { service, ratingRepository } = setup(rating(5, 550, 1));
+    await service.delete(1, 5);
+    expect(ratingRepository.findOne).toHaveBeenCalledWith({
+      where: { ratingId: 5 },
+      relations: { member: true },
+    });
+  });
+
+  it('요청자가 작성자와 다르면 수정·삭제 모두 403 이고 아무것도 바꾸지 않는다', async () => {
+    const { service, ratingRepository } = setup(rating(5, 550, 1));
+    await expectApiError(
+      service.update(2, 5, { score: 1 }),
+      403,
+      ErrorCode.RATING_FORBIDDEN,
+    );
+    await expectApiError(service.delete(2, 5), 403, ErrorCode.RATING_FORBIDDEN);
+    expect(ratingRepository.save).not.toHaveBeenCalled();
+    expect(ratingRepository.remove).not.toHaveBeenCalled();
   });
 });

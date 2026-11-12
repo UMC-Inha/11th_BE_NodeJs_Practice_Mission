@@ -7,7 +7,7 @@ import {
   Min,
 } from 'class-validator';
 
-/** POST /members/{memberId}/ratings 요청 Body */
+/** POST /ratings 요청 Body. 누가 남기는지는 Body 가 아니라 토큰이 알려 준다(memberId 없음). */
 export class CreateRatingDto {
   // TMDB 가 부여한 영화 ID. 우리 DB 에 영화 테이블이 없어서 존재 여부는 확인하지 않는다.
   @IsInt({ message: '영화 ID는 정수여야 합니다.' })
