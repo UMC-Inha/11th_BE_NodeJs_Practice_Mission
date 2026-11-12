@@ -1,0 +1,255 @@
+{
+  "checkedAt": "2026-10-28T13:50:23.871Z",
+  "results": [
+    {
+      "label": "닉네임 중복(수현)",
+      "method": "GET",
+      "url": "/members/nickname/%EC%88%98%ED%98%84",
+      "requestOrigin": null,
+      "status": 200,
+      "accessControlAllowOrigin": null,
+      "response": {
+        "available": false
+      }
+    },
+    {
+      "label": "닉네임 사용 가능(케빈)",
+      "method": "GET",
+      "url": "/members/nickname/%EC%BC%80%EB%B9%88",
+      "requestOrigin": null,
+      "status": 200,
+      "accessControlAllowOrigin": null,
+      "response": {
+        "available": true
+      }
+    },
+    {
+      "label": "이메일 중복",
+      "method": "GET",
+      "url": "/members/email/noco@umc.com",
+      "requestOrigin": null,
+      "status": 200,
+      "accessControlAllowOrigin": null,
+      "response": {
+        "available": false
+      }
+    },
+    {
+      "label": "이메일 사용 가능",
+      "method": "GET",
+      "url": "/members/email/kevin@umc.com",
+      "requestOrigin": null,
+      "status": 200,
+      "accessControlAllowOrigin": null,
+      "response": {
+        "available": true
+      }
+    },
+    {
+      "label": "1번 회원 평점 최신순",
+      "method": "GET",
+      "url": "/members/1/ratings",
+      "requestOrigin": null,
+      "status": 200,
+      "accessControlAllowOrigin": null,
+      "response": [
+        {
+          "ratingId": 2,
+          "movieId": 155,
+          "score": 4,
+          "comment": "다시 봐도 명작",
+          "createdAt": "2026-10-28T13:46:01.000Z",
+          "updatedAt": "2026-10-28T13:46:01.000Z"
+        },
+        {
+          "ratingId": 1,
+          "movieId": 550,
+          "score": 5,
+          "comment": "최고의 영화!",
+          "createdAt": "2026-10-28T13:46:01.000Z",
+          "updatedAt": "2026-10-28T13:46:01.000Z"
+        }
+      ]
+    },
+    {
+      "label": "2번 회원 평점",
+      "method": "GET",
+      "url": "/members/2/ratings",
+      "requestOrigin": null,
+      "status": 200,
+      "accessControlAllowOrigin": null,
+      "response": [
+        {
+          "ratingId": 3,
+          "movieId": 550,
+          "score": 3,
+          "comment": "호불호가 갈릴 것 같아요",
+          "createdAt": "2026-10-28T13:46:01.000Z",
+          "updatedAt": "2026-10-28T13:46:01.000Z"
+        }
+      ]
+    },
+    {
+      "label": "없는 회원",
+      "method": "GET",
+      "url": "/members/999/ratings",
+      "requestOrigin": null,
+      "status": 404,
+      "accessControlAllowOrigin": null,
+      "response": {
+        "message": "존재하지 않는 유저입니다.",
+        "error": "Not Found",
+        "statusCode": 404
+      }
+    },
+    {
+      "label": "숫자 아닌 회원 ID",
+      "method": "GET",
+      "url": "/members/abc/ratings",
+      "requestOrigin": null,
+      "status": 400,
+      "accessControlAllowOrigin": null,
+      "response": {
+        "message": "Validation failed (numeric string is expected)",
+        "error": "Bad Request",
+        "statusCode": 400
+      }
+    },
+    {
+      "label": "(선택) 닉네임 1자",
+      "method": "GET",
+      "url": "/members/nickname/%EC%88%98",
+      "requestOrigin": null,
+      "status": 400,
+      "accessControlAllowOrigin": null,
+      "response": {
+        "message": [
+          "닉네임은 2~12자로 입력해 주세요."
+        ],
+        "error": "Bad Request",
+        "statusCode": 400
+      }
+    },
+    {
+      "label": "(선택) 닉네임 13자",
+      "method": "GET",
+      "url": "/members/nickname/%EA%B0%80%EA%B0%80%EA%B0%80%EA%B0%80%EA%B0%80%EA%B0%80%EA%B0%80%EA%B0%80%EA%B0%80%EA%B0%80%EA%B0%80%EA%B0%80%EA%B0%80",
+      "requestOrigin": null,
+      "status": 400,
+      "accessControlAllowOrigin": null,
+      "response": {
+        "message": [
+          "닉네임은 2~12자로 입력해 주세요."
+        ],
+        "error": "Bad Request",
+        "statusCode": 400
+      }
+    },
+    {
+      "label": "(선택) 이메일 형식 오류",
+      "method": "GET",
+      "url": "/members/email/noco-umc.com",
+      "requestOrigin": null,
+      "status": 400,
+      "accessControlAllowOrigin": null,
+      "response": {
+        "message": [
+          "이메일 형식이 올바르지 않습니다."
+        ],
+        "error": "Bad Request",
+        "statusCode": 400
+      }
+    },
+    {
+      "label": "(선택) 페이지 0, 크기 1",
+      "method": "GET",
+      "url": "/members/1/ratings?page=0&size=1",
+      "requestOrigin": null,
+      "status": 200,
+      "accessControlAllowOrigin": null,
+      "response": [
+        {
+          "ratingId": 2,
+          "movieId": 155,
+          "score": 4,
+          "comment": "다시 봐도 명작",
+          "createdAt": "2026-10-28T13:46:01.000Z",
+          "updatedAt": "2026-10-28T13:46:01.000Z"
+        }
+      ]
+    },
+    {
+      "label": "(선택) 페이지 1, 크기 1",
+      "method": "GET",
+      "url": "/members/1/ratings?page=1&size=1",
+      "requestOrigin": null,
+      "status": 200,
+      "accessControlAllowOrigin": null,
+      "response": [
+        {
+          "ratingId": 1,
+          "movieId": 550,
+          "score": 5,
+          "comment": "최고의 영화!",
+          "createdAt": "2026-10-28T13:46:01.000Z",
+          "updatedAt": "2026-10-28T13:46:01.000Z"
+        }
+      ]
+    },
+    {
+      "label": "(선택) 페이지 범위 밖",
+      "method": "GET",
+      "url": "/members/1/ratings?page=5&size=10",
+      "requestOrigin": null,
+      "status": 200,
+      "accessControlAllowOrigin": null,
+      "response": []
+    },
+    {
+      "label": "(선택) size=0 거부",
+      "method": "GET",
+      "url": "/members/1/ratings?size=0",
+      "requestOrigin": null,
+      "status": 400,
+      "accessControlAllowOrigin": null,
+      "response": {
+        "message": [
+          "size는 1~50 사이 정수여야 합니다."
+        ],
+        "error": "Bad Request",
+        "statusCode": 400
+      }
+    },
+    {
+      "label": "CORS 허용 출처",
+      "method": "GET",
+      "url": "/members/nickname/noco",
+      "requestOrigin": "http://localhost:5173",
+      "status": 200,
+      "accessControlAllowOrigin": "http://localhost:5173",
+      "response": {
+        "available": true
+      }
+    },
+    {
+      "label": "CORS 허용 안 된 출처 (서버는 200, 브라우저가 차단)",
+      "method": "GET",
+      "url": "/members/nickname/noco",
+      "requestOrigin": "http://localhost:8081",
+      "status": 200,
+      "accessControlAllowOrigin": null,
+      "response": {
+        "available": true
+      }
+    },
+    {
+      "label": "CORS 사전 요청(OPTIONS)",
+      "method": "OPTIONS",
+      "url": "/members/1/ratings",
+      "requestOrigin": "http://localhost:5173",
+      "status": 204,
+      "accessControlAllowOrigin": "http://localhost:5173",
+      "response": null
+    }
+  ]
+}

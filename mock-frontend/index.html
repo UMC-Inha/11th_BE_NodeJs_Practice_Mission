@@ -1,0 +1,19 @@
+<!-- mock-frontend/index.html (5주차 실습 0 · 워크북 첨부 index.txt 그대로) -->
+<!-- 실행: mock-frontend 폴더에서 npx serve -l 5173 → http://localhost:5173 -->
+<!doctype html>
+<html lang="ko">
+  <body>
+    <h1>간이 프론트 : 닉네임 중복 체크</h1>
+    <button onclick="checkNickname()">'noco'으로 중복 체크</button>
+    <p id="result"></p>
+
+    <script>
+      async function checkNickname() {
+        // Spring이면 8080, NestJS면 3000으로 바꿔서 테스트하세요.
+        const res = await fetch("http://localhost:3000/members/nickname/noco");
+        const data = await res.json();
+        document.getElementById("result").innerText = JSON.stringify(data);
+      }
+    </script>
+  </body>
+</html>

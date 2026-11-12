@@ -1,0 +1,191 @@
+{
+  "info": {
+    "name": "UMC 5주차 영화 평점 API (케빈)",
+    "description": "닉네임/이메일 중복 체크, 유저별 평점 조회, 선택 미션(형식 검증·페이지네이션)과 CORS 헤더 확인. sql/schema.sql + sql/seed.sql 시드 기준.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [{ "key": "baseUrl", "value": "http://localhost:3000" }],
+  "item": [
+    {
+      "name": "닉네임 중복 체크 - 이미 있음(수현)",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/members/nickname/%EC%88%98%ED%98%84"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('200', () => pm.response.to.have.status(200));",
+              "pm.test('available false', () => pm.expect(pm.response.json()).to.eql({ available: false }));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "닉네임 중복 체크 - 사용 가능(케빈)",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/members/nickname/%EC%BC%80%EB%B9%88"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('available true', () => pm.expect(pm.response.json()).to.eql({ available: true }));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "이메일 중복 체크 - 이미 있음",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/members/email/noco@umc.com"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('available false', () => pm.expect(pm.response.json()).to.eql({ available: false }));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "이메일 중복 체크 - 사용 가능",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/members/email/kevin@umc.com"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('available true', () => pm.expect(pm.response.json()).to.eql({ available: true }));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "유저별 평점 조회 - 1번 회원 최신순",
+      "request": { "method": "GET", "url": "{{baseUrl}}/members/1/ratings" },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const body = pm.response.json();",
+              "pm.test('2건, ratingId 내림차순', () => pm.expect(body.map(r => r.ratingId)).to.eql([2, 1]));",
+              "pm.test('명세 6개 필드만', () => pm.expect(Object.keys(body[0])).to.eql(['ratingId','movieId','score','comment','createdAt','updatedAt']));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "유저별 평점 조회 - 없는 회원 404",
+      "request": { "method": "GET", "url": "{{baseUrl}}/members/999/ratings" },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": ["pm.test('404', () => pm.response.to.have.status(404));"]
+          }
+        }
+      ]
+    },
+    {
+      "name": "(선택) 닉네임 1자 → 400",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/members/nickname/a"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": ["pm.test('400', () => pm.response.to.have.status(400));"]
+          }
+        }
+      ]
+    },
+    {
+      "name": "(선택) 이메일 형식 오류 → 400",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/members/email/noco-umc.com"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": ["pm.test('400', () => pm.response.to.have.status(400));"]
+          }
+        }
+      ]
+    },
+    {
+      "name": "(선택) 페이지네이션 page=1&size=1",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/members/1/ratings?page=1&size=1"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('두 번째 페이지는 ratingId 1', () => pm.expect(pm.response.json().map(r => r.ratingId)).to.eql([1]));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "CORS - 허용 출처 5173",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Origin", "value": "http://localhost:5173" }],
+        "url": "{{baseUrl}}/members/nickname/noco"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Access-Control-Allow-Origin', () => pm.expect(pm.response.headers.get('Access-Control-Allow-Origin')).to.eql('http://localhost:5173'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "CORS - 허용 안 된 출처 (헤더 없음)",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "Origin", "value": "http://localhost:8081" }],
+        "url": "{{baseUrl}}/members/nickname/noco"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('서버는 200', () => pm.response.to.have.status(200));",
+              "pm.test('허용 헤더 없음', () => pm.expect(pm.response.headers.has('Access-Control-Allow-Origin')).to.be.false);"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

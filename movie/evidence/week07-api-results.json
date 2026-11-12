@@ -1,0 +1,540 @@
+{
+  "checkedAt": "2026-11-12T07:01:07.878Z",
+  "database": "umc_movie_test_verify7",
+  "server": "node dist/main.js (PORT 3100, 이 실행에서만 쓰는 무작위 JWT 키)",
+  "note": "accessToken 의 서명 부분은 <signature masked> 로 가렸다.",
+  "results": [
+    {
+      "label": "1단계 회원 A 가입 201",
+      "method": "POST",
+      "url": "/members",
+      "authorization": null,
+      "request": {
+        "email": "viewer1@umc.com",
+        "password": "Umc!1234",
+        "nickname": "뷰어1"
+      },
+      "status": 201,
+      "response": {
+        "isSuccess": true,
+        "code": "COMMON201",
+        "message": "회원가입에 성공했습니다.",
+        "result": {
+          "memberId": 3,
+          "email": "viewer1@umc.com",
+          "nickname": "뷰어1"
+        }
+      }
+    },
+    {
+      "label": "1단계 회원 B 가입 201",
+      "method": "POST",
+      "url": "/members",
+      "authorization": null,
+      "request": {
+        "email": "viewer2@umc.com",
+        "password": "Umc!1234",
+        "nickname": "뷰어2"
+      },
+      "status": 201,
+      "response": {
+        "isSuccess": true,
+        "code": "COMMON201",
+        "message": "회원가입에 성공했습니다.",
+        "result": {
+          "memberId": 4,
+          "email": "viewer2@umc.com",
+          "nickname": "뷰어2"
+        }
+      }
+    },
+    {
+      "label": "2단계 회원 A 로그인 200 (accessToken 발급)",
+      "method": "POST",
+      "url": "/auth/login",
+      "authorization": null,
+      "request": {
+        "email": "viewer1@umc.com",
+        "password": "Umc!1234"
+      },
+      "status": 200,
+      "response": {
+        "isSuccess": true,
+        "code": "COMMON200",
+        "message": "로그인에 성공했습니다.",
+        "result": {
+          "nickname": "뷰어1",
+          "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZW1haWwiOiJ2aWV3ZXIxQHVtYy5jb20iLCJpYXQiOjE3OTQ0NjY4NjYsImV4cCI6MTc5NDQ3MDQ2Nn0.<signature masked>"
+        }
+      }
+    },
+    {
+      "label": "2단계 회원 B 로그인 200",
+      "method": "POST",
+      "url": "/auth/login",
+      "authorization": null,
+      "request": {
+        "email": "viewer2@umc.com",
+        "password": "Umc!1234"
+      },
+      "status": 200,
+      "response": {
+        "isSuccess": true,
+        "code": "COMMON200",
+        "message": "로그인에 성공했습니다.",
+        "result": {
+          "nickname": "뷰어2",
+          "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0IiwiZW1haWwiOiJ2aWV3ZXIyQHVtYy5jb20iLCJpYXQiOjE3OTQ0NjY4NjYsImV4cCI6MTc5NDQ3MDQ2Nn0.<signature masked>"
+        }
+      }
+    },
+    {
+      "label": "2단계 토큰 A 를 디코드해 본 결과 (jwt.io 와 같은 확인, 서명은 가림)",
+      "method": "DECODE",
+      "url": "accessToken.split(\".\")[0..1] → base64url 디코드",
+      "authorization": null,
+      "request": null,
+      "status": null,
+      "response": {
+        "header": {
+          "alg": "HS256",
+          "typ": "JWT"
+        },
+        "payload": {
+          "sub": "3",
+          "email": "viewer1@umc.com",
+          "iat": 1794466866,
+          "exp": 1794470466
+        },
+        "validForSeconds": 3600
+      }
+    },
+    {
+      "label": "로그인 실패: 틀린 비밀번호 401 (AUTH401_1)",
+      "method": "POST",
+      "url": "/auth/login",
+      "authorization": null,
+      "request": {
+        "email": "viewer1@umc.com",
+        "password": "Wrong!1234"
+      },
+      "status": 401,
+      "response": {
+        "isSuccess": false,
+        "code": "AUTH401_1",
+        "message": "이메일 또는 비밀번호가 올바르지 않습니다.",
+        "result": null
+      }
+    },
+    {
+      "label": "로그인 실패: 가입하지 않은 이메일 401 (AUTH401_1)",
+      "method": "POST",
+      "url": "/auth/login",
+      "authorization": null,
+      "request": {
+        "email": "nobody@umc.com",
+        "password": "Umc!1234"
+      },
+      "status": 401,
+      "response": {
+        "isSuccess": false,
+        "code": "AUTH401_1",
+        "message": "이메일 또는 비밀번호가 올바르지 않습니다.",
+        "result": null
+      }
+    },
+    {
+      "label": "로그인 실패 두 응답이 완전히 같은지 비교",
+      "method": "COMPARE",
+      "url": "틀린 비밀번호 응답 vs 가입하지 않은 이메일 응답",
+      "authorization": null,
+      "request": null,
+      "status": null,
+      "response": {
+        "identicalBody": true,
+        "code": "AUTH401_1",
+        "message": "이메일 또는 비밀번호가 올바르지 않습니다."
+      }
+    },
+    {
+      "label": "(참고) 틀린 비밀번호 vs 없는 이메일 응답 시간 (각 9회 중앙값, ms)",
+      "method": "TIMING",
+      "url": "POST /auth/login",
+      "authorization": null,
+      "request": null,
+      "status": null,
+      "response": {
+        "wrongPasswordMedianMs": 51,
+        "unknownEmailMedianMs": 51,
+        "note": "없는 이메일에도 bcrypt 비교를 한 번 하므로 두 값이 비슷하다. 이 값은 머신마다 다르다."
+      }
+    },
+    {
+      "label": "로그인 입력 검증: 이메일 형식 400",
+      "method": "POST",
+      "url": "/auth/login",
+      "authorization": null,
+      "request": {
+        "email": "umc-example.com",
+        "password": "Umc!1234"
+      },
+      "status": 400,
+      "response": {
+        "isSuccess": false,
+        "code": "COMMON400",
+        "message": "이메일 형식이 올바르지 않습니다.",
+        "result": null
+      }
+    },
+    {
+      "label": "GET /members/me 토큰 없이 → 401 (AUTH401_2)",
+      "method": "GET",
+      "url": "/members/me",
+      "authorization": null,
+      "request": null,
+      "status": 401,
+      "response": {
+        "isSuccess": false,
+        "code": "AUTH401_2",
+        "message": "로그인이 필요한 요청입니다.",
+        "result": null
+      }
+    },
+    {
+      "label": "GET /members/me 올바른 토큰 → 200 내 정보",
+      "method": "GET",
+      "url": "/members/me",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZW1haWwiOiJ2aWV3ZXIxQHVtYy5jb20iLCJpYXQiOjE3OTQ0NjY4NjYsImV4cCI6MTc5NDQ3MDQ2Nn0.<signature masked>",
+      "request": null,
+      "status": 200,
+      "response": {
+        "isSuccess": true,
+        "code": "COMMON200",
+        "message": "회원 정보를 조회했습니다.",
+        "result": {
+          "email": "viewer1@umc.com",
+          "nickname": "뷰어1",
+          "createdAt": "2026-11-12T07:01:06.000Z"
+        }
+      }
+    },
+    {
+      "label": "GET /members/me payload 의 글자 하나를 다른 글자로 교체 → 401 (AUTH401_3)",
+      "method": "GET",
+      "url": "/members/me",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzAiwiZW1haWwiOiJ2aWV3ZXIxQHVtYy5jb20iLCJpYXQiOjE3OTQ0NjY4NjYsImV4cCI6MTc5NDQ3MDQ2Nn0.<signature masked>",
+      "request": null,
+      "status": 401,
+      "response": {
+        "isSuccess": false,
+        "code": "AUTH401_3",
+        "message": "유효하지 않은 토큰입니다.",
+        "result": null
+      }
+    },
+    {
+      "label": "(참고) 토큰 맨 뒤에 글자를 \"덧붙이기\"만 해도 이 서버에서는 거절된다",
+      "method": "GET",
+      "url": "/members/me",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZW1haWwiOiJ2aWV3ZXIxQHVtYy5jb20iLCJpYXQiOjE3OTQ0NjY4NjYsImV4cCI6MTc5NDQ3MDQ2Nn0.<signature masked>",
+      "request": null,
+      "status": 401,
+      "response": {
+        "isSuccess": false,
+        "code": "AUTH401_3",
+        "message": "유효하지 않은 토큰입니다.",
+        "result": null
+      }
+    },
+    {
+      "label": "PATCH /members/me 닉네임 변경 200",
+      "method": "PATCH",
+      "url": "/members/me",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZW1haWwiOiJ2aWV3ZXIxQHVtYy5jb20iLCJpYXQiOjE3OTQ0NjY4NjYsImV4cCI6MTc5NDQ3MDQ2Nn0.<signature masked>",
+      "request": {
+        "nickname": "영화광"
+      },
+      "status": 200,
+      "response": {
+        "isSuccess": true,
+        "code": "COMMON200",
+        "message": "회원 정보를 수정했습니다.",
+        "result": {
+          "email": "viewer1@umc.com",
+          "nickname": "영화광",
+          "createdAt": "2026-11-12T07:01:06.000Z"
+        }
+      }
+    },
+    {
+      "label": "PATCH /members/me 다른 회원의 닉네임이면 409 (MEMBER409_1)",
+      "method": "PATCH",
+      "url": "/members/me",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0IiwiZW1haWwiOiJ2aWV3ZXIyQHVtYy5jb20iLCJpYXQiOjE3OTQ0NjY4NjYsImV4cCI6MTc5NDQ3MDQ2Nn0.<signature masked>",
+      "request": {
+        "nickname": "영화광"
+      },
+      "status": 409,
+      "response": {
+        "isSuccess": false,
+        "code": "MEMBER409_1",
+        "message": "이미 사용 중인 닉네임입니다.",
+        "result": null
+      }
+    },
+    {
+      "label": "PATCH /members/me 내 닉네임 그대로면 중복이 아니다 200",
+      "method": "PATCH",
+      "url": "/members/me",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZW1haWwiOiJ2aWV3ZXIxQHVtYy5jb20iLCJpYXQiOjE3OTQ0NjY4NjYsImV4cCI6MTc5NDQ3MDQ2Nn0.<signature masked>",
+      "request": {
+        "nickname": "영화광"
+      },
+      "status": 200,
+      "response": {
+        "isSuccess": true,
+        "code": "COMMON200",
+        "message": "회원 정보를 수정했습니다.",
+        "result": {
+          "email": "viewer1@umc.com",
+          "nickname": "영화광",
+          "createdAt": "2026-11-12T07:01:06.000Z"
+        }
+      }
+    },
+    {
+      "label": "3단계 평점 등록 201 (토큰 A, Body 에 memberId 없음)",
+      "method": "POST",
+      "url": "/ratings",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZW1haWwiOiJ2aWV3ZXIxQHVtYy5jb20iLCJpYXQiOjE3OTQ0NjY4NjYsImV4cCI6MTc5NDQ3MDQ2Nn0.<signature masked>",
+      "request": {
+        "movieId": 550,
+        "score": 5,
+        "comment": "최고의 영화!"
+      },
+      "status": 201,
+      "response": {
+        "isSuccess": true,
+        "code": "COMMON201",
+        "message": "평점 등록에 성공했습니다.",
+        "result": {
+          "ratingId": 4,
+          "movieId": 550,
+          "score": 5,
+          "comment": "최고의 영화!",
+          "createdAt": "2026-11-12T07:01:07.000Z",
+          "updatedAt": "2026-11-12T07:01:07.000Z"
+        }
+      }
+    },
+    {
+      "label": "등록 요청 Body 에 memberId 를 넣으면 400 (서버가 받지 않는다)",
+      "method": "POST",
+      "url": "/ratings",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZW1haWwiOiJ2aWV3ZXIxQHVtYy5jb20iLCJpYXQiOjE3OTQ0NjY4NjYsImV4cCI6MTc5NDQ3MDQ2Nn0.<signature masked>",
+      "request": {
+        "movieId": 155,
+        "score": 4,
+        "memberId": 4
+      },
+      "status": 400,
+      "response": {
+        "isSuccess": false,
+        "code": "COMMON400",
+        "message": "property memberId should not exist",
+        "result": null
+      }
+    },
+    {
+      "label": "4단계 같은 movieId 중복 등록 409 (RATING409_1)",
+      "method": "POST",
+      "url": "/ratings",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZW1haWwiOiJ2aWV3ZXIxQHVtYy5jb20iLCJpYXQiOjE3OTQ0NjY4NjYsImV4cCI6MTc5NDQ3MDQ2Nn0.<signature masked>",
+      "request": {
+        "movieId": 550,
+        "score": 3
+      },
+      "status": 409,
+      "response": {
+        "isSuccess": false,
+        "code": "RATING409_1",
+        "message": "이미 이 영화에 평점을 남기셨습니다.",
+        "result": null
+      }
+    },
+    {
+      "label": "5단계 본인 수정 200 (토큰 A)",
+      "method": "PATCH",
+      "url": "/ratings/4",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZW1haWwiOiJ2aWV3ZXIxQHVtYy5jb20iLCJpYXQiOjE3OTQ0NjY4NjYsImV4cCI6MTc5NDQ3MDQ2Nn0.<signature masked>",
+      "request": {
+        "score": 2,
+        "comment": "다시 보니 별로"
+      },
+      "status": 200,
+      "response": {
+        "isSuccess": true,
+        "code": "COMMON200",
+        "message": "평점 수정에 성공했습니다.",
+        "result": {
+          "ratingId": 4,
+          "movieId": 550,
+          "score": 2,
+          "comment": "다시 보니 별로",
+          "createdAt": "2026-11-12T07:01:07.000Z",
+          "updatedAt": "2026-11-12T07:01:07.000Z"
+        }
+      }
+    },
+    {
+      "label": "6단계 남의 평점 수정 → 403 (토큰 B, RATING403_1)",
+      "method": "PATCH",
+      "url": "/ratings/4",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0IiwiZW1haWwiOiJ2aWV3ZXIyQHVtYy5jb20iLCJpYXQiOjE3OTQ0NjY4NjYsImV4cCI6MTc5NDQ3MDQ2Nn0.<signature masked>",
+      "request": {
+        "score": 1
+      },
+      "status": 403,
+      "response": {
+        "isSuccess": false,
+        "code": "RATING403_1",
+        "message": "본인이 작성한 평점만 수정하거나 삭제할 수 있습니다.",
+        "result": null
+      }
+    },
+    {
+      "label": "7단계 토큰 없이 수정 → 401 (AUTH401_2)",
+      "method": "PATCH",
+      "url": "/ratings/4",
+      "authorization": null,
+      "request": {
+        "score": 1
+      },
+      "status": 401,
+      "response": {
+        "isSuccess": false,
+        "code": "AUTH401_2",
+        "message": "로그인이 필요한 요청입니다.",
+        "result": null
+      }
+    },
+    {
+      "label": "6단계(403)와 7단계(401)의 code 비교",
+      "method": "COMPARE",
+      "url": "403 응답 vs 401 응답",
+      "authorization": null,
+      "request": null,
+      "status": null,
+      "response": {
+        "forbidden": {
+          "status": 403,
+          "code": "RATING403_1"
+        },
+        "unauthorized": {
+          "status": 401,
+          "code": "AUTH401_2"
+        },
+        "differentCode": true
+      }
+    },
+    {
+      "label": "8단계 없는 평점 삭제 → 404 (토큰 A, RATING404_1)",
+      "method": "DELETE",
+      "url": "/ratings/99999",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZW1haWwiOiJ2aWV3ZXIxQHVtYy5jb20iLCJpYXQiOjE3OTQ0NjY4NjYsImV4cCI6MTc5NDQ3MDQ2Nn0.<signature masked>",
+      "request": null,
+      "status": 404,
+      "response": {
+        "isSuccess": false,
+        "code": "RATING404_1",
+        "message": "해당 평점을 찾을 수 없습니다.",
+        "result": null
+      }
+    },
+    {
+      "label": "(공개 조회) 토큰 없이 A 의 평점 목록 200 — 5주차 그대로 배열",
+      "method": "GET",
+      "url": "/members/3/ratings",
+      "authorization": null,
+      "request": null,
+      "status": 200,
+      "response": [
+        {
+          "ratingId": 4,
+          "movieId": 550,
+          "score": 2,
+          "comment": "다시 보니 별로",
+          "createdAt": "2026-11-12T07:01:07.000Z",
+          "updatedAt": "2026-11-12T07:01:07.000Z"
+        }
+      ]
+    },
+    {
+      "label": "6주차 방식 POST /members/{memberId}/ratings → 404 (사라진 경로)",
+      "method": "POST",
+      "url": "/members/3/ratings",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZW1haWwiOiJ2aWV3ZXIxQHVtYy5jb20iLCJpYXQiOjE3OTQ0NjY4NjYsImV4cCI6MTc5NDQ3MDQ2Nn0.<signature masked>",
+      "request": {
+        "movieId": 155,
+        "score": 3
+      },
+      "status": 404,
+      "response": {
+        "isSuccess": false,
+        "code": "COMMON404",
+        "message": "Cannot POST /members/3/ratings",
+        "result": null
+      }
+    },
+    {
+      "label": "6주차 방식 DELETE /members/{memberId}/ratings/{ratingId} → 404",
+      "method": "DELETE",
+      "url": "/members/3/ratings/4",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZW1haWwiOiJ2aWV3ZXIxQHVtYy5jb20iLCJpYXQiOjE3OTQ0NjY4NjYsImV4cCI6MTc5NDQ3MDQ2Nn0.<signature masked>",
+      "request": null,
+      "status": 404,
+      "response": {
+        "isSuccess": false,
+        "code": "COMMON404",
+        "message": "Cannot DELETE /members/3/ratings/4",
+        "result": null
+      }
+    },
+    {
+      "label": "9단계 본인 삭제 200 (토큰 A, result null)",
+      "method": "DELETE",
+      "url": "/ratings/4",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZW1haWwiOiJ2aWV3ZXIxQHVtYy5jb20iLCJpYXQiOjE3OTQ0NjY4NjYsImV4cCI6MTc5NDQ3MDQ2Nn0.<signature masked>",
+      "request": null,
+      "status": 200,
+      "response": {
+        "isSuccess": true,
+        "code": "COMMON200",
+        "message": "평점 삭제에 성공했습니다.",
+        "result": null
+      }
+    },
+    {
+      "label": "삭제 후 조회: 목록에서 사라짐",
+      "method": "GET",
+      "url": "/members/3/ratings",
+      "authorization": null,
+      "request": null,
+      "status": 200,
+      "response": []
+    },
+    {
+      "label": "DB 확인: member.password 는 bcrypt 해시 (원문·해시 전체는 기록하지 않음)",
+      "method": "SQL",
+      "url": "SELECT LEFT(password,4), CHAR_LENGTH(password) FROM member",
+      "authorization": null,
+      "request": null,
+      "status": null,
+      "response": {
+        "prefix": "$2b$",
+        "length": 60,
+        "isPlainText": false
+      }
+    }
+  ]
+}

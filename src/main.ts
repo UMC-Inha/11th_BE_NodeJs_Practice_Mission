@@ -4,8 +4,11 @@ import type { Pool } from 'mysql2/promise';
 import { AppModule } from './app.module.js';
 import { DATABASE_CONNECTION } from './database.provider.js';
 
+import { createValidationPipe } from './validation.js';
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.useGlobalPipes(createValidationPipe());
 
   // 실습 체크리스트 "서버 콘솔에 에러 없이 DB 커넥션이 연결된다" 확인용.
   // 커넥션 풀은 첫 쿼리 때 연결을 만들기 때문에, 켜질 때 한 번 찔러 봐야
