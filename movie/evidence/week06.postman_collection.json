@@ -1,0 +1,548 @@
+{
+  "info": {
+    "name": "UMC 6주차 회원가입·평점 쓰기 API (케빈)",
+    "description": "회원가입 201/400/409, 평점 등록 201/400/404/409, 수정 200/403/404, 삭제 204/403/404. 5주차 조회 API로 결과 확인. sql/schema.sql + sql/seed.sql 기준이며 실행할 때마다 새 이메일·닉네임을 만든다.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    }
+  ],
+  "item": [
+    {
+      "name": "회원가입 성공 - 201 (password 응답 없음)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"viewer{{suffix}}@umc.com\",\n  \"password\": \"Umc!1234\",\n  \"nickname\": \"뷰어{{suffix}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/members"
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.collectionVariables.set('suffix', String(Date.now()).slice(-6));"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('201', () => pm.response.to.have.status(201));",
+              "pm.test('응답 본문', () => { const b = pm.response.json(); pm.expect(b.isSuccess).to.eql(true); pm.expect(b.code).to.eql('COMMON201'); pm.expect(Object.keys(b.result)).to.eql(['memberId','email','nickname']); pm.collectionVariables.set('memberA', b.result.memberId); });",
+              "pm.test('password 문자열이 응답에 없다', () => pm.expect(pm.response.text()).to.not.include('password'));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "회원가입 성공 - 다른 회원 B 201",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"other{{suffix}}@umc.com\",\n  \"password\": \"Umc!1234\",\n  \"nickname\": \"타인{{suffix}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/members"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('201', () => pm.response.to.have.status(201));",
+              "pm.test('응답 본문', () => { const b = pm.response.json(); pm.collectionVariables.set('memberB', b.result.memberId); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "검증 실패 - 이메일 형식 400",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"umc-example.com\",\n  \"password\": \"Umc!1234\",\n  \"nickname\": \"뷰어{{suffix}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/members"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('400', () => pm.response.to.have.status(400));",
+              "pm.test('실패 틀 COMMON400', () => { const b = pm.response.json(); pm.expect(b.isSuccess).to.eql(false); pm.expect(b.code).to.eql('COMMON400'); pm.expect(b.result).to.eql(null); pm.expect(b.message).to.eql('올바른 이메일 형식이 아닙니다.'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "검증 실패 - 비밀번호 규칙 400",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"x{{suffix}}@umc.com\",\n  \"password\": \"umc1234\",\n  \"nickname\": \"검증{{suffix}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/members"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('400', () => pm.response.to.have.status(400));",
+              "pm.test('실패 틀 COMMON400', () => { const b = pm.response.json(); pm.expect(b.isSuccess).to.eql(false); pm.expect(b.code).to.eql('COMMON400'); pm.expect(b.result).to.eql(null); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "이메일 중복 - 409 MEMBER4091",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"viewer{{suffix}}@umc.com\",\n  \"password\": \"Umc!1234\",\n  \"nickname\": \"새닉{{suffix}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/members"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('409', () => pm.response.to.have.status(409));",
+              "pm.test('실패 틀 MEMBER4091', () => { const b = pm.response.json(); pm.expect(b.isSuccess).to.eql(false); pm.expect(b.code).to.eql('MEMBER4091'); pm.expect(b.result).to.eql(null); pm.expect(b.message).to.eql('이미 사용 중인 이메일입니다.'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "닉네임 중복 - 409 MEMBER4092",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"new{{suffix}}@umc.com\",\n  \"password\": \"Umc!1234\",\n  \"nickname\": \"뷰어{{suffix}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/members"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('409', () => pm.response.to.have.status(409));",
+              "pm.test('실패 틀 MEMBER4092', () => { const b = pm.response.json(); pm.expect(b.isSuccess).to.eql(false); pm.expect(b.code).to.eql('MEMBER4092'); pm.expect(b.result).to.eql(null); pm.expect(b.message).to.eql('이미 사용 중인 닉네임입니다.'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "평점 등록 - 201 (result = ratingId)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"movieId\": 550,\n  \"score\": 5,\n  \"comment\": \"최고의 영화!\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/members/{{memberA}}/ratings"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('201', () => pm.response.to.have.status(201));",
+              "pm.test('응답 본문', () => { const b = pm.response.json(); pm.expect(b.code).to.eql('COMMON201'); pm.expect(b.result).to.be.a('number'); pm.collectionVariables.set('ratingId', b.result); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "같은 영화 중복 등록 - 409 RATING4091",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"movieId\": 550,\n  \"score\": 3\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/members/{{memberA}}/ratings"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('409', () => pm.response.to.have.status(409));",
+              "pm.test('실패 틀 RATING4091', () => { const b = pm.response.json(); pm.expect(b.isSuccess).to.eql(false); pm.expect(b.code).to.eql('RATING4091'); pm.expect(b.result).to.eql(null); pm.expect(b.message).to.eql('이미 이 영화에 평점을 남기셨습니다.'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "별점 범위 오류 - 400",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"movieId\": 155,\n  \"score\": 6\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/members/{{memberA}}/ratings"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('400', () => pm.response.to.have.status(400));",
+              "pm.test('실패 틀 COMMON400', () => { const b = pm.response.json(); pm.expect(b.isSuccess).to.eql(false); pm.expect(b.code).to.eql('COMMON400'); pm.expect(b.result).to.eql(null); pm.expect(b.message).to.eql('별점은 5점 이하여야 합니다.'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "없는 회원에게 등록 - 404 MEMBER4041",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"movieId\": 550,\n  \"score\": 5\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/members/999999/ratings"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('404', () => pm.response.to.have.status(404));",
+              "pm.test('실패 틀 MEMBER4041', () => { const b = pm.response.json(); pm.expect(b.isSuccess).to.eql(false); pm.expect(b.code).to.eql('MEMBER4041'); pm.expect(b.result).to.eql(null); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "평점 수정 - 200",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"score\": 2,\n  \"comment\": \"다시 보니 별로\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/members/{{memberA}}/ratings/{{ratingId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('200', () => pm.response.to.have.status(200));",
+              "pm.test('응답 본문', () => { const b = pm.response.json(); pm.expect(b).to.eql({ isSuccess: true, code: 'COMMON200', message: '평점 수정에 성공했습니다.', result: null }); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "수정 결과 조회 (5주차 API)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/members/{{memberA}}/ratings"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('200', () => pm.response.to.have.status(200));",
+              "pm.test('응답 본문', () => { const b = pm.response.json(); pm.expect(b).to.have.length(1); pm.expect(b[0].score).to.eql(2); pm.expect(b[0].comment).to.eql('다시 보니 별로'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "다른 회원이 수정 - 403 RATING4031",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"score\": 1\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/members/{{memberB}}/ratings/{{ratingId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('403', () => pm.response.to.have.status(403));",
+              "pm.test('실패 틀 RATING4031', () => { const b = pm.response.json(); pm.expect(b.isSuccess).to.eql(false); pm.expect(b.code).to.eql('RATING4031'); pm.expect(b.result).to.eql(null); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "없는 ratingId 수정 - 404 RATING4041",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"score\": 3\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": "{{baseUrl}}/members/{{memberA}}/ratings/999999"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('404', () => pm.response.to.have.status(404));",
+              "pm.test('실패 틀 RATING4041', () => { const b = pm.response.json(); pm.expect(b.isSuccess).to.eql(false); pm.expect(b.code).to.eql('RATING4041'); pm.expect(b.result).to.eql(null); pm.expect(b.message).to.eql('존재하지 않는 평점입니다.'); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "다른 회원이 삭제 - 403",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/members/{{memberB}}/ratings/{{ratingId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('403', () => pm.response.to.have.status(403));",
+              "pm.test('실패 틀 RATING4031', () => { const b = pm.response.json(); pm.expect(b.isSuccess).to.eql(false); pm.expect(b.code).to.eql('RATING4031'); pm.expect(b.result).to.eql(null); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "평점 삭제 - 204 (본문 없음)",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/members/{{memberA}}/ratings/{{ratingId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('204', () => pm.response.to.have.status(204));",
+              "pm.test('본문이 비어 있다', () => pm.expect(pm.response.text()).to.eql(''));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "삭제 후 조회 - 빈 배열",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/members/{{memberA}}/ratings"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('200', () => pm.response.to.have.status(200));",
+              "pm.test('응답 본문', () => { const b = pm.response.json(); pm.expect(b).to.eql([]); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "이미 삭제한 평점 다시 삭제 - 404",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": "{{baseUrl}}/members/{{memberA}}/ratings/{{ratingId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('404', () => pm.response.to.have.status(404));",
+              "pm.test('실패 틀 RATING4041', () => { const b = pm.response.json(); pm.expect(b.isSuccess).to.eql(false); pm.expect(b.code).to.eql('RATING4041'); pm.expect(b.result).to.eql(null); });"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

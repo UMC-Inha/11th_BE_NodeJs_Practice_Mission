@@ -1,0 +1,61 @@
+{
+  "checkedAt": "2026-11-12T07:02:17.595Z",
+  "database": "umc_movie_test_expiry7",
+  "server": "node dist/main.js (PORT 3100, JWT_ACCESS_EXPIRATION=60, 이 실행에서만 쓰는 무작위 JWT 키)",
+  "note": "accessToken 의 서명 부분은 <signature masked> 로 가렸다.",
+  "token": {
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZW1haWwiOiJleHBpcnlAdW1jLmNvbSIsImlhdCI6MTc5NDQ2Njg3NiwiZXhwIjoxNzk0NDY2OTM2fQ.<signature masked>",
+    "payload": {
+      "sub": "3",
+      "email": "expiry@umc.com",
+      "iat": 1794466876,
+      "exp": 1794466936
+    },
+    "validForSeconds": 60
+  },
+  "beforeExpiry": {
+    "secondsAfterLogin": 0.1,
+    "request": "GET /members/me (Authorization: Bearer 위 토큰)",
+    "status": 200,
+    "response": {
+      "isSuccess": true,
+      "code": "COMMON200",
+      "message": "회원 정보를 조회했습니다.",
+      "result": {
+        "email": "expiry@umc.com",
+        "nickname": "만료체험",
+        "createdAt": "2026-11-12T07:01:16.000Z"
+      }
+    }
+  },
+  "noToken": {
+    "request": "GET /members/me (Authorization 헤더 없음)",
+    "status": 401,
+    "response": {
+      "isSuccess": false,
+      "code": "AUTH401_2",
+      "message": "로그인이 필요한 요청입니다.",
+      "result": null
+    }
+  },
+  "afterExpiry": {
+    "secondsAfterLogin": 60.7,
+    "request": "GET /members/me (Authorization: Bearer 같은 토큰)",
+    "status": 401,
+    "response": {
+      "isSuccess": false,
+      "code": "AUTH401_4",
+      "message": "토큰이 만료되었습니다. 다시 로그인해주세요.",
+      "result": null
+    }
+  },
+  "sameStatusDifferentCode": {
+    "status": 401,
+    "expiredCode": "AUTH401_4",
+    "noTokenCode": "AUTH401_2"
+  },
+  "afterRelogin": {
+    "request": "다시 로그인해서 받은 새 토큰으로 GET /members/me",
+    "status": 200
+  }
+}
