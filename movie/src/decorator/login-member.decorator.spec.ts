@@ -45,7 +45,13 @@ describe('@LoginMember()', () => {
 });
 
 describe('컨트롤러는 요청 객체의 키 이름을 직접 쓰지 않는다 (선택 미션 2)', () => {
-  const controllers = ['auth', 'member', 'rating'].map((name) => ({
+  const controllers = [
+    'auth',
+    'member',
+    'rating',
+    'favorite',
+    'movie-record',
+  ].map((name) => ({
     name,
     source: readFileSync(
       new URL(`../controller/${name}.controller.ts`, import.meta.url),
