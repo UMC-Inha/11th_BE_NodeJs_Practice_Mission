@@ -4,6 +4,7 @@ import { JwtModule } from "@nestjs/jwt";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
+import { Favorite } from "./entity/favorite.entity";
 import { Member } from "./entity/member.entity";
 import { Rating } from "./entity/rating.entity";
 import { AuthController } from "./controller/auth.controller";
@@ -26,14 +27,13 @@ import { RatingService } from "./service/rating.service";
       autoLoadEntities: true,
       synchronize: false,
     }),
-    TypeOrmModule.forFeature([Member, Rating]),
+    TypeOrmModule.forFeature([Member, Rating, Favorite]),
     JwtModule.registerAsync({
-      global: true, // 전역 등록하면 어느 서비스에서든 JwtService를 주입받을 수 있어요
+      global: true,
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>("JWT_SECRET"),
         signOptions: {
-          // 환경변수는 문자열로 들어오므로 Number()로 바꿔요
           expiresIn: Number(
             configService.get<string>("JWT_ACCESS_EXPIRATION") ?? 3600,
           ),
