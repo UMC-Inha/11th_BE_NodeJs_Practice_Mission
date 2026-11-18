@@ -1,6 +1,8 @@
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
+import { CreateFavoriteDto } from './create-favorite.dto.js';
 import { CreateMemberDto } from './create-member.dto.js';
+import { CreateMovieRecordDto } from './create-movie-record.dto.js';
 import { CreateRatingDto } from './create-rating.dto.js';
 import { LoginRequestDto } from './login-request.dto.js';
 import { MemberUpdateRequestDto } from './member-update-request.dto.js';
@@ -209,5 +211,98 @@ describe('MemberUpdateRequestDto', () => {
       await firstError(MemberUpdateRequestDto, { nickname: '   ' }),
     ).toBeDefined();
     expect(await firstError(MemberUpdateRequestDto, {})).toBeDefined();
+  });
+});
+
+describe('CreateFavoriteDto', () => {
+  it('정상 값은 통과, memberId 같은 다른 값은 DTO 에 없다', async () => {
+    expect(
+      await firstError(CreateFavoriteDto, { movieId: 550 }),
+    ).toBeUndefined();
+    expect(
+      Object.keys(plainToInstance(CreateFavoriteDto, { movieId: 550 })),
+    ).toEqual(['movieId']);
+  });
+
+  it('영화 ID 는 필수·정수·양수 — 상황마다 가장 알맞은 메시지가 먼저 나온다', async () => {
+    expect(await firstError(CreateFavoriteDto, {})).toBe(
+      '영화 ID는 필수입니다.',
+    );
+    expect(await firstError(CreateFavoriteDto, { movieId: null })).toBe(
+      '영화 ID는 필수입니다.',
+    );
+    expect(await firstError(CreateFavoriteDto, { movieId: '550' })).toBe(
+      '영화 ID는 정수여야 합니다.',
+    );
+    expect(await firstError(CreateFavoriteDto, { movieId: 1.5 })).toBe(
+      '영화 ID는 정수여야 합니다.',
+    );
+    expect(await firstError(CreateFavoriteDto, { movieId: 0 })).toBe(
+      '영화 ID는 양수여야 합니다.',
+    );
+    expect(await firstError(CreateFavoriteDto, { movieId: -3 })).toBe(
+      '영화 ID는 양수여야 합니다.',
+    );
+  });
+});
+
+describe('CreateMovieRecordDto', () => {
+  const ok = { movieId: 238, score: 5, comment: '좋다', addToFavorites: true };
+
+  it('정상 값은 통과 (후기는 선택)', async () => {
+    expect(await firstError(CreateMovieRecordDto, ok)).toBeUndefined();
+    expect(
+      await firstError(CreateMovieRecordDto, {
+        movieId: 1,
+        score: 1,
+        addToFavorites: false,
+      }),
+    ).toBeUndefined();
+  });
+
+  it('별점은 1~5 정수', async () => {
+    expect(await firstError(CreateMovieRecordDto, { ...ok, score: 0 })).toBe(
+      '별점은 1점 이상이어야 합니다.',
+    );
+    expect(await firstError(CreateMovieRecordDto, { ...ok, score: 6 })).toBe(
+      '별점은 5점 이하여야 합니다.',
+    );
+    expect(await firstError(CreateMovieRecordDto, { ...ok, score: 4.5 })).toBe(
+      '별점은 정수여야 합니다.',
+    );
+    expect(
+      await firstError(CreateMovieRecordDto, {
+        movieId: 1,
+        addToFavorites: true,
+      }),
+    ).toBe('별점은 필수입니다.');
+  });
+
+  it('addToFavorites 는 반드시 boolean', async () => {
+    const message = '즐겨찾기 추가 여부는 true 또는 false여야 합니다.';
+    expect(
+      await firstError(CreateMovieRecordDto, { movieId: 1, score: 3 }),
+    ).toBe(message);
+    expect(
+      await firstError(CreateMovieRecordDto, { ...ok, addToFavorites: 'true' }),
+    ).toBe(message);
+    expect(
+      await firstError(CreateMovieRecordDto, { ...ok, addToFavorites: 1 }),
+    ).toBe(message);
+  });
+
+  it('후기는 500자 이하', async () => {
+    expect(
+      await firstError(CreateMovieRecordDto, {
+        ...ok,
+        comment: 'ㅋ'.repeat(500),
+      }),
+    ).toBeUndefined();
+    expect(
+      await firstError(CreateMovieRecordDto, {
+        ...ok,
+        comment: 'ㅋ'.repeat(501),
+      }),
+    ).toBe('후기는 500자 이하로 입력해주세요.');
   });
 });

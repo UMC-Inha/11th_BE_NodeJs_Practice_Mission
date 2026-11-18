@@ -8,6 +8,7 @@ import { QueryFailedError } from 'typeorm';
 import {
   ApiException,
   ErrorCode,
+  favoriteNotFound,
   loginFailed,
   memberNotFound,
   ratingForbidden,
@@ -92,6 +93,17 @@ describe('AllExceptionsFilter', () => {
     }
   });
 
+  it('즐겨찾기 404 는 상태·code·message 그대로 (401 과 다른 code)', () => {
+    const { status, body } = run(favoriteNotFound());
+    expect(status).toBe(404);
+    expect(body).toEqual({
+      isSuccess: false,
+      code: 'FAVORITE404_1',
+      message: '즐겨찾기한 영화를 찾을 수 없습니다.',
+      result: null,
+    });
+  });
+
   it('ValidationPipe 의 message 배열은 첫 번째 이유만, code 는 COMMON400', () => {
     const { status, body } = run(
       new BadRequestException({
@@ -137,6 +149,19 @@ describe('AllExceptionsFilter', () => {
     expect(run(duplicateEntry('rating.uk_rating_member_movie')).body.code).toBe(
       'RATING409_1',
     );
+  });
+
+  it('즐겨찾기 UNIQUE(uk_favorite_member_movie) → 409 FAVORITE409_1, 같은 응답 틀', () => {
+    const { status, body } = run(
+      duplicateEntry('favorite.uk_favorite_member_movie'),
+    );
+    expect(status).toBe(409);
+    expect(body).toEqual({
+      isSuccess: false,
+      code: 'FAVORITE409_1',
+      message: '이미 이 영화를 즐겨찾기하셨습니다.',
+      result: null,
+    });
   });
 
   it('어느 UNIQUE 인지 모르면 일반 409 COMMON409', () => {

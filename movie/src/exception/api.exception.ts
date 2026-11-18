@@ -23,6 +23,8 @@ export const ErrorCode = {
   RATING_NOT_FOUND: 'RATING404_1',
   RATING_FORBIDDEN: 'RATING403_1',
   RATING_DUPLICATED: 'RATING409_1',
+  FAVORITE_NOT_FOUND: 'FAVORITE404_1',
+  FAVORITE_DUPLICATED: 'FAVORITE409_1',
 } as const;
 
 /** 우리가 의도해서 던지는 오류. HTTP 상태와 함께 응답 틀의 code 를 들고 다닌다. */
@@ -108,4 +110,18 @@ export const ratingDuplicated = () =>
     HttpStatus.CONFLICT,
     ErrorCode.RATING_DUPLICATED,
     '이미 이 영화에 평점을 남기셨습니다.',
+  );
+
+export const favoriteNotFound = () =>
+  new ApiException(
+    HttpStatus.NOT_FOUND,
+    ErrorCode.FAVORITE_NOT_FOUND,
+    '즐겨찾기한 영화를 찾을 수 없습니다.',
+  );
+
+export const favoriteDuplicated = () =>
+  new ApiException(
+    HttpStatus.CONFLICT,
+    ErrorCode.FAVORITE_DUPLICATED,
+    '이미 이 영화를 즐겨찾기하셨습니다.',
   );
