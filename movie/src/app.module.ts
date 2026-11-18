@@ -1,21 +1,26 @@
+import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { JwtModule } from '@nestjs/jwt';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthController } from './controller/auth.controller.js';
+import { FavoriteController } from './controller/favorite.controller.js';
+import { MemberController } from './controller/member.controller.js';
+import { MovieRecordController } from './controller/movie-record.controller.js';
+import { RatingController } from './controller/rating.controller.js';
+import { Favorite } from './entity/favorite.entity.js';
+import { Member } from './entity/member.entity.js';
+import { Rating } from './entity/rating.entity.js';
 import { AuthService } from './service/auth.service.js';
-import { Module } from "@nestjs/common";
-import { ConfigModule, ConfigService } from "@nestjs/config";
-import { JwtModule } from "@nestjs/jwt";
-import { TypeOrmModule } from "@nestjs/typeorm";
-import { Member } from "./entity/member.entity.js";
-import { Rating } from "./entity/rating.entity.js";
-import { MemberController } from "./controller/member.controller.js";
-import { RatingController } from "./controller/rating.controller.js";
-import { MemberService } from "./service/member.service.js";
-import { RatingService } from "./service/rating.service.js";
+import { FavoriteService } from './service/favorite.service.js';
+import { MemberService } from './service/member.service.js';
+import { MovieRecordService } from './service/movie-record.service.js';
+import { RatingService } from './service/rating.service.js';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRoot({
-      type: "mysql",
+      type: 'mysql',
       host: process.env.DB_HOST,
       port: 3306,
       username: process.env.DB_USER,
@@ -24,20 +29,51 @@ import { RatingService } from "./service/rating.service.js";
       autoLoadEntities: true,
       synchronize: false,
     }),
-    TypeOrmModule.forFeature([Member, Rating]),
+    TypeOrmModule.forFeature([Member, Rating, Favorite]),
     JwtModule.registerAsync({
-      global: true, // 전역 등록해두면 어느 서비스에서든 JwtService를 주입받을 수 있습니다
+      global: true,
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET'),
-        signOptions: {
-          // 초 단위 숫자로 넘깁니다. 환경변수는 문자열로 들어오므로 Number()로 바꿔주세요.
-          expiresIn: Number(configService.get<string>('JWT_ACCESS_EXPIRATION') ?? 3600),
-        },
-      }),
+      useFactory: (configService: ConfigService) => {
+        const secret = configService.get<string>('JWT_SECRET');
+        if (!secret?.trim()) {
+          throw new Error(
+            'JWT_SECRET에 비어 있지 않은 서명 키를 설정해야 합니다.',
+          );
+        }
+
+        const configuredExpiration = configService.get<string>(
+          'JWT_ACCESS_EXPIRATION',
+        );
+        const expiresIn =
+          configuredExpiration === undefined
+            ? 3600
+            : Number(configuredExpiration);
+        if (
+          (configuredExpiration !== undefined &&
+            !/^[0-9]+$/.test(configuredExpiration.trim())) ||
+          !Number.isSafeInteger(expiresIn) ||
+          expiresIn < 1
+        ) {
+          throw new Error('JWT_ACCESS_EXPIRATION은 양의 정수(초)여야 합니다.');
+        }
+
+        return { secret, signOptions: { expiresIn } };
+      },
     }),
   ],
-  controllers: [MemberController, RatingController, AuthController],
-  providers: [MemberService, RatingService, AuthService],
+  controllers: [
+    AuthController,
+    MemberController,
+    RatingController,
+    FavoriteController,
+    MovieRecordController,
+  ],
+  providers: [
+    AuthService,
+    MemberService,
+    RatingService,
+    FavoriteService,
+    MovieRecordService,
+  ],
 })
 export class AppModule {}
