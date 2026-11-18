@@ -1,0 +1,642 @@
+{
+  "checkedAt": "2026-11-18T02:12:51.127Z",
+  "database": "umc_movie_test_verify8",
+  "server": "node dist/main.js (PORT 3100, 이 실행에서만 쓰는 무작위 JWT 키)",
+  "note": "accessToken 의 서명 부분은 <signature masked> 로 가렸다. dbRows 는 그 요청 직후 일회용 DB 에서 직접 센 행 수다.",
+  "results": [
+    {
+      "label": "준비 회원 A 가입 201",
+      "method": "POST",
+      "url": "/members",
+      "authorization": null,
+      "request": {
+        "email": "viewer1@umc.com",
+        "password": "Umc!1234",
+        "nickname": "뷰어1"
+      },
+      "status": 201,
+      "response": {
+        "isSuccess": true,
+        "code": "COMMON201",
+        "message": "회원가입에 성공했습니다.",
+        "result": {
+          "memberId": 3,
+          "email": "viewer1@umc.com",
+          "nickname": "뷰어1"
+        }
+      }
+    },
+    {
+      "label": "준비 회원 B 가입 201",
+      "method": "POST",
+      "url": "/members",
+      "authorization": null,
+      "request": {
+        "email": "viewer2@umc.com",
+        "password": "Umc!1234",
+        "nickname": "뷰어2"
+      },
+      "status": 201,
+      "response": {
+        "isSuccess": true,
+        "code": "COMMON201",
+        "message": "회원가입에 성공했습니다.",
+        "result": {
+          "memberId": 4,
+          "email": "viewer2@umc.com",
+          "nickname": "뷰어2"
+        }
+      }
+    },
+    {
+      "label": "준비 회원 A 로그인 200",
+      "method": "POST",
+      "url": "/auth/login",
+      "authorization": null,
+      "request": {
+        "email": "viewer1@umc.com",
+        "password": "Umc!1234"
+      },
+      "status": 200,
+      "response": {
+        "isSuccess": true,
+        "code": "COMMON200",
+        "message": "로그인에 성공했습니다.",
+        "result": {
+          "nickname": "뷰어1",
+          "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZW1haWwiOiJ2aWV3ZXIxQHVtYy5jb20iLCJpYXQiOjE3OTQ5Njc5NzAsImV4cCI6MTc5NDk3MTU3MH0.<signature masked>"
+        }
+      }
+    },
+    {
+      "label": "준비 회원 B 로그인 200",
+      "method": "POST",
+      "url": "/auth/login",
+      "authorization": null,
+      "request": {
+        "email": "viewer2@umc.com",
+        "password": "Umc!1234"
+      },
+      "status": 200,
+      "response": {
+        "isSuccess": true,
+        "code": "COMMON200",
+        "message": "로그인에 성공했습니다.",
+        "result": {
+          "nickname": "뷰어2",
+          "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0IiwiZW1haWwiOiJ2aWV3ZXIyQHVtYy5jb20iLCJpYXQiOjE3OTQ5Njc5NzEsImV4cCI6MTc5NDk3MTU3MX0.<signature masked>"
+        }
+      }
+    },
+    {
+      "label": "F0 토큰 없이 POST /favorites → 401 AUTH401_2",
+      "method": "POST",
+      "url": "/favorites",
+      "authorization": null,
+      "request": {
+        "movieId": 550
+      },
+      "status": 401,
+      "response": {
+        "isSuccess": false,
+        "code": "AUTH401_2",
+        "message": "로그인이 필요한 요청입니다.",
+        "result": null
+      }
+    },
+    {
+      "label": "F1 즐겨찾기 등록 201 (토큰 A, Body 에 memberId 없음)",
+      "method": "POST",
+      "url": "/favorites",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZW1haWwiOiJ2aWV3ZXIxQHVtYy5jb20iLCJpYXQiOjE3OTQ5Njc5NzAsImV4cCI6MTc5NDk3MTU3MH0.<signature masked>",
+      "request": {
+        "movieId": 550
+      },
+      "status": 201,
+      "response": {
+        "isSuccess": true,
+        "code": "COMMON201",
+        "message": "즐겨찾기를 등록했습니다.",
+        "result": {
+          "favoriteId": 1,
+          "movieId": 550,
+          "createdAt": "2026-11-18T02:12:51.000Z"
+        }
+      }
+    },
+    {
+      "label": "F2 같은 영화를 한 번 더 → 409 FAVORITE409_1",
+      "method": "POST",
+      "url": "/favorites",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZW1haWwiOiJ2aWV3ZXIxQHVtYy5jb20iLCJpYXQiOjE3OTQ5Njc5NzAsImV4cCI6MTc5NDk3MTU3MH0.<signature masked>",
+      "request": {
+        "movieId": 550
+      },
+      "status": 409,
+      "response": {
+        "isSuccess": false,
+        "code": "FAVORITE409_1",
+        "message": "이미 이 영화를 즐겨찾기하셨습니다.",
+        "result": null
+      }
+    },
+    {
+      "label": "F3 내 즐겨찾기 목록 200 (방금 저장한 영화 1개)",
+      "method": "GET",
+      "url": "/favorites",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZW1haWwiOiJ2aWV3ZXIxQHVtYy5jb20iLCJpYXQiOjE3OTQ5Njc5NzAsImV4cCI6MTc5NDk3MTU3MH0.<signature masked>",
+      "request": null,
+      "status": 200,
+      "response": {
+        "isSuccess": true,
+        "code": "COMMON200",
+        "message": "내 즐겨찾기 목록을 조회했습니다.",
+        "result": [
+          {
+            "favoriteId": 1,
+            "movieId": 550,
+            "createdAt": "2026-11-18T02:12:51.000Z"
+          }
+        ]
+      }
+    },
+    {
+      "label": "F4 GET /favorites/550 → isFavorite: true",
+      "method": "GET",
+      "url": "/favorites/550",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZW1haWwiOiJ2aWV3ZXIxQHVtYy5jb20iLCJpYXQiOjE3OTQ5Njc5NzAsImV4cCI6MTc5NDk3MTU3MH0.<signature masked>",
+      "request": null,
+      "status": 200,
+      "response": {
+        "isSuccess": true,
+        "code": "COMMON200",
+        "message": "즐겨찾기 여부를 조회했습니다.",
+        "result": {
+          "isFavorite": true
+        }
+      }
+    },
+    {
+      "label": "F5 DELETE /favorites/550 → 200, result null",
+      "method": "DELETE",
+      "url": "/favorites/550",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZW1haWwiOiJ2aWV3ZXIxQHVtYy5jb20iLCJpYXQiOjE3OTQ5Njc5NzAsImV4cCI6MTc5NDk3MTU3MH0.<signature masked>",
+      "request": null,
+      "status": 200,
+      "response": {
+        "isSuccess": true,
+        "code": "COMMON200",
+        "message": "즐겨찾기를 해제했습니다.",
+        "result": null
+      }
+    },
+    {
+      "label": "F6 다시 GET /favorites/550 → isFavorite: false (정상 상태)",
+      "method": "GET",
+      "url": "/favorites/550",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZW1haWwiOiJ2aWV3ZXIxQHVtYy5jb20iLCJpYXQiOjE3OTQ5Njc5NzAsImV4cCI6MTc5NDk3MTU3MH0.<signature masked>",
+      "request": null,
+      "status": 200,
+      "response": {
+        "isSuccess": true,
+        "code": "COMMON200",
+        "message": "즐겨찾기 여부를 조회했습니다.",
+        "result": {
+          "isFavorite": false
+        }
+      }
+    },
+    {
+      "label": "F7 빈 목록 GET /favorites → 200 []",
+      "method": "GET",
+      "url": "/favorites",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZW1haWwiOiJ2aWV3ZXIxQHVtYy5jb20iLCJpYXQiOjE3OTQ5Njc5NzAsImV4cCI6MTc5NDk3MTU3MH0.<signature masked>",
+      "request": null,
+      "status": 200,
+      "response": {
+        "isSuccess": true,
+        "code": "COMMON200",
+        "message": "내 즐겨찾기 목록을 조회했습니다.",
+        "result": []
+      }
+    },
+    {
+      "label": "F8 없던 즐겨찾기 해제 → 404 FAVORITE404_1",
+      "method": "DELETE",
+      "url": "/favorites/123456",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZW1haWwiOiJ2aWV3ZXIxQHVtYy5jb20iLCJpYXQiOjE3OTQ5Njc5NzAsImV4cCI6MTc5NDk3MTU3MH0.<signature masked>",
+      "request": null,
+      "status": 404,
+      "response": {
+        "isSuccess": false,
+        "code": "FAVORITE404_1",
+        "message": "즐겨찾기한 영화를 찾을 수 없습니다.",
+        "result": null
+      }
+    },
+    {
+      "label": "F9 movieId 0 → 400 COMMON400",
+      "method": "POST",
+      "url": "/favorites",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZW1haWwiOiJ2aWV3ZXIxQHVtYy5jb20iLCJpYXQiOjE3OTQ5Njc5NzAsImV4cCI6MTc5NDk3MTU3MH0.<signature masked>",
+      "request": {
+        "movieId": 0
+      },
+      "status": 400,
+      "response": {
+        "isSuccess": false,
+        "code": "COMMON400",
+        "message": "영화 ID는 양수여야 합니다.",
+        "result": null
+      }
+    },
+    {
+      "label": "F10 Body 에 memberId 를 몰래 넣으면 → 400",
+      "method": "POST",
+      "url": "/favorites",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZW1haWwiOiJ2aWV3ZXIxQHVtYy5jb20iLCJpYXQiOjE3OTQ5Njc5NzAsImV4cCI6MTc5NDk3MTU3MH0.<signature masked>",
+      "request": {
+        "movieId": 31,
+        "memberId": 4
+      },
+      "status": 400,
+      "response": {
+        "isSuccess": false,
+        "code": "COMMON400",
+        "message": "property memberId should not exist",
+        "result": null
+      }
+    },
+    {
+      "label": "F11 회원 A 즐겨찾기 100",
+      "method": "POST",
+      "url": "/favorites",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZW1haWwiOiJ2aWV3ZXIxQHVtYy5jb20iLCJpYXQiOjE3OTQ5Njc5NzAsImV4cCI6MTc5NDk3MTU3MH0.<signature masked>",
+      "request": {
+        "movieId": 100
+      },
+      "status": 201,
+      "response": {
+        "isSuccess": true,
+        "code": "COMMON201",
+        "message": "즐겨찾기를 등록했습니다.",
+        "result": {
+          "favoriteId": 2,
+          "movieId": 100,
+          "createdAt": "2026-11-18T02:12:51.000Z"
+        }
+      }
+    },
+    {
+      "label": "F11 회원 A 즐겨찾기 200",
+      "method": "POST",
+      "url": "/favorites",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZW1haWwiOiJ2aWV3ZXIxQHVtYy5jb20iLCJpYXQiOjE3OTQ5Njc5NzAsImV4cCI6MTc5NDk3MTU3MH0.<signature masked>",
+      "request": {
+        "movieId": 200
+      },
+      "status": 201,
+      "response": {
+        "isSuccess": true,
+        "code": "COMMON201",
+        "message": "즐겨찾기를 등록했습니다.",
+        "result": {
+          "favoriteId": 3,
+          "movieId": 200,
+          "createdAt": "2026-11-18T02:12:51.000Z"
+        }
+      }
+    },
+    {
+      "label": "F11 회원 B 즐겨찾기 200",
+      "method": "POST",
+      "url": "/favorites",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0IiwiZW1haWwiOiJ2aWV3ZXIyQHVtYy5jb20iLCJpYXQiOjE3OTQ5Njc5NzEsImV4cCI6MTc5NDk3MTU3MX0.<signature masked>",
+      "request": {
+        "movieId": 200
+      },
+      "status": 201,
+      "response": {
+        "isSuccess": true,
+        "code": "COMMON201",
+        "message": "즐겨찾기를 등록했습니다.",
+        "result": {
+          "favoriteId": 4,
+          "movieId": 200,
+          "createdAt": "2026-11-18T02:12:51.000Z"
+        }
+      }
+    },
+    {
+      "label": "F12 회원 A 목록: 내 것만, 최신 등록 순(200 → 100)",
+      "method": "GET",
+      "url": "/favorites",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZW1haWwiOiJ2aWV3ZXIxQHVtYy5jb20iLCJpYXQiOjE3OTQ5Njc5NzAsImV4cCI6MTc5NDk3MTU3MH0.<signature masked>",
+      "request": null,
+      "status": 200,
+      "response": {
+        "isSuccess": true,
+        "code": "COMMON200",
+        "message": "내 즐겨찾기 목록을 조회했습니다.",
+        "result": [
+          {
+            "favoriteId": 3,
+            "movieId": 200,
+            "createdAt": "2026-11-18T02:12:51.000Z"
+          },
+          {
+            "favoriteId": 2,
+            "movieId": 100,
+            "createdAt": "2026-11-18T02:12:51.000Z"
+          }
+        ]
+      }
+    },
+    {
+      "label": "F13 회원 B 목록: 내 것만(200 하나)",
+      "method": "GET",
+      "url": "/favorites",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0IiwiZW1haWwiOiJ2aWV3ZXIyQHVtYy5jb20iLCJpYXQiOjE3OTQ5Njc5NzEsImV4cCI6MTc5NDk3MTU3MX0.<signature masked>",
+      "request": null,
+      "status": 200,
+      "response": {
+        "isSuccess": true,
+        "code": "COMMON200",
+        "message": "내 즐겨찾기 목록을 조회했습니다.",
+        "result": [
+          {
+            "favoriteId": 4,
+            "movieId": 200,
+            "createdAt": "2026-11-18T02:12:51.000Z"
+          }
+        ]
+      }
+    },
+    {
+      "label": "F14 회원 B 가 A 의 영화(100)를 해제하려 하면 → 404 (남의 것을 건드리지 못한다)",
+      "method": "DELETE",
+      "url": "/favorites/100",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0IiwiZW1haWwiOiJ2aWV3ZXIyQHVtYy5jb20iLCJpYXQiOjE3OTQ5Njc5NzEsImV4cCI6MTc5NDk3MTU3MX0.<signature masked>",
+      "request": null,
+      "status": 404,
+      "response": {
+        "isSuccess": false,
+        "code": "FAVORITE404_1",
+        "message": "즐겨찾기한 영화를 찾을 수 없습니다.",
+        "result": null
+      }
+    },
+    {
+      "label": "R1 POST /movie-records (평점 + 즐겨찾기) → 201, rating 과 favorite 이 함께",
+      "method": "POST",
+      "url": "/movie-records",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZW1haWwiOiJ2aWV3ZXIxQHVtYy5jb20iLCJpYXQiOjE3OTQ5Njc5NzAsImV4cCI6MTc5NDk3MTU3MH0.<signature masked>",
+      "request": {
+        "movieId": 238,
+        "score": 5,
+        "comment": "다시 보고 싶은 영화입니다.",
+        "addToFavorites": true
+      },
+      "status": 201,
+      "response": {
+        "isSuccess": true,
+        "code": "COMMON201",
+        "message": "영화 기록을 저장했습니다.",
+        "result": {
+          "rating": {
+            "ratingId": 4,
+            "movieId": 238,
+            "score": 5,
+            "comment": "다시 보고 싶은 영화입니다.",
+            "createdAt": "2026-11-18T02:12:51.000Z",
+            "updatedAt": "2026-11-18T02:12:51.000Z"
+          },
+          "favorite": {
+            "favoriteId": 5,
+            "movieId": 238,
+            "createdAt": "2026-11-18T02:12:51.000Z"
+          }
+        }
+      },
+      "dbRows": {
+        "rating": 1,
+        "favorite": 1
+      }
+    },
+    {
+      "label": "R2 같은 요청을 다시 → 409 RATING409_1, 평점·즐겨찾기 행이 늘지 않는다",
+      "method": "POST",
+      "url": "/movie-records",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZW1haWwiOiJ2aWV3ZXIxQHVtYy5jb20iLCJpYXQiOjE3OTQ5Njc5NzAsImV4cCI6MTc5NDk3MTU3MH0.<signature masked>",
+      "request": {
+        "movieId": 238,
+        "score": 5,
+        "comment": "두 번째",
+        "addToFavorites": true
+      },
+      "status": 409,
+      "response": {
+        "isSuccess": false,
+        "code": "RATING409_1",
+        "message": "이미 이 영화에 평점을 남기셨습니다.",
+        "result": null
+      },
+      "dbRows": {
+        "rating": 1,
+        "favorite": 1
+      }
+    },
+    {
+      "label": "R3 addToFavorites false → 201, favorite 은 null (즐겨찾기 행 0)",
+      "method": "POST",
+      "url": "/movie-records",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZW1haWwiOiJ2aWV3ZXIxQHVtYy5jb20iLCJpYXQiOjE3OTQ5Njc5NzAsImV4cCI6MTc5NDk3MTU3MH0.<signature masked>",
+      "request": {
+        "movieId": 155,
+        "score": 4,
+        "addToFavorites": false
+      },
+      "status": 201,
+      "response": {
+        "isSuccess": true,
+        "code": "COMMON201",
+        "message": "영화 기록을 저장했습니다.",
+        "result": {
+          "rating": {
+            "ratingId": 5,
+            "movieId": 155,
+            "score": 4,
+            "comment": null,
+            "createdAt": "2026-11-18T02:12:51.000Z",
+            "updatedAt": "2026-11-18T02:12:51.000Z"
+          },
+          "favorite": null
+        }
+      },
+      "dbRows": {
+        "rating": 1,
+        "favorite": 0
+      }
+    },
+    {
+      "label": "R4 즐겨찾기가 이미 있는 영화(100)에 addToFavorites true → 409 FAVORITE409_1, 평점도 저장되지 않는다",
+      "method": "POST",
+      "url": "/movie-records",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZW1haWwiOiJ2aWV3ZXIxQHVtYy5jb20iLCJpYXQiOjE3OTQ5Njc5NzAsImV4cCI6MTc5NDk3MTU3MH0.<signature masked>",
+      "request": {
+        "movieId": 100,
+        "score": 3,
+        "addToFavorites": true
+      },
+      "status": 409,
+      "response": {
+        "isSuccess": false,
+        "code": "FAVORITE409_1",
+        "message": "이미 이 영화를 즐겨찾기하셨습니다.",
+        "result": null
+      },
+      "dbRows": {
+        "rating": 0,
+        "favorite": 1
+      }
+    },
+    {
+      "label": "R5 별점 6 → 400 (아무것도 저장되지 않는다)",
+      "method": "POST",
+      "url": "/movie-records",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZW1haWwiOiJ2aWV3ZXIxQHVtYy5jb20iLCJpYXQiOjE3OTQ5Njc5NzAsImV4cCI6MTc5NDk3MTU3MH0.<signature masked>",
+      "request": {
+        "movieId": 77,
+        "score": 6,
+        "addToFavorites": true
+      },
+      "status": 400,
+      "response": {
+        "isSuccess": false,
+        "code": "COMMON400",
+        "message": "별점은 5점 이하여야 합니다.",
+        "result": null
+      },
+      "dbRows": {
+        "rating": 0,
+        "favorite": 0
+      }
+    },
+    {
+      "label": "R6 토큰 없이 → 401 AUTH401_2",
+      "method": "POST",
+      "url": "/movie-records",
+      "authorization": null,
+      "request": {
+        "movieId": 1,
+        "score": 3,
+        "addToFavorites": true
+      },
+      "status": 401,
+      "response": {
+        "isSuccess": false,
+        "code": "AUTH401_2",
+        "message": "로그인이 필요한 요청입니다.",
+        "result": null
+      }
+    },
+    {
+      "label": "T1 [DB 트리거: favorite INSERT 만 실패] POST /movie-records → 500, 먼저 저장한 평점도 되돌려진다",
+      "method": "POST",
+      "url": "/movie-records",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZW1haWwiOiJ2aWV3ZXIxQHVtYy5jb20iLCJpYXQiOjE3OTQ5Njc5NzAsImV4cCI6MTc5NDk3MTU3MH0.<signature masked>",
+      "request": {
+        "movieId": 9001,
+        "score": 5,
+        "addToFavorites": true
+      },
+      "status": 500,
+      "response": {
+        "isSuccess": false,
+        "code": "COMMON500",
+        "message": "서버 내부 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.",
+        "result": null
+      },
+      "dbRows": {
+        "rating": 0,
+        "favorite": 0
+      }
+    },
+    {
+      "label": "T1 해석",
+      "method": "NOTE",
+      "url": null,
+      "detail": "평점 INSERT 는 이미 성공한 뒤에 즐겨찾기 INSERT 가 실패했다. 그런데도 rating 행이 0 인 것이 rollback 이다. (트랜잭션 없이 두 Service 를 연달아 부르면 rating 1행만 남는다는 것은 test/movie-records.e2e-spec.ts 가 같은 트리거로 보여 준다.)"
+    },
+    {
+      "label": "T2 [DB 트리거: 평점이 저장되는 순간 다른 요청이 같은 즐겨찾기를 넣은 경쟁 재현] → 409 FAVORITE409_1, 평점·즐겨찾기 모두 취소",
+      "method": "POST",
+      "url": "/movie-records",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZW1haWwiOiJ2aWV3ZXIxQHVtYy5jb20iLCJpYXQiOjE3OTQ5Njc5NzAsImV4cCI6MTc5NDk3MTU3MH0.<signature masked>",
+      "request": {
+        "movieId": 9003,
+        "score": 4,
+        "addToFavorites": true
+      },
+      "status": 409,
+      "response": {
+        "isSuccess": false,
+        "code": "FAVORITE409_1",
+        "message": "이미 이 영화를 즐겨찾기하셨습니다.",
+        "result": null
+      },
+      "dbRows": {
+        "rating": 0,
+        "favorite": 0
+      }
+    },
+    {
+      "label": "U1 같은 영화를 동시에 8번 즐겨찾기 → 정확히 1건 201, 나머지 7건 409 FAVORITE409_1",
+      "method": "POST ×8 (동시)",
+      "url": "/favorites",
+      "authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzIiwiZW1haWwiOiJ2aWV3ZXIxQHVtYy5jb20iLCJpYXQiOjE3OTQ5Njc5NzAsImV4cCI6MTc5NDk3MTU3MH0.<signature masked>",
+      "request": {
+        "movieId": 4242
+      },
+      "status": [
+        201,
+        409,
+        409,
+        409,
+        409,
+        409,
+        409,
+        409
+      ],
+      "response": {
+        "isSuccess": true,
+        "code": "COMMON201",
+        "message": "즐겨찾기를 등록했습니다.",
+        "result": {
+          "favoriteId": 8,
+          "movieId": 4242,
+          "createdAt": "2026-11-18T02:12:51.000Z"
+        }
+      },
+      "dbRows": {
+        "rating": 0,
+        "favorite": 1
+      }
+    },
+    {
+      "label": "U2 [서비스를 거치지 않고 SQL 로 직접] 같은 (member_id, movie_id) 를 또 넣으면 DB UNIQUE 가 거부",
+      "method": "SQL",
+      "url": "INSERT INTO favorite (member_id, movie_id) VALUES (?, ?)",
+      "authorization": null,
+      "request": {
+        "member_id": 3,
+        "movie_id": 4242
+      },
+      "status": null,
+      "response": {
+        "code": "ER_DUP_ENTRY",
+        "sqlMessage": "Duplicate entry '3-4242' for key 'favorite.uk_favorite_member_movie'"
+      }
+    }
+  ]
+}

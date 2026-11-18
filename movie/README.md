@@ -1,9 +1,11 @@
-# 5~7주차 — 영화 평점 서비스 (NestJS 새 프로젝트)
+# 5~8주차 — 영화 평점 서비스 (NestJS 새 프로젝트)
 
 3~4주차 도서 대여 프로젝트(레포 루트)는 그대로 두고, 워크북대로 `nest new movie`로 새 프로젝트를 만들었다.
-영화 정보는 프론트가 TMDB에서 직접 받고, 이 서버는 회원·평점(이후 즐겨찾기)만 맡는다.
+영화 정보는 프론트가 TMDB에서 직접 받고, 이 서버는 회원·평점·즐겨찾기만 맡는다.
 5주차에 조회 API를 만들었고, 6주차에 회원가입과 평점 등록·수정·삭제를 더했고,
 7주차에 **로그인(JWT)** 을 만들어 "요청한 사람이 누구인지"를 URL이 아니라 토큰으로 구분하게 바꿨다.
+8주차에는 **즐겨찾기**와 "평점 + 즐겨찾기를 한 번에 저장하는 **트랜잭션**"(`POST /movie-records`)을 만들고,
+**Swagger**(`/api-docs`)로 API 문서를 붙였다.
 
 ## 실행
 
@@ -13,7 +15,7 @@ npm ci
 cp .env.example .env        # DB 비밀번호, JWT_SECRET 채우기 (.env 는 Git 제외)
 mysql -u root -p < sql/schema.sql   # umc_movie DB + member/rating/favorite
 mysql -u root -p < sql/seed.sql     # 수현·민서, TMDB 영화 550·155 평점
-npm run start:dev           # http://localhost:3000
+npm run start:dev           # http://localhost:3000, API 문서: http://localhost:3000/api-docs
 ```
 
 ### JWT 환경변수 (7주차)
@@ -42,6 +44,15 @@ npm run start:dev           # http://localhost:3000
 | 평점 등록 🔒 | POST | `/ratings` | 201 `{ ..., code: "COMMON201", result: { ratingId, movieId, score, comment, createdAt, updatedAt } }` |
 | 평점 수정 🔒 | PATCH | `/ratings/{ratingId}` | 200 `{ ..., code: "COMMON200", result: { ... 수정된 평점 } }` |
 | 평점 삭제 🔒 | DELETE | `/ratings/{ratingId}` | **200** `{ ..., code: "COMMON200", result: null }` |
+| **즐겨찾기 등록** 🔒 | POST | `/favorites` | 201 `{ ..., code: "COMMON201", result: { favoriteId, movieId, createdAt } }` |
+| **내 즐겨찾기 목록** 🔒 | GET | `/favorites` | 200 `{ ..., result: [{ favoriteId, movieId, createdAt }] }` (favoriteId 최신순, 내 것만) |
+| **즐겨찾기 여부** 🔒 | GET | `/favorites/{movieId}` | 200 `{ ..., result: { isFavorite: true \| false } }` (없으면 404가 아니라 `false`) |
+| **즐겨찾기 해제** 🔒 | DELETE | `/favorites/{movieId}` | **200** `{ ..., code: "COMMON200", result: null }` |
+| **영화 기록 (평점 + 즐겨찾기)** 🔒 | POST | `/movie-records` | 201 `{ ..., result: { rating: { ... }, favorite: { ... } \| null } }` |
+| **API 문서(Swagger)** 🔓 | GET | `/api-docs` · `/api-docs-json` | HTML 화면 · OpenAPI JSON |
+
+- 즐겨찾기 경로의 `{movieId}` 는 TMDB 영화 ID 다. 어느 요청에도 `memberId` 가 없다(토큰에서 꺼낸다).
+- 즐겨찾기는 `(member_id, movie_id)` 가 **DB UNIQUE**(`uk_favorite_member_movie`)라 한 회원이 같은 영화를 두 번 넣을 수 없다. 남의 즐겨찾기를 해제하려 하면 "내 것 중에 없다"로 보고 404 를 돌려준다(남의 것이 있는지 알려 주지 않는다).
 
 ### 6주차 → 7주차에서 바뀐 것
 
@@ -57,6 +68,16 @@ npm run start:dev           # http://localhost:3000
 - 삭제를 204에서 200으로 바꾼 이유: 204는 본문을 보내지 않겠다는 뜻이라 `{ isSuccess, code, message, result }` 를 실을 수 없다. 삭제만 응답 틀에서 빠지지 않도록 200 + `result: null` 로 맞췄다.
 - 5주차 조회 API(`GET /members/{memberId}/ratings`, 중복 체크)의 **성공 본문은 그대로**다(프론트가 이미 `{available}`·배열을 그대로 읽는다). 특정 회원의 평점 목록은 누구나 볼 수 있는 공개 기능이라 토큰을 요구하지 않는다.
 - 6주차 평점 등록·수정·삭제를 호출하던 클라이언트는 `/ratings` + `Authorization` 헤더로 바꿔야 한다.
+
+### 8주차: 즐겨찾기와 트랜잭션
+
+`POST /movie-records` 는 "평점을 남기면서 즐겨찾기에도 넣기"라는 **한 가지 행동**이다. 요청은 `{ movieId, score, comment?, addToFavorites }` 이고, 평점 저장과 즐겨찾기 저장이 둘 다 성공해야 성공이다.
+
+- `RatingService.create()` 와 `FavoriteService.create()` 를 연달아 부르면 **각자 따로 커밋**된다. 평점은 저장됐는데 즐겨찾기가 실패하면 평점만 남는다. 그래서 `MovieRecordService` 하나에서 `dataSource.transaction(async (manager) => …)` 로 묶었다. 콜백이 정상 종료하면 commit, 예외가 밖으로 나가면 rollback 이다.
+- 콜백 안에서는 **`manager.getRepository(...)` 로 만든 Repository 만** 쓴다. 주입받아 둔 Repository 를 섞으면 같은 트랜잭션 연결을 쓴다는 보장이 없어서 일부가 롤백되지 않는다.
+- 먼저 "이미 있는지" 확인해 친절한 409(`RATING409_1`·`FAVORITE409_1`)를 주지만, 동시에 들어온 요청이 그 확인을 함께 통과하는 경우의 **마지막 방어선은 DB UNIQUE** 다. UNIQUE 위반(`ER_DUP_ENTRY`)은 `AllExceptionsFilter` 가 키 이름을 보고 같은 409 로 바꾼다. 이때 트랜잭션도 같이 rollback 된다.
+- MySQL InnoDB 의 기본 격리 수준은 `REPEATABLE READ` 다. 이 구현은 잠금(`FOR UPDATE`)이나 낙관적 잠금을 쓰지 않고 **UNIQUE 제약 + 트랜잭션**만으로 중복과 부분 저장을 막는다.
+- 실제 MySQL 로 확인한 것(`test/movie-records.e2e-spec.ts`, `npm run verify:week08`): 즐겨찾기 INSERT 에 트리거로 오류를 내면 **방금 저장한 평점 행도 0개로 되돌아간다**(트랜잭션 없이 두 Service 를 이어 부르면 평점이 1개 남는 것도 같은 테스트에서 보여 준다). 같은 요청 8개를 동시에 보내면 201 이 정확히 1개, 나머지 7개는 409 이고 행은 1개뿐이다.
 
 ### 인증과 인가는 다른 일이다
 
@@ -89,10 +110,12 @@ POST /auth/login ──▶ AuthService: 이메일로 회원 찾기 → bcrypt.co
 | 403 | `RATING403_1` | 본인이 작성한 평점만 수정하거나 삭제할 수 있습니다. | 다른 회원의 평점을 수정·삭제 |
 | 404 | `MEMBER404_1` | 해당 회원을 찾을 수 없습니다. | 없는 회원 (토큰을 발급한 뒤 회원이 사라진 경우 포함) |
 | 404 | `RATING404_1` | 해당 평점을 찾을 수 없습니다. | 없는 평점 (403 보다 먼저 확인) |
+| 404 | `FAVORITE404_1` | 즐겨찾기한 영화를 찾을 수 없습니다. | 내 즐겨찾기에 없는 영화를 해제 (남의 즐겨찾기도 같은 응답) |
 | 404 | `COMMON404` | (Nest 기본 메시지) | 없는 경로 (6주차 `/members/{memberId}/ratings` 쓰기 경로 포함) |
 | 409 | `MEMBER409_1` | 이미 사용 중인 닉네임입니다. | 회원가입·내 정보 수정 (사전 확인과 DB UNIQUE 위반 모두) |
 | 409 | `MEMBER409_2` | 이미 사용 중인 이메일입니다. | 회원가입 (**워크북 표에는 없는 코드**. 이메일과 닉네임을 code 로 구분하려고 6주차부터 따로 둔다) |
 | 409 | `RATING409_1` | 이미 이 영화에 평점을 남기셨습니다. | 같은 영화에 평점 중복 (사전 확인과 DB UNIQUE 위반 모두) |
+| 409 | `FAVORITE409_1` | 이미 이 영화를 즐겨찾기하셨습니다. | 즐겨찾기 중복, `POST /movie-records` 의 즐겨찾기 중복 (사전 확인과 DB UNIQUE 위반 모두) |
 | 500 | `COMMON500` | 서버 내부 오류가 발생했습니다. … | 예상 못 한 오류. 화면에는 고정 문구만, 원문은 서버 로그에만 |
 
 - **401 과 403 의 차이**: 401은 "네가 누군지 모르겠어"(토큰이 없거나 위조됐거나 만료됨), 403은 "누군지는 알겠는데 그건 네 것이 아니야". 프론트는 401이면 로그인 화면으로, 403이면 "권한이 없습니다" 안내로 보내야 해서 code 로 구분할 수 있어야 한다. 만료(`AUTH401_4`)도 같은 401 이지만 토큰이 없을 때(`AUTH401_2`)와 이유가 달라서 code 를 나눴다.
@@ -119,8 +142,19 @@ POST /auth/login ──▶ AuthService: 이메일로 회원 찾기 → bcrypt.co
 - 비밀번호는 bcrypt 해시(60자)로만 저장하고 응답에는 절대 넣지 않는다.
 - 평점: `movieId` 양의 정수(TMDB ID), `score` 1~5 정수(필수), `comment` 500자 이하(선택). **`memberId` 는 받지 않는다**(보내면 400).
 - 수정은 PATCH라서 `comment`를 **생략하면 기존 후기를 유지**하고 `null`을 보내면 지운다. `score`는 항상 보낸다. (워크북 예제는 `dto.comment ?? null` 이라 생략하면 후기가 지워진다. 6주차부터 이 쪽으로 바꿨고 7주차에도 그대로 둔다.)
+- 즐겨찾기: `movieId` 양의 정수(TMDB ID, 필수). `memberId` 는 받지 않는다(보내면 400). 경로의 `{movieId}` 도 양의 정수여야 한다.
+- 영화 기록: `movieId` 양의 정수, `score` 1~5 정수(필수), `comment` 500자 이하(선택), `addToFavorites` 불리언(필수). `false` 면 평점만 저장하고 응답의 `favorite` 은 `null` 이다.
 - DTO에 없는 필드를 보내면 400(`forbidNonWhitelisted`).
 - 5주차 규칙은 그대로: (선택) 닉네임·이메일 형식 400, `?page=0&size=10` 페이지네이션, BIGINT ID는 숫자로 응답한다.
+
+## Swagger (API 문서)
+
+서버를 띄우고 `http://localhost:3000/api-docs` 를 열면 Swagger UI, `/api-docs-json` 에서 OpenAPI JSON 을 볼 수 있다(`src/swagger/`).
+
+- 🔒 가 붙은 API 는 로그인이 필요한 API 다. 먼저 `POST /auth/login` 을 Try it out 으로 호출해 `accessToken` 을 복사하고, 화면 위쪽 **Authorize** 에 **토큰만** 붙여넣는다(`Bearer ` 는 Swagger 가 붙인다). 그 뒤의 모든 요청에 `Authorization: Bearer …` 가 실린다.
+- 15개 API 모두 요청 예시와 응답 코드(성공·400·401·404·409)별 예시를 문서로 남겼다. 문서의 예시가 실제 응답과 같은지는 `test/swagger.e2e-spec.ts` 가 실제 서버 응답과 비교해 확인한다.
+- 문서 데코레이터(`@ApiProperty`·`@ApiResponse` 등)는 문서만 만들 뿐 요청 검증·응답 틀을 바꾸지 않는다(검증은 `ValidationPipe`, 실패 틀은 `AllExceptionsFilter` 그대로).
+- 화면 기록: `evidence/week08-swagger-overview.jpg`(전체 API와 자물쇠), `evidence/week08-swagger-favorites-post.jpg`(Authorize 뒤 `POST /favorites` 를 Try it out 으로 보내 201 을 받은 화면).
 
 ## CORS
 
@@ -135,6 +169,8 @@ POST /auth/login ──▶ AuthService: 이메일로 회원 찾기 → bcrypt.co
 
 ```bash
 npm run build && npm test && npm run test:e2e && npm run lint
+npm run verify:week08     # 8주차: 실제 서버(PORT 3100)에 즐겨찾기·영화 기록·트랜잭션 rollback·동시 8요청 등 32개 확인 → evidence/week08-api-results.json
+npm run newman:week08     # 8주차: Postman Collection 27개 요청·55개 assertion → evidence/week08-newman.json (컬렉션: evidence/week08.postman_collection.json)
 npm run verify:week07     # 7주차: 실제 서버(PORT 3100)에 9단계 시나리오 등 26개 요청 + 비교·디코드·SQL 확인 5개 → evidence/week07-api-results.json
 npm run newman:week07     # 7주차: Postman Collection 20개 요청·46개 assertion → evidence/week07-newman.json
 npm run verify:expiry     # 7주차 선택 1: JWT_ACCESS_EXPIRATION=60 으로 토큰 만료 직접 확인(약 65초) → evidence/week07-expiry.json
@@ -142,7 +178,8 @@ npm run verify:week05     # 5주차: 실제 DB 조회 18개 요청 (evidence/wee
 ```
 
 - `test:e2e` 의 `members.e2e-spec.ts`(5주차)와 `verify:week05` 는 실제 로컬 MySQL(`umc_movie`, 시드 데이터)에 **조회만** 한다.
-- 쓰기·인증 테스트(`members-write.e2e-spec.ts`, `auth.e2e-spec.ts`)와 7주차 `verify:*`·`newman:*` 스크립트는 **매번 새로 만드는 일회용 DB**(`umc_movie_test`, `umc_movie_test_auth`, `umc_movie_test_verify7` …)에서만 돌고 끝나면 지운다. 테스트 DB 헬퍼는 이름이 `umc_movie_test` 로 시작하지 않으면 `DROP` 을 하기 전에 멈춘다. `umc_movie` 의 데이터는 바뀌지 않는다.
+- 쓰기·인증 테스트(`members-write.e2e-spec.ts`, `auth.e2e-spec.ts`, 8주차 `favorites`·`movie-records`·`swagger` e2e)와 7·8주차 `verify:*`·`newman:*` 스크립트는 **매번 새로 만드는 일회용 DB**(`umc_movie_test`, `umc_movie_test_auth`, `umc_movie_test_rec`, `umc_movie_test_verify8` …)에서만 돌고 끝나면 지운다. 테스트 DB 헬퍼는 이름이 `umc_movie_test` 로 시작하지 않으면 `DROP` 을 하기 전에 멈춘다. `umc_movie` 의 데이터는 바뀌지 않는다.
 - e2e 는 `.env` 의 진짜 `JWT_SECRET` 대신 실행마다 새로 만든 일회용 키를 쓴다(`test/support/env.ts`). 라이브 스크립트도 서버를 띄울 때마다 무작위 키를 넣는다.
+- 8주차 트랜잭션 테스트는 MySQL 트리거로 "즐겨찾기 INSERT 가 실패하는 상황"을 만들어 rollback 을 확인하고, 테스트가 끝나면 트리거도 지운다(일회용 DB 안에서만).
 - 라이브 스크립트가 남기는 증거 파일의 JWT 는 **서명 부분을 `<signature masked>` 로 가린다**(header·payload 는 읽을 수 있게 둔다).
 - `evidence/week06-*` 는 **6주차 계약**(`/members/{memberId}/ratings`, 삭제 204, `MEMBER4091` 같은 code)의 기록이다. 해당 코드와 스크립트는 `brownglasses/week06` 브랜치에 있다. 7주차에서 경로가 바뀌어 6주차 스크립트(`verify-week06`, `run-newman-week06`)는 이 브랜치에서 지웠다.
