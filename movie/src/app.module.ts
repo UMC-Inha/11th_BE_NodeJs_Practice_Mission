@@ -8,9 +8,11 @@ import { Favorite } from "./entity/favorite.entity";
 import { Member } from "./entity/member.entity";
 import { Rating } from "./entity/rating.entity";
 import { AuthController } from "./controller/auth.controller";
+import { FavoriteController } from "./controller/favorite.controller";
 import { MemberController } from "./controller/member.controller";
 import { RatingController } from "./controller/rating.controller";
 import { AuthService } from "./service/auth.service";
+import { FavoriteService } from "./service/favorite.service";
 import { MemberService } from "./service/member.service";
 import { RatingService } from "./service/rating.service";
 
@@ -46,7 +48,14 @@ import { RatingService } from "./service/rating.service";
     AuthController,
     MemberController,
     RatingController,
+    FavoriteController,
   ],
-  providers: [AppService, AuthService, MemberService, RatingService],
+  providers: [
+    AppService,
+    AuthService,
+    MemberService,
+    RatingService,
+    FavoriteService,
+  ],
 })
 export class AppModule {}
