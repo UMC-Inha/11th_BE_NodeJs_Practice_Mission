@@ -1,8 +1,15 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsNotEmpty, IsString, Length } from 'class-validator';
 
 /** PATCH /members/me 요청 Body. 규칙은 회원가입의 닉네임과 같다(2~12자). */
 export class MemberUpdateRequestDto {
+  @ApiProperty({
+    description: '새 닉네임 (앞뒤 공백은 지운 뒤 2~12자)',
+    example: '케빈',
+    minLength: 2,
+    maxLength: 12,
+  })
   @Transform(({ value }: { value: unknown }) =>
     typeof value === 'string' ? value.trim() : value,
   )

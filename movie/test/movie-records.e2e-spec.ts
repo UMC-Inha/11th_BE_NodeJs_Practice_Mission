@@ -149,7 +149,10 @@ describe('영화 기록 API 와 트랜잭션 (격리된 테스트 DB)', () => {
       expect(await rows(me, 11)).toEqual({ rating: 1, favorite: 0 });
     });
 
-    it('즐겨찾기가 이미 있고 addToFavorites true 면 409 FAVORITE409_1 이고 평점도 저장되지 않는다', async () => {
+    // 9주차 선택 미션의 시나리오 그대로다. 다만 이 서비스는 평점을 저장하기 "전에" 즐겨찾기 중복을 먼저 검사해서,
+    // 트랜잭션을 지워도 이 테스트는 통과한다(평점을 저장하기 전에 이미 409 로 끝나기 때문).
+    // 트랜잭션이 정말 되돌리는지는 아래 '롤백 증명' 의 두 테스트(트리거로 실패 만들기 · 경쟁 재현)가 확인한다.
+    it('즐겨찾기가 이미 있고 addToFavorites true 면 409 FAVORITE409_1 이고 평점도 저장되지 않는다 (사전 검사가 먼저 막으므로 트랜잭션이 없어도 통과한다)', async () => {
       const me = await f.signUpAndLogin();
       await f.addFavorite(me, 13);
 
