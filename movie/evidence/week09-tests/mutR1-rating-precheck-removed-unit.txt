@@ -1,0 +1,28 @@
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.12 ~/movie
+
+ ❯ src/service/rating.service.spec.ts (16 tests | 1 failed) 76ms
+       × 같은 회원·같은 영화면 409 RATING409_1 이고 저장하지 않는다 3ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/service/rating.service.spec.ts > RatingService 쓰기 (등록·수정·삭제) > create > 같은 회원·같은 영화면 409 RATING409_1 이고 저장하지 않는다
+AssertionError: expected undefined to be an instance of ApiException
+ ❯ expectApiError src/service/rating.service.spec.ts:42:17
+     40|     (e: unknown) => e,
+     41|   );
+     42|   expect(error).toBeInstanceOf(ApiException);
+       |                 ^
+     43|   expect((error as ApiException).getStatus()).toBe(status);
+     44|   expect((error as ApiException).code).toBe(code);
+ ❯ src/service/rating.service.spec.ts:169:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 15 passed (16)
+   Start at  23:44:24
+   Duration  2.73s (transform 457ms, setup 0ms, import 2.06s, tests 76ms, environment 0ms)
+

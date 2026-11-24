@@ -1,0 +1,135 @@
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.12 ~/movie
+
+ ❯ test/movie-records.e2e-spec.ts (13 tests | 1 failed) 23440ms
+       × 경쟁 상황 재현: 평점 저장 직후 다른 요청이 같은 즐겨찾기를 넣으면 UNIQUE 위반 → FAVORITE409_1, 평점·즐겨찾기 모두 취소 1954ms
+ ❯ test/favorites.e2e-spec.ts (14 tests | 4 failed) 24799ms
+       × 등록 201 → 중복 409 → 목록 1건 → 여부 true → 해제 200 → 여부 false → 목록 [] 2444ms
+       × 같은 영화를 동시에 8번 즐겨찾기하면 정확히 1건만 201, 나머지는 409 FAVORITE409_1, DB 에는 1행 1640ms
+       × 8개 요청이 사전 검사를 모두 "없음"으로 통과하게 만들어도(배리어) DB UNIQUE 가 7개를 막는다: 1건 201, 7건 409 FAVORITE409_1, 1행 1715ms
+       × 사전 검사가 "없다"고 잘못 답해도(경쟁 재현) DB 제약 위반이 FAVORITE409_1 로 바뀐다 1649ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/favorites.e2e-spec.ts > 즐겨찾기 API (격리된 테스트 DB) > 워크북 Postman 시나리오 (한 회원, 영화 550) > 등록 201 → 중복 409 → 목록 1건 → 여부 true → 해제 200 → 여부 false → 목록 []
+AssertionError: expected { isSuccess: false, …(3) } to deeply equal { isSuccess: false, …(3) }
+
+- Expected
++ Received
+
+  {
+-   "code": "FAVORITE409_1",
++   "code": "COMMON409",
+    "isSuccess": false,
+-   "message": "이미 이 영화를 즐겨찾기하셨습니다.",
++   "message": "이미 존재하는 데이터입니다.",
+    "result": null,
+  }
+
+ ❯ test/favorites.e2e-spec.ts:59:31
+     57|         .post('/favorites', { movieId: 550 })
+     58|         .expect(409);
+     59|       expect(duplicated.body).toEqual(
+       |                               ^
+     60|         f.failure('FAVORITE409_1', '이미 이 영화를 즐겨찾기하셨습니다.'),
+     61|       );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯
+
+ FAIL  test/favorites.e2e-spec.ts > 즐겨찾기 API (격리된 테스트 DB) > 사전 검사를 통과해도 DB UNIQUE 가 막는다 > 같은 영화를 동시에 8번 즐겨찾기하면 정확히 1건만 201, 나머지는 409 FAVORITE409_1, DB 에는 1행
+AssertionError: expected { isSuccess: false, …(3) } to deeply equal { isSuccess: false, …(3) }
+
+- Expected
++ Received
+
+  {
+-   "code": "FAVORITE409_1",
++   "code": "COMMON409",
+    "isSuccess": false,
+    "message": "이미 존재하는 데이터입니다.",
+    "result": null,
+  }
+
+ ❯ test/favorites.e2e-spec.ts:250:26
+    248|       ]);
+    249|       for (const res of results.filter((r) => r.status === 409)) {
+    250|         expect(res.body).toEqual(f.failure('FAVORITE409_1'));
+       |                          ^
+    251|       }
+    252|       expect(
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯
+
+ FAIL  test/favorites.e2e-spec.ts > 즐겨찾기 API (격리된 테스트 DB) > 사전 검사를 통과해도 DB UNIQUE 가 막는다 > 8개 요청이 사전 검사를 모두 "없음"으로 통과하게 만들어도(배리어) DB UNIQUE 가 7개를 막는다: 1건 201, 7건 409 FAVORITE409_1, 1행
+AssertionError: expected { isSuccess: false, …(3) } to deeply equal { isSuccess: false, …(3) }
+
+- Expected
++ Received
+
+  {
+-   "code": "FAVORITE409_1",
++   "code": "COMMON409",
+    "isSuccess": false,
+-   "message": "이미 이 영화를 즐겨찾기하셨습니다.",
++   "message": "이미 존재하는 데이터입니다.",
+    "result": null,
+  }
+
+ ❯ test/favorites.e2e-spec.ts:288:26
+    286|       ]);
+    287|       for (const res of results.filter((r) => r.status === 409)) {
+    288|         expect(res.body).toEqual(
+       |                          ^
+    289|           f.failure('FAVORITE409_1', '이미 이 영화를 즐겨찾기하셨습니다.'),
+    290|         );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯
+
+ FAIL  test/favorites.e2e-spec.ts > 즐겨찾기 API (격리된 테스트 DB) > 사전 검사를 통과해도 DB UNIQUE 가 막는다 > 사전 검사가 "없다"고 잘못 답해도(경쟁 재현) DB 제약 위반이 FAVORITE409_1 로 바뀐다
+AssertionError: expected { isSuccess: false, …(3) } to deeply equal { isSuccess: false, …(3) }
+
+- Expected
++ Received
+
+  {
+-   "code": "FAVORITE409_1",
++   "code": "COMMON409",
+    "isSuccess": false,
+-   "message": "이미 이 영화를 즐겨찾기하셨습니다.",
++   "message": "이미 존재하는 데이터입니다.",
+    "result": null,
+  }
+
+ ❯ test/favorites.e2e-spec.ts:314:24
+    312|         .post('/favorites', { movieId: 550 })
+    313|         .expect(409);
+    314|       expect(res.body).toEqual(
+       |                        ^
+    315|         f.failure('FAVORITE409_1', '이미 이 영화를 즐겨찾기하셨습니다.'),
+    316|       );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯
+
+ FAIL  test/movie-records.e2e-spec.ts > 영화 기록 API 와 트랜잭션 (격리된 테스트 DB) > 롤백 증명 — 둘째 저장이 실패하면 첫째 저장도 취소된다 (실제 DB) > 경쟁 상황 재현: 평점 저장 직후 다른 요청이 같은 즐겨찾기를 넣으면 UNIQUE 위반 → FAVORITE409_1, 평점·즐겨찾기 모두 취소
+AssertionError: expected 'COMMON409' to be 'FAVORITE409_1' // Object.is equality
+
+Expected: "FAVORITE409_1"
+Received: "COMMON409"
+
+ ❯ test/movie-records.e2e-spec.ts:311:29
+    309|
+    310|       expect(res.status).toBe(409);
+    311|       expect(res.body.code).toBe('FAVORITE409_1');
+       |                             ^
+    312|       // 트리거가 넣은 즐겨찾기까지 포함해 트랜잭션 전체가 취소됐다
+    313|       expect(await rows(me, 9003)).toEqual({ rating: 0, favorite: 0 });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  5 failed | 22 passed (27)
+   Start at  23:36:47
+   Duration  30.88s (transform 2.20s, setup 306ms, import 10.20s, tests 48.24s, environment 0ms)
+

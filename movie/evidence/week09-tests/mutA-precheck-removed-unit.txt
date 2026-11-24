@@ -1,0 +1,28 @@
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.12 ~/movie
+
+ ❯ src/service/favorite.service.spec.ts (10 tests | 1 failed) 13ms
+       × 이미 즐겨찾기했으면 409 FAVORITE409_1 이고 저장하지 않는다 5ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/service/favorite.service.spec.ts > FavoriteService > create > 이미 즐겨찾기했으면 409 FAVORITE409_1 이고 저장하지 않는다
+AssertionError: expected undefined to be an instance of ApiException
+ ❯ expectApiError src/service/favorite.service.spec.ts:39:17
+     37|     (e: unknown) => e,
+     38|   );
+     39|   expect(error).toBeInstanceOf(ApiException);
+       |                 ^
+     40|   expect((error as ApiException).getStatus()).toBe(status);
+     41|   expect((error as ApiException).code).toBe(code);
+ ❯ src/service/favorite.service.spec.ts:88:7
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 18 passed (19)
+   Start at  23:35:02
+   Duration  4.67s (transform 1.51s, setup 0ms, import 6.50s, tests 26ms, environment 0ms)
+

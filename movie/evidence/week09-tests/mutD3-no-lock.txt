@@ -1,0 +1,58 @@
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.12 ~/movie
+
+ ❯ test/swagger.e2e-spec.ts (49 tests | 2 failed) 6850ms
+       × /ratings/{ratingId} delete 는 자물쇠(bearer)가 있고 401 AUTH401_2/3/4 예시가 있다 3ms
+       × /ratings/{ratingId} delete: 한 줄 요약에 토큰 필요 여부가 있고, 설명이 있고, 응답 상태 코드가 빠짐없이 적혀 있다 (자물쇠 true, ["200","400","401","403","404"]) 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/swagger.e2e-spec.ts > Swagger 문서 (격리된 테스트 DB) > 토큰이 필요한 API 와 공개 API 의 구분 > /ratings/{ratingId} delete 는 자물쇠(bearer)가 있고 401 AUTH401_2/3/4 예시가 있다
+AssertionError: expected undefined to deeply equal [ { bearer: [] } ]
+
+- Expected:
+[
+  {
+    "bearer": [],
+  },
+]
+
++ Received:
+undefined
+
+ ❯ test/swagger.e2e-spec.ts:129:43
+    127|       '%s %s 는 자물쇠(bearer)가 있고 401 AUTH401_2/3/4 예시가 있다',
+    128|       (path, method) => {
+    129|         expect(op(path, method).security).toEqual([{ bearer: [] }]);
+       |                                           ^
+    130|         const examples = example(path, method, 401)?.examples ?? {};
+    131|         expect(Object.keys(examples).sort()).toEqual([
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  test/swagger.e2e-spec.ts > Swagger 문서 (격리된 테스트 DB) > 9주차 필수 미션: 평점·내 정보·즐겨찾기 문서 (한 줄 설명 · 토큰 필요 여부 · 실패 응답의 상태 코드와 code) > /ratings/{ratingId} delete: 한 줄 요약에 토큰 필요 여부가 있고, 설명이 있고, 응답 상태 코드가 빠짐없이 적혀 있다 (자물쇠 true, ["200","400","401","403","404"])
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ test/swagger.e2e-spec.ts:261:50
+    259|         const operation = op(path, method);
+    260|         expect(operation.summary).toContain(needsToken ? '토큰 필요' : '공개…
+    261|         expect(operation.security !== undefined).toBe(needsToken);
+       |                                                  ^
+    262|         expect(
+    263|           (operation as { description?: string }).description?.length …
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 47 passed (49)
+   Start at  23:43:09
+   Duration  10.68s (transform 1.60s, setup 202ms, import 3.38s, tests 6.85s, environment 0ms)
+

@@ -1,0 +1,61 @@
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.12 ~/movie
+
+ ❯ test/movie-records.e2e-spec.ts (13 tests | 2 failed) 19131ms
+       × 트랜잭션: 즐겨찾기 INSERT 가 실패하면 먼저 저장한 평점도 되돌려져 두 테이블 모두 0행이다 1574ms
+       × 경쟁 상황 재현: 평점 저장 직후 다른 요청이 같은 즐겨찾기를 넣으면 UNIQUE 위반 → FAVORITE409_1, 평점·즐겨찾기 모두 취소 1307ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/movie-records.e2e-spec.ts > 영화 기록 API 와 트랜잭션 (격리된 테스트 DB) > 롤백 증명 — 둘째 저장이 실패하면 첫째 저장도 취소된다 (실제 DB) > 트랜잭션: 즐겨찾기 INSERT 가 실패하면 먼저 저장한 평점도 되돌려져 두 테이블 모두 0행이다
+AssertionError: expected { rating: 1, favorite: +0 } to deeply equal { rating: +0, favorite: +0 }
+
+- Expected
++ Received
+
+  {
+    "favorite": 0,
+-   "rating": 0,
++   "rating": 1,
+  }
+
+ ❯ test/movie-records.e2e-spec.ts:273:36
+    271|       expect(res.text).not.toContain('강제로 만든');
+    272|       // 평점 INSERT 가 성공한 뒤에 실패했는데도, 평점이 남아 있지 않다 = rollback
+    273|       expect(await rows(me, 9001)).toEqual({ rating: 0, favorite: 0 });
+       |                                    ^
+    274|     });
+    275|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  test/movie-records.e2e-spec.ts > 영화 기록 API 와 트랜잭션 (격리된 테스트 DB) > 롤백 증명 — 둘째 저장이 실패하면 첫째 저장도 취소된다 (실제 DB) > 경쟁 상황 재현: 평점 저장 직후 다른 요청이 같은 즐겨찾기를 넣으면 UNIQUE 위반 → FAVORITE409_1, 평점·즐겨찾기 모두 취소
+AssertionError: expected { rating: 1, favorite: 1 } to deeply equal { rating: +0, favorite: +0 }
+
+- Expected
++ Received
+
+  {
+-   "favorite": 0,
+-   "rating": 0,
++   "favorite": 1,
++   "rating": 1,
+  }
+
+ ❯ test/movie-records.e2e-spec.ts:313:36
+    311|       expect(res.body.code).toBe('FAVORITE409_1');
+    312|       // 트리거가 넣은 즐겨찾기까지 포함해 트랜잭션 전체가 취소됐다
+    313|       expect(await rows(me, 9003)).toEqual({ rating: 0, favorite: 0 });
+       |                                    ^
+    314|     });
+    315|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  2 failed | 25 passed (27)
+   Start at  23:37:43
+   Duration  27.25s (transform 1.33s, setup 158ms, import 7.76s, tests 41.98s, environment 0ms)
+
