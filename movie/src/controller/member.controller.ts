@@ -9,6 +9,7 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { LoginMember } from '../decorator/login-member.decorator.js';
 import { ApiResponse } from '../dto/api-response.dto.js';
 import { CheckResponseDto } from '../dto/check-response.dto.js';
@@ -19,7 +20,9 @@ import { MemberUpdateRequestDto } from '../dto/member-update-request.dto.js';
 import { EmailParamDto, NicknameParamDto } from '../dto/member-request.dto.js';
 import { AuthGuard } from '../guard/auth.guard.js';
 import { MemberService } from '../service/member.service.js';
+import { ApiAuthFailures } from '../swagger/api-docs.js';
 
+@ApiTags('회원')
 @Controller('members')
 export class MemberController {
   constructor(private readonly memberService: MemberService) {}
@@ -28,6 +31,9 @@ export class MemberController {
   // 고정 경로(me)를 변수 경로(:x)보다 위에 둔다. 아래에 members/:x 모양의 경로가 생기면 me 를 값으로 착각한다.
   @Get('me')
   @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '내 정보 조회 (토큰 필요)' })
+  @ApiAuthFailures()
   async getMyInfo(
     @LoginMember() memberId: number,
   ): Promise<ApiResponse<MemberInfoResponseDto>> {
@@ -42,6 +48,9 @@ export class MemberController {
   // PATCH /members/me { nickname } → 200, 내 정보 조회와 같은 result
   @Patch('me')
   @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '내 정보(닉네임) 수정 (토큰 필요)' })
+  @ApiAuthFailures()
   async updateMyInfo(
     @LoginMember() memberId: number,
     @Body() dto: MemberUpdateRequestDto,
@@ -56,6 +65,7 @@ export class MemberController {
 
   // GET /members/nickname/{nickname}
   @Get('nickname/:nickname')
+  @ApiOperation({ summary: '닉네임 중복 확인 (공개)' })
   checkNickname(
     @Param() { nickname }: NicknameParamDto,
   ): Promise<CheckResponseDto> {
@@ -64,6 +74,7 @@ export class MemberController {
 
   // GET /members/email/{email}
   @Get('email/:email')
+  @ApiOperation({ summary: '이메일 중복 확인 (공개)' })
   checkEmail(@Param() { email }: EmailParamDto): Promise<CheckResponseDto> {
     return this.memberService.checkEmail(email);
   }
@@ -71,6 +82,7 @@ export class MemberController {
   // POST /members  → 201 { isSuccess, code, message, result: { memberId, email, nickname } }
   @Post()
   @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: '회원가입 (공개)' })
   async signUp(
     @Body() dto: CreateMemberDto,
   ): Promise<ApiResponse<MemberResponseDto>> {

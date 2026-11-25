@@ -4,11 +4,13 @@ import { Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import request from 'supertest';
 import { App } from 'supertest/types';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { AppModule } from '../../src/app.module.js';
 import { configureApp } from '../../src/app.setup.js';
+import { Favorite } from '../../src/entity/favorite.entity.js';
 import { Member } from '../../src/entity/member.entity.js';
 import { Rating } from '../../src/entity/rating.entity.js';
+import { setupSwagger } from '../../src/swagger/swagger.setup.js';
 import { createTestDatabase, dropTestDatabase } from './test-database.js';
 
 export const ALLOWED_ORIGIN = 'http://localhost:5173';
@@ -25,7 +27,10 @@ export interface TestUser {
  * 일회용 테스트 DB 를 만들고 실제 AppModule(JwtModule·AuthGuard 포함)을 띄운다.
  * 파일마다 자기 DB 이름을 넘겨서, 병렬로 도는 e2e 파일끼리 DB 를 지우고 만드는 일이 겹치지 않게 한다.
  */
-export async function createFixture(dbName: string) {
+export async function createFixture(
+  dbName: string,
+  options: { swagger?: boolean } = {},
+) {
   await createTestDatabase(dbName);
   const originalDbName = process.env.DB_NAME;
   // AppModule 의 TypeORM 설정이 모듈을 만들 때 DB_NAME 을 읽으므로, 그 전에 바꾼다.
@@ -36,11 +41,15 @@ export async function createFixture(dbName: string) {
   }).compile();
   const app: INestApplication<App> = moduleRef.createNestApplication();
   configureApp(app, [ALLOWED_ORIGIN]);
+  // 8주차 Challenge: Swagger 는 main.ts 에서만 붙이는 문서 설정이라, 문서를 검사하는 테스트만 켠다.
+  if (options.swagger) setupSwagger(app);
   await app.init();
 
   const server = () => app.getHttpServer();
   const members: Repository<Member> = app.get(getRepositoryToken(Member));
   const ratings: Repository<Rating> = app.get(getRepositoryToken(Rating));
+  const favorites: Repository<Favorite> = app.get(getRepositoryToken(Favorite));
+  const dataSource = app.get(DataSource);
   const jwt = app.get(JwtService);
   let seq = 0;
 
@@ -89,6 +98,29 @@ export async function createFixture(dbName: string) {
     return res.body.result.ratingId as number;
   }
 
+  /** 이 회원의 토큰으로 즐겨찾기를 등록하고 favoriteId 를 돌려준다. */
+  async function addFavorite(user: TestUser, movieId: number): Promise<number> {
+    const res = await request(server())
+      .post('/favorites')
+      .set('Authorization', bearer(user.token))
+      .send({ movieId })
+      .expect(201);
+    return res.body.result.favoriteId as number;
+  }
+
+  /** 이 회원의 토큰으로 요청을 보낸다. */
+  const as = (user: TestUser) => ({
+    get: (path: string) =>
+      request(server()).get(path).set('Authorization', bearer(user.token)),
+    post: (path: string, body: object) =>
+      request(server())
+        .post(path)
+        .set('Authorization', bearer(user.token))
+        .send(body),
+    delete: (path: string) =>
+      request(server()).delete(path).set('Authorization', bearer(user.token)),
+  });
+
   /** 공개 조회 API(5주차)로 평점 목록을 본다. 토큰이 필요 없다. */
   const listRatings = async (memberId: number) =>
     (await request(server()).get(`/members/${memberId}/ratings`).expect(200))
@@ -118,12 +150,16 @@ export async function createFixture(dbName: string) {
     server,
     members,
     ratings,
+    favorites,
+    dataSource,
     jwt,
     newUser,
     post,
     bearer,
     signUpAndLogin,
     addRating,
+    addFavorite,
+    as,
     listRatings,
     failure,
     close,

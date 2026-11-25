@@ -12,6 +12,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { LoginMember } from '../decorator/login-member.decorator.js';
 import { ApiResponse } from '../dto/api-response.dto.js';
 import { CreateRatingDto } from '../dto/create-rating.dto.js';
@@ -20,12 +21,14 @@ import { RatingResponseDto } from '../dto/rating-response.dto.js';
 import { UpdateRatingDto } from '../dto/update-rating.dto.js';
 import { AuthGuard } from '../guard/auth.guard.js';
 import { RatingService } from '../service/rating.service.js';
+import { ApiAuthFailures } from '../swagger/api-docs.js';
 
 /**
  * 파일은 담당 자원(Rating) 기준으로 나눈다.
  * 7주차부터 쓰기 API 의 URL 에서 /members/{memberId} 가 사라지고, "누구"는 토큰이 알려 준다.
  * 값을 받지 않는 것이 곧 그 값을 조작당하지 않는 방법이다.
  */
+@ApiTags('평점')
 @Controller()
 export class RatingController {
   constructor(private readonly ratingService: RatingService) {}
@@ -33,6 +36,7 @@ export class RatingController {
   // GET /members/{memberId}/ratings?page=0&size=10
   // 5주차에 만든 "특정 회원의 평점 목록"이다. 누구나 볼 수 있는 공개 API 라 AuthGuard 를 붙이지 않는다.
   @Get('members/:memberId/ratings')
+  @ApiOperation({ summary: '유저별 평점 조회 (공개 — 토큰 필요 없음)' })
   getMemberRatings(
     @Param('memberId', ParseIntPipe) memberId: number,
     @Query() query: RatingPageQueryDto,
@@ -43,6 +47,9 @@ export class RatingController {
   // POST /ratings → 201, result 는 방금 만든 평점
   @Post('ratings')
   @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '평점 등록 (토큰 필요)' })
+  @ApiAuthFailures()
   @HttpCode(HttpStatus.CREATED)
   async create(
     @LoginMember() memberId: number,
@@ -59,6 +66,9 @@ export class RatingController {
   // PATCH /ratings/{ratingId} → 200, result 는 수정된 평점
   @Patch('ratings/:ratingId')
   @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '평점 수정 (토큰 필요, 내 평점만)' })
+  @ApiAuthFailures()
   async update(
     @LoginMember() memberId: number,
     @Param('ratingId', ParseIntPipe) ratingId: number,
@@ -77,6 +87,9 @@ export class RatingController {
   // 삭제만 응답 틀에서 빠지는 것을 막으려고 200 + result null 로 맞춘다.
   @Delete('ratings/:ratingId')
   @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: '평점 삭제 (토큰 필요, 내 평점만)' })
+  @ApiAuthFailures()
   async delete(
     @LoginMember() memberId: number,
     @Param('ratingId', ParseIntPipe) ratingId: number,

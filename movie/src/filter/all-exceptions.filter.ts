@@ -12,6 +12,7 @@ import {
   ApiException,
   ErrorCode,
   emailDuplicated,
+  favoriteDuplicated,
   nicknameDuplicated,
   ratingDuplicated,
 } from '../exception/api.exception.js';
@@ -23,7 +24,7 @@ const MYSQL_DUP_ENTRY = 'ER_DUP_ENTRY';
  * 어디서 어떤 오류가 나도 { isSuccess:false, code, message, result:null } 로 돌려준다.
  *
  * 1. ApiException        → 우리가 정한 상태·code·message 그대로
- * 2. DB UNIQUE 위반       → 사전 중복 체크를 통과한 뒤에 생긴 경쟁 상황. 409 로 바꾼다.
+ * 2. DB UNIQUE 위반       → 사전 중복 체크를 통과한 뒤에 생긴 경쟁 상황(동시 요청). 409 로 바꾼다.
  * 3. 그 밖의 HttpException → ValidationPipe(400), 없는 경로(404) 등. code 는 COMMON + 상태
  * 4. 처음 보는 오류        → 서버 로그에만 남기고, 화면에는 500 과 고정 문구만 준다.
  */
@@ -110,13 +111,14 @@ function duplicateKeyOf(exception: unknown): string {
 }
 
 /**
- * UNIQUE key 이름으로 이메일 / 닉네임 / 평점 중복을 구분한다. 알 수 없는 key 면 null.
+ * UNIQUE key 이름으로 이메일 / 닉네임 / 평점 / 즐겨찾기 중복을 구분한다. 알 수 없는 key 면 null.
  */
 export function toDuplicateException(exception: unknown): ApiException | null {
   if (!isDuplicateEntryError(exception)) return null;
   const key = duplicateKeyOf(exception);
 
   if (key.endsWith('uk_rating_member_movie')) return ratingDuplicated();
+  if (key.endsWith('uk_favorite_member_movie')) return favoriteDuplicated();
   if (key === 'member.email' || key === 'email') return emailDuplicated();
   if (key === 'member.nickname' || key === 'nickname') {
     return nicknameDuplicated();
