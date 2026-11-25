@@ -1,8 +1,8 @@
-import { Rating } from "../entity/rating.entity.js";
+import { Rating } from '../entity/rating.entity.js';
 
 export class RatingResponseDto {
   ratingId: number;
-  movieId: number;
+  movieId: string;
   score: number;
   comment: string | null;
   createdAt: Date;
@@ -11,7 +11,7 @@ export class RatingResponseDto {
   static from(rating: Rating): RatingResponseDto {
     return {
       ratingId: rating.ratingId,
-      movieId: rating.movieId,
+      movieId: String(rating.movieId),
       score: rating.score,
       comment: rating.comment,
       createdAt: rating.createdAt,
