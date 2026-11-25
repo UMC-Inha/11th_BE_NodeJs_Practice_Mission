@@ -5,26 +5,26 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  Patch,
   Post,
   Req,
   UseGuards,
-  Patch,
 } from "@nestjs/common";
+import { ApiOperation, ApiTags } from "@nestjs/swagger";
 import { CreateMemberDto } from "../dto/create-member.dto";
+import { MemberUpdateRequestDto } from "../dto/member-update-request.dto";
 import { MemberService } from "../service/member.service";
 import { AuthGuard } from "../guard/auth.guard";
-import { MemberUpdateRequestDto } from "../dto/member-update-request.dto";
-// 데코레이터가 붙은 매개변수의 타입은 import type으로 가져와야 합니다
 import type { AuthenticatedRequest } from "../guard/auth.guard";
 
+@ApiTags("회원")
 @Controller("members")
 export class MemberController {
   constructor(private readonly memberService: MemberService) {}
 
   @Get("me")
-  @UseGuards(AuthGuard) // 이 줄이 없으면 토큰 없이도 호출됩니다
+  @UseGuards(AuthGuard)
   async getMyInfo(@Req() request: AuthenticatedRequest) {
-    // Guard가 담아둔 값을 꺼냅니다
     const result = await this.memberService.getMyInfo(request.memberId);
 
     return {
@@ -33,16 +33,6 @@ export class MemberController {
       message: "회원 정보를 조회했습니다.",
       result,
     };
-  }
-
-  @Get("nickname/:nickname")
-  checkNickname(@Param("nickname") nickname: string) {
-    return this.memberService.checkNickname(nickname);
-  }
-
-  @Get("email/:email")
-  checkEmail(@Param("email") email: string) {
-    return this.memberService.checkEmail(email);
   }
 
   @Patch("me")
@@ -61,6 +51,21 @@ export class MemberController {
     };
   }
 
+  @Get("nickname/:nickname")
+  checkNickname(@Param("nickname") nickname: string) {
+    return this.memberService.checkNickname(nickname);
+  }
+
+  @Get("email/:email")
+  checkEmail(@Param("email") email: string) {
+    return this.memberService.checkEmail(email);
+  }
+
+  @ApiOperation({
+    summary: "회원가입",
+    description:
+      "이메일, 비밀번호, 닉네임으로 회원을 등록합니다. 토큰이 없어도 호출할 수 있는 공개 API입니다.",
+  })
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async signUp(@Body() dto: CreateMemberDto) {
