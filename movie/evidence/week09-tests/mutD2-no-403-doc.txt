@@ -1,0 +1,68 @@
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.12 ~/movie
+
+ ❯ test/swagger.e2e-spec.ts (49 tests | 3 failed) 6355ms
+       × /ratings/{ratingId} patch: 한 줄 요약에 토큰 필요 여부가 있고, 설명이 있고, 응답 상태 코드가 빠짐없이 적혀 있다 (자물쇠 true, ["200","400","401","403","404"]) 6ms
+       × PATCH·DELETE /ratings/{ratingId}: 403 RATING403_1 과 404 RATING404_1 이 따로 적혀 있다 1ms
+       × 9주차: 평점·회원 API 의 실패 예시(400·403·404·409)도 실제 응답과 같다 2585ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/swagger.e2e-spec.ts > Swagger 문서 (격리된 테스트 DB) > 9주차 필수 미션: 평점·내 정보·즐겨찾기 문서 (한 줄 설명 · 토큰 필요 여부 · 실패 응답의 상태 코드와 code) > /ratings/{ratingId} patch: 한 줄 요약에 토큰 필요 여부가 있고, 설명이 있고, 응답 상태 코드가 빠짐없이 적혀 있다 (자물쇠 true, ["200","400","401","403","404"])
+AssertionError: expected [ '200', '400', '401', '404' ] to deeply equal [ '200', '400', '401', '403', '404' ]
+
+- Expected
++ Received
+
+  [
+    "200",
+    "400",
+    "401",
+-   "403",
+    "404",
+  ]
+
+ ❯ test/swagger.e2e-spec.ts:266:57
+    264|           `${method} ${path} 설명`,
+    265|         ).toBeGreaterThanOrEqual(20);
+    266|         expect(Object.keys(operation.responses).sort()).toEqual(status…
+       |                                                         ^
+    267|       },
+    268|     );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  test/swagger.e2e-spec.ts > Swagger 문서 (격리된 테스트 DB) > 9주차 필수 미션: 평점·내 정보·즐겨찾기 문서 (한 줄 설명 · 토큰 필요 여부 · 실패 응답의 상태 코드와 code) > PATCH·DELETE /ratings/{ratingId}: 403 RATING403_1 과 404 RATING404_1 이 따로 적혀 있다
+TypeError: Cannot read properties of undefined (reading 'content')
+ ❯ example test/swagger.e2e-spec.ts:76:47
+     74|   };
+     75|   const example = (path: string, method: string, status: number) =>
+     76|     op(path, method).responses[String(status)].content?.['application/…
+       |                                               ^
+     77|
+     78|   it('UI(/api-docs)와 JSON(/api-docs-json)이 모두 열리고 Bearer 인증 방식이 정의돼 있다…
+ ❯ test/swagger.e2e-spec.ts:316:13
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  test/swagger.e2e-spec.ts > Swagger 문서 (격리된 테스트 DB) > 문서의 예시가 실제 서버 응답과 어긋나지 않는다 > 9주차: 평점·회원 API 의 실패 예시(400·403·404·409)도 실제 응답과 같다
+TypeError: Cannot read properties of undefined (reading 'content')
+ ❯ example test/swagger.e2e-spec.ts:76:47
+     74|   };
+     75|   const example = (path: string, method: string, status: number) =>
+     76|     op(path, method).responses[String(status)].content?.['application/…
+       |                                               ^
+     77|
+     78|   it('UI(/api-docs)와 JSON(/api-docs-json)이 모두 열리고 Bearer 인증 방식이 정의돼 있다…
+ ❯ documented test/swagger.e2e-spec.ts:417:23
+ ❯ test/swagger.e2e-spec.ts:468:9
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 46 passed (49)
+   Start at  23:42:54
+   Duration  11.52s (transform 1.84s, setup 187ms, import 4.59s, tests 6.35s, environment 0ms)
+

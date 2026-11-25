@@ -76,7 +76,10 @@ describe('컨트롤러는 요청 객체의 키 이름을 직접 쓰지 않는다
       )
       .filter(
         ({ line }) =>
-          /['"]memberId['"]/.test(line) && !line.trim().startsWith('//'),
+          /['"]memberId['"]/.test(line) &&
+          !line.trim().startsWith('//') &&
+          // 9주차: Swagger 에 경로 변수의 설명·예시를 적는 @ApiParam 은 문서일 뿐 요청 값을 읽는 코드가 아니다.
+          !line.trim().startsWith('@ApiParam('),
       )
       .map(({ line }) => line.trim());
     expect(lines).toEqual([

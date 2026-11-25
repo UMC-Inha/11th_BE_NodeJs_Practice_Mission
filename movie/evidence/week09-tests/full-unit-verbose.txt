@@ -1,0 +1,153 @@
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.12 ~/movie
+
+ ✓ src/config/jwt.config.spec.ts > resolveJwtSecret (서버 시작 전 검사) > 32자 이상이면 그대로 쓴다 2ms
+ ✓ src/config/jwt.config.spec.ts > resolveJwtSecret (서버 시작 전 검사) > 없거나 비어 있으면 서버를 띄우지 않는다 1ms
+ ✓ src/config/jwt.config.spec.ts > resolveJwtSecret (서버 시작 전 검사) > 31자 이하이면 서버를 띄우지 않는다 0ms
+ ✓ src/config/jwt.config.spec.ts > resolveJwtSecret (서버 시작 전 검사) > .env.example 의 예시 값 그대로이면 서버를 띄우지 않는다 0ms
+ ✓ src/config/jwt.config.spec.ts > resolveJwtSecret (서버 시작 전 검사) > 오류 메시지에 비밀키 값을 담지 않는다 0ms
+ ✓ src/config/jwt.config.spec.ts > resolveAccessExpiration (초 단위) > 없으면 3600초(1시간) 0ms
+ ✓ src/config/jwt.config.spec.ts > resolveAccessExpiration (초 단위) > 문자열로 들어온 숫자를 초 단위 숫자로 바꾼다 0ms
+ ✓ src/config/jwt.config.spec.ts > resolveAccessExpiration (초 단위) > 1h 는 받지 않는다(1 이상의 정수 초만) 0ms
+ ✓ src/config/jwt.config.spec.ts > resolveAccessExpiration (초 단위) > 0 는 받지 않는다(1 이상의 정수 초만) 0ms
+ ✓ src/config/jwt.config.spec.ts > resolveAccessExpiration (초 단위) > -5 는 받지 않는다(1 이상의 정수 초만) 0ms
+ ✓ src/config/jwt.config.spec.ts > resolveAccessExpiration (초 단위) > 1.5 는 받지 않는다(1 이상의 정수 초만) 0ms
+ ✓ src/config/jwt.config.spec.ts > resolveAccessExpiration (초 단위) > abc 는 받지 않는다(1 이상의 정수 초만) 0ms
+ ✓ src/config/jwt.config.spec.ts > buildJwtOptions > 서명 알고리즘을 HS256 으로 고정하고 유효시간을 초 단위 숫자로 넘긴다 1ms
+ ✓ src/app.setup.spec.ts > parseCorsOrigins > 비어 있으면 5173 하나만 허용 11ms
+ ✓ src/app.setup.spec.ts > parseCorsOrigins > 쉼표로 여러 출처, 공백은 지운다 5ms
+ ✓ src/app.setup.spec.ts > parseCorsOrigins > * 이면 모든 출처 0ms
+ ✓ src/guard/auth.guard.spec.ts > extractBearerToken > "Bearer {토큰}" 에서 토큰만 꺼낸다 (Bearer 뒤 한 칸) 3ms
+ ✓ src/guard/auth.guard.spec.ts > extractBearerToken > 스킴 대소문자는 구분하지 않는다 0ms
+ ✓ src/guard/auth.guard.spec.ts > extractBearerToken > undefined 는 토큰이 없는 것으로 본다 0ms
+ ✓ src/guard/auth.guard.spec.ts > extractBearerToken > "" 는 토큰이 없는 것으로 본다 0ms
+ ✓ src/guard/auth.guard.spec.ts > extractBearerToken > "Bearer" 는 토큰이 없는 것으로 본다 0ms
+ ✓ src/guard/auth.guard.spec.ts > extractBearerToken > "Bearer " 는 토큰이 없는 것으로 본다 0ms
+ ✓ src/guard/auth.guard.spec.ts > extractBearerToken > "Bearer    " 는 토큰이 없는 것으로 본다 0ms
+ ✓ src/guard/auth.guard.spec.ts > extractBearerToken > "Basic abc" 는 토큰이 없는 것으로 본다 0ms
+ ✓ src/guard/auth.guard.spec.ts > extractBearerToken > "abc.def.ghi" 는 토큰이 없는 것으로 본다 0ms
+ ✓ src/guard/auth.guard.spec.ts > AuthGuard (인증) > 올바른 토큰이면 통과하고 요청에 회원 번호를 숫자로 담는다 10ms
+ ✓ src/guard/auth.guard.spec.ts > AuthGuard (인증) > Authorization 헤더가 없으면 401 AUTH401_2 2ms
+ ✓ src/guard/auth.guard.spec.ts > AuthGuard (인증) > Bearer 형식이 아니거나 토큰이 비어 있어도 AUTH401_2 0ms
+ ✓ src/guard/auth.guard.spec.ts > AuthGuard (인증) > payload 의 글자 하나를 "교체"하면 서명이 맞지 않아 401 AUTH401_3 6ms
+ ✓ src/guard/auth.guard.spec.ts > AuthGuard (인증) > 서명의 글자 하나를 교체해도 AUTH401_3 0ms
+ ✓ src/guard/auth.guard.spec.ts > AuthGuard (인증) > 다른 비밀키로 서명한 토큰은 AUTH401_3 0ms
+ ✓ src/guard/auth.guard.spec.ts > AuthGuard (인증) > 토큰이 아닌 문자열은 AUTH401_3 0ms
+ ✓ src/guard/auth.guard.spec.ts > AuthGuard (인증) > 유효시간이 지난 토큰은 401 AUTH401_4 — 토큰이 없을 때(AUTH401_2)와 구분된다 1ms
+ ✓ src/guard/auth.guard.spec.ts > AuthGuard (인증) > 만료된 토큰도 서명이 틀리면 만료가 아니라 위조(AUTH401_3)로 본다 0ms
+ ✓ src/guard/auth.guard.spec.ts > AuthGuard (인증) > 서명 없는 토큰(alg=none)은 AUTH401_3 0ms
+ ✓ src/guard/auth.guard.spec.ts > AuthGuard (인증) > 같은 비밀키로 HS384 로 서명한 토큰도 거절한다 (알고리즘은 HS256 으로 고정) 0ms
+ ✓ src/guard/auth.guard.spec.ts > AuthGuard (인증) > 서명은 맞아도 sub 가 회원 번호가 아니면 AUTH401_3 10ms
+ ✓ src/guard/auth.guard.spec.ts > AuthGuard (인증) > 통과하지 못하면 요청에 회원 번호를 담지 않는다 0ms
+ ✓ src/filter/all-exceptions.filter.spec.ts > AllExceptionsFilter > DB UNIQUE 위반을 바꿀 때 key 이름만 경고 로그로 남기고 값은 남기지 않는다 3ms
+ ✓ src/filter/all-exceptions.filter.spec.ts > AllExceptionsFilter > ApiException 은 상태·code·message 를 그대로 쓴다 1ms
+ ✓ src/filter/all-exceptions.filter.spec.ts > AllExceptionsFilter > 인증·인가 실패(401·403)도 상태·code 그대로, 응답 틀은 같다 1ms
+ ✓ src/filter/all-exceptions.filter.spec.ts > AllExceptionsFilter > 즐겨찾기 404 는 상태·code·message 그대로 (401 과 다른 code) 0ms
+ ✓ src/filter/all-exceptions.filter.spec.ts > AllExceptionsFilter > ValidationPipe 의 message 배열은 첫 번째 이유만, code 는 COMMON400 0ms
+ ✓ src/filter/all-exceptions.filter.spec.ts > AllExceptionsFilter > 없는 경로 같은 일반 HttpException 은 COMMON + 상태 코드 1ms
+ ✓ src/filter/all-exceptions.filter.spec.ts > AllExceptionsFilter > DB UNIQUE 위반(email) → 409 MEMBER409_2, 같은 응답 틀 0ms
+ ✓ src/filter/all-exceptions.filter.spec.ts > AllExceptionsFilter > DB UNIQUE 위반(nickname) → 409 MEMBER409_1, 평점 UNIQUE → RATING409_1 0ms
+ ✓ src/filter/all-exceptions.filter.spec.ts > AllExceptionsFilter > 즐겨찾기 UNIQUE(uk_favorite_member_movie) → 409 FAVORITE409_1, 같은 응답 틀 0ms
+ ✓ src/filter/all-exceptions.filter.spec.ts > AllExceptionsFilter > 어느 UNIQUE 인지 모르면 일반 409 COMMON409 0ms
+ ✓ src/filter/all-exceptions.filter.spec.ts > AllExceptionsFilter > 처음 보는 오류는 500 과 고정 문구만 보여주고 내부 메시지는 숨긴다 3ms
+ ✓ src/filter/all-exceptions.filter.spec.ts > toDuplicateException > UNIQUE 위반이 아니면 null 0ms
+ ✓ src/filter/all-exceptions.filter.spec.ts > toDuplicateException > 결과는 ApiException 1ms
+ ✓ src/service/rating.service.spec.ts > RatingService > 없는 회원이면 404 MEMBER404_1 85ms
+ ✓ src/service/rating.service.spec.ts > RatingService > ratingId 최신순으로 조회하고 명세의 6개 필드만 돌려준다 2ms
+ ✓ src/service/rating.service.spec.ts > RatingService > page·size 를 주면 그만큼 건너뛰고 잘라 온다 1ms
+ ✓ src/service/rating.service.spec.ts > RatingService > size 만 주면 page 0 부터, page 만 주면 size 10 0ms
+ ✓ src/service/rating.service.spec.ts > RatingService 쓰기 (등록·수정·삭제) > create > 저장하고 만들어진 평점을 돌려준다, comment 를 생략하면 null 1ms
+ ✓ src/service/rating.service.spec.ts > RatingService 쓰기 (등록·수정·삭제) > create > 없는 회원이면 404 이고 저장하지 않는다 0ms
+ ✓ src/service/rating.service.spec.ts > RatingService 쓰기 (등록·수정·삭제) > create > 같은 회원·같은 영화면 409 RATING409_1 이고 저장하지 않는다 0ms
+ ✓ src/service/rating.service.spec.ts > RatingService 쓰기 (등록·수정·삭제) > update > 내 평점이면 점수와 후기를 바꾼다 4ms
+ ✓ src/service/rating.service.spec.ts > RatingService 쓰기 (등록·수정·삭제) > update > comment 를 생략하면 기존 후기를 그대로 두고, null 이면 지운다 1ms
+ ✓ src/service/rating.service.spec.ts > RatingService 쓰기 (등록·수정·삭제) > update > 없는 평점이면 404 RATING404_1 0ms
+ ✓ src/service/rating.service.spec.ts > RatingService 쓰기 (등록·수정·삭제) > update > 다른 회원의 평점이면 403 RATING403_1 이고 바꾸지 않는다 0ms
+ ✓ src/service/rating.service.spec.ts > RatingService 쓰기 (등록·수정·삭제) > delete > 내 평점이면 지운다 0ms
+ ✓ src/service/rating.service.spec.ts > RatingService 쓰기 (등록·수정·삭제) > delete > 없는 평점이면 404, 다른 회원의 평점이면 403 이고 지우지 않는다 0ms
+ ✓ src/service/rating.service.spec.ts > RatingService 소유권 확인 순서 (인가) > 평점을 먼저 찾고(없으면 404) 그다음에 주인을 본다 — 없는 평점에 403 을 주지 않는다 0ms
+ ✓ src/service/rating.service.spec.ts > RatingService 소유권 확인 순서 (인가) > 작성자를 함께 불러와서(relations.member) 토큰의 주인과 비교한다 0ms
+ ✓ src/service/rating.service.spec.ts > RatingService 소유권 확인 순서 (인가) > 요청자가 작성자와 다르면 수정·삭제 모두 403 이고 아무것도 바꾸지 않는다 0ms
+ ✓ src/decorator/login-member.decorator.spec.ts > @LoginMember() > AuthGuard 가 요청에 담아 둔 회원 번호를 그대로 돌려준다 1ms
+ ✓ src/decorator/login-member.decorator.spec.ts > @LoginMember() > 요청에 회원 번호가 없으면(가드를 빠뜨린 경우) 조용히 undefined 를 주지 않고 오류를 낸다 1ms
+ ✓ src/decorator/login-member.decorator.spec.ts > 컨트롤러는 요청 객체의 키 이름을 직접 쓰지 않는다 (선택 미션 2) > undefined 에 request["memberId"] / @Req() 가 없다 0ms
+ ✓ src/decorator/login-member.decorator.spec.ts > 컨트롤러는 요청 객체의 키 이름을 직접 쓰지 않는다 (선택 미션 2) > undefined 에 request["memberId"] / @Req() 가 없다 0ms
+ ✓ src/decorator/login-member.decorator.spec.ts > 컨트롤러는 요청 객체의 키 이름을 직접 쓰지 않는다 (선택 미션 2) > undefined 에 request["memberId"] / @Req() 가 없다 0ms
+ ✓ src/decorator/login-member.decorator.spec.ts > 컨트롤러는 요청 객체의 키 이름을 직접 쓰지 않는다 (선택 미션 2) > undefined 에 request["memberId"] / @Req() 가 없다 0ms
+ ✓ src/decorator/login-member.decorator.spec.ts > 컨트롤러는 요청 객체의 키 이름을 직접 쓰지 않는다 (선택 미션 2) > undefined 에 request["memberId"] / @Req() 가 없다 0ms
+ ✓ src/decorator/login-member.decorator.spec.ts > 컨트롤러는 요청 객체의 키 이름을 직접 쓰지 않는다 (선택 미션 2) > "memberId" 문자열은 공개 조회 API 의 경로 변수(:memberId)에서만 나온다 1ms
+ ✓ src/service/movie-record.service.spec.ts > MovieRecordService > addToFavorites true: 하나의 트랜잭션 안에서 평점 → 즐겨찾기 순서로 저장하고 commit 한다 3ms
+ ✓ src/service/movie-record.service.spec.ts > MovieRecordService > addToFavorites false: 평점만 저장하고 favorite 은 null 1ms
+ ✓ src/service/movie-record.service.spec.ts > MovieRecordService > 콜백 안의 모든 Repository 를 manager 에서 꺼낸다(Service 는 DataSource 만 받는다) 0ms
+ ✓ src/service/movie-record.service.spec.ts > MovieRecordService > 즐겨찾기 저장이 실패하면 오류를 그대로 던지고 rollback 이 일어난다(commit 없음) 2ms
+ ✓ src/service/movie-record.service.spec.ts > MovieRecordService > 이미 평점이 있으면 409 RATING409_1 — 아무것도 저장하지 않고 rollback 1ms
+ ✓ src/service/movie-record.service.spec.ts > MovieRecordService > 즐겨찾기가 이미 있고 addToFavorites true 면 409 FAVORITE409_1 — 평점도 저장하지 않는다 0ms
+ ✓ src/service/movie-record.service.spec.ts > MovieRecordService > 즐겨찾기가 이미 있어도 addToFavorites false 면 상관없이 평점만 저장한다 0ms
+ ✓ src/service/movie-record.service.spec.ts > MovieRecordService > 회원이 없으면 404 MEMBER404_1 1ms
+ ✓ src/service/movie-record.service.spec.ts > MovieRecordService > 후기를 생략하면 null 로 저장한다 2ms
+ ✓ src/service/auth.service.spec.ts > AuthService.login > 성공하면 nickname 과 accessToken 을 돌려준다 160ms
+ ✓ src/service/auth.service.spec.ts > AuthService.login > 토큰 payload 에는 sub·email·iat·exp 만 있고 비밀번호는 없다 (payload 는 누구나 읽을 수 있다) 17ms
+ ✓ src/service/auth.service.spec.ts > AuthService.login > 발급한 토큰은 같은 키로 검증되고 sub 가 회원 번호다 15ms
+ ✓ src/dto/write-dto-validation.spec.ts > CreateMemberDto > 정상 값은 통과 10ms
+ ✓ src/dto/write-dto-validation.spec.ts > CreateMemberDto > 이메일 형식이 틀리면 거절 1ms
+ ✓ src/dto/write-dto-validation.spec.ts > CreateMemberDto > 닉네임은 2~12자 (앞뒤 공백은 지우고 센다) 4ms
+ ✓ src/dto/write-dto-validation.spec.ts > CreateMemberDto > 비밀번호 대문자 없음 → 거절 0ms
+ ✓ src/dto/write-dto-validation.spec.ts > CreateMemberDto > 비밀번호 소문자 없음 → 거절 0ms
+ ✓ src/dto/write-dto-validation.spec.ts > CreateMemberDto > 비밀번호 숫자 없음 → 거절 0ms
+ ✓ src/dto/write-dto-validation.spec.ts > CreateMemberDto > 비밀번호 특수문자 없음 → 거절 0ms
+ ✓ src/dto/write-dto-validation.spec.ts > CreateMemberDto > 비밀번호 8자 미만 → 거절 0ms
+ ✓ src/dto/write-dto-validation.spec.ts > CreateMemberDto > 비밀번호 특수문자는 !@#$%^&* 말고도 허용, 72자 초과는 거절 5ms
+ ✓ src/dto/write-dto-validation.spec.ts > CreateRatingDto / UpdateRatingDto > 정상 값은 통과 (comment 는 선택) 10ms
+ ✓ src/dto/write-dto-validation.spec.ts > CreateRatingDto / UpdateRatingDto > score=0 → 거절 0ms
+ ✓ src/dto/write-dto-validation.spec.ts > CreateRatingDto / UpdateRatingDto > score=6 → 거절 0ms
+ ✓ src/dto/write-dto-validation.spec.ts > CreateRatingDto / UpdateRatingDto > score=1.5 → 거절 0ms
+ ✓ src/dto/write-dto-validation.spec.ts > CreateRatingDto / UpdateRatingDto > score=5 → 거절 0ms
+ ✓ src/dto/write-dto-validation.spec.ts > CreateRatingDto / UpdateRatingDto > score=null → 거절 0ms
+ ✓ src/dto/write-dto-validation.spec.ts > CreateRatingDto / UpdateRatingDto > movieId=0 → 거절 0ms
+ ✓ src/dto/write-dto-validation.spec.ts > CreateRatingDto / UpdateRatingDto > movieId=-1 → 거절 0ms
+ ✓ src/dto/write-dto-validation.spec.ts > CreateRatingDto / UpdateRatingDto > movieId=1.5 → 거절 0ms
+ ✓ src/dto/write-dto-validation.spec.ts > CreateRatingDto / UpdateRatingDto > movieId=550 → 거절 0ms
+ ✓ src/dto/write-dto-validation.spec.ts > CreateRatingDto / UpdateRatingDto > comment 는 500자까지 0ms
+ ✓ src/dto/write-dto-validation.spec.ts > CreateRatingDto / UpdateRatingDto > 수정은 comment 생략 또는 null 이면 통과 0ms
+ ✓ src/dto/write-dto-validation.spec.ts > LoginRequestDto > 정상 값은 통과, 이메일 앞뒤 공백은 지우고 본다 0ms
+ ✓ src/dto/write-dto-validation.spec.ts > LoginRequestDto > 로그인에서는 비밀번호 규칙(대소문자·숫자·특수문자)을 검사하지 않는다 0ms
+ ✓ src/dto/write-dto-validation.spec.ts > LoginRequestDto > 이메일 형식이 틀리거나 비어 있으면 거절 0ms
+ ✓ src/dto/write-dto-validation.spec.ts > LoginRequestDto > 비밀번호가 비어 있거나 문자열이 아니면 거절 0ms
+ ✓ src/dto/write-dto-validation.spec.ts > MemberUpdateRequestDto > 닉네임은 2~12자 (앞뒤 공백은 지우고 센다) 0ms
+ ✓ src/dto/write-dto-validation.spec.ts > CreateFavoriteDto > 정상 값은 통과, memberId 같은 다른 값은 DTO 에 없다 1ms
+ ✓ src/dto/write-dto-validation.spec.ts > CreateFavoriteDto > 영화 ID 는 필수·정수·양수 — 상황마다 가장 알맞은 메시지가 먼저 나온다 0ms
+ ✓ src/dto/write-dto-validation.spec.ts > CreateMovieRecordDto > 정상 값은 통과 (후기는 선택) 0ms
+ ✓ src/dto/write-dto-validation.spec.ts > CreateMovieRecordDto > 별점은 1~5 정수 0ms
+ ✓ src/dto/write-dto-validation.spec.ts > CreateMovieRecordDto > addToFavorites 는 반드시 boolean 0ms
+ ✓ src/dto/write-dto-validation.spec.ts > CreateMovieRecordDto > 후기는 500자 이하 0ms
+ ✓ src/service/member.service.spec.ts > MemberService > 이미 있는 닉네임이면 available=false 4ms
+ ✓ src/service/member.service.spec.ts > MemberService > 없는 이메일이면 available=true 0ms
+ ✓ src/service/auth.service.spec.ts > AuthService.login > 없는 이메일과 틀린 비밀번호는 상태·code·message 가 똑같다 379ms
+ ✓ src/service/favorite.service.spec.ts > FavoriteService > create > 토큰의 회원으로 저장하고 favoriteId·movieId·createdAt 세 필드만 돌려준다 17ms
+ ✓ src/service/favorite.service.spec.ts > FavoriteService > create > 이미 즐겨찾기했으면 409 FAVORITE409_1 이고 저장하지 않는다 1ms
+ ✓ src/service/favorite.service.spec.ts > FavoriteService > create > 회원이 없으면 404 MEMBER404_1 이고 중복 검사도 하지 않는다 0ms
+ ✓ src/service/favorite.service.spec.ts > FavoriteService > create > 사전 검사가 "없다"고 해도 DB UNIQUE 위반은 그대로 위로 던진다(필터가 409 로 바꾼다) 1ms
+ ✓ src/service/favorite.service.spec.ts > FavoriteService > getMyFavorites > 내 것만, favoriteId 내림차순(최신순)으로 조회한다 1ms
+ ✓ src/service/favorite.service.spec.ts > FavoriteService > getMyFavorites > 없으면 오류가 아니라 빈 배열 17ms
+ ✓ src/service/favorite.service.spec.ts > FavoriteService > getStatus > exists 가 true 면 isFavorite 도 undefined 0ms
+ ✓ src/service/favorite.service.spec.ts > FavoriteService > getStatus > exists 가 false 면 isFavorite 도 undefined 0ms
+ ✓ src/service/favorite.service.spec.ts > FavoriteService > delete > 내 즐겨찾기를 찾아 지운다 0ms
+ ✓ src/service/favorite.service.spec.ts > FavoriteService > delete > 없으면 404 FAVORITE404_1 (인증 실패 401 과 다르다) 0ms
+ ✓ src/service/auth.service.spec.ts > AuthService.login > 없는 이메일에도 bcrypt 비교를 한 번 한다 (응답 시간으로 가입 여부를 알 수 없게) 235ms
+ ✓ src/service/member.service.spec.ts > MemberService.signUp > 비밀번호는 bcrypt 해시(60자)로만 저장하고 응답에는 password 가 없다 640ms
+ ✓ src/service/member.service.spec.ts > MemberService.signUp > 이메일 중복이면 409 MEMBER409_2 이고 저장하지 않는다 1ms
+ ✓ src/service/member.service.spec.ts > MemberService.signUp > 닉네임 중복이면 409 MEMBER409_1 (이메일과 code 가 다르다) 0ms
+ ✓ src/service/member.service.spec.ts > MemberService 내 정보 (GET·PATCH /members/me) > getMyInfo 는 email·nickname·createdAt 만 돌려주고 password 는 없다 1ms
+ ✓ src/service/member.service.spec.ts > MemberService 내 정보 (GET·PATCH /members/me) > 토큰은 멀쩡한데 회원이 이미 없으면 404 MEMBER404_1 0ms
+ ✓ src/service/member.service.spec.ts > MemberService 내 정보 (GET·PATCH /members/me) > updateMyInfo 는 "나를 제외한" 회원 중에서 닉네임 중복을 찾는다 1ms
+ ✓ src/service/member.service.spec.ts > MemberService 내 정보 (GET·PATCH /members/me) > 다른 회원이 쓰는 닉네임이면 409 MEMBER409_1 이고 저장하지 않는다 0ms
+ ✓ src/service/member.service.spec.ts > MemberService 내 정보 (GET·PATCH /members/me) > 없는 회원이면 404 이고 중복 확인도 하지 않는다 0ms
+ ✓ src/service/auth.service.spec.ts > AuthService.login > 시드 데이터처럼 올바르지 않은 해시가 저장돼 있어도 500 이 아니라 로그인 실패로 답한다 251ms
+ ✓ src/service/auth.service.spec.ts > AuthService.login > 토큰 발급 실패 시에는 토큰 없이 오류가 그대로 올라간다 (성공처럼 보이지 않는다) 4ms
+
+ Test Files  11 passed (11)
+      Tests  143 passed (143)
+   Start at  00:11:18
+   Duration  3.49s (transform 3.38s, setup 0ms, import 16.02s, tests 1.99s, environment 18ms)
+

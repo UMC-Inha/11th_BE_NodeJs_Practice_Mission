@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import {
   IsEmail,
@@ -15,6 +16,11 @@ const trim = ({ value }: { value: unknown }) =>
 /** POST /members 요청 Body. 규칙은 워크북 "회원가입 입력 규칙"을 따른다. */
 export class CreateMemberDto {
   // member.email 컬럼 길이(RFC 5321 최대 254자)를 넘기면 DB 오류가 되므로 먼저 막는다.
+  @ApiProperty({
+    description: '이메일 (앞뒤 공백은 지운다, 254자 이하)',
+    example: 'kevin@example.com',
+    maxLength: 254,
+  })
   @Transform(trim)
   @MaxLength(254, { message: '이메일은 254자 이하로 입력해 주세요.' })
   @IsEmail({}, { message: '올바른 이메일 형식이 아닙니다.' })
@@ -22,6 +28,13 @@ export class CreateMemberDto {
 
   // 대문자·소문자·숫자·특수문자(영문·숫자·공백이 아닌 문자)를 모두 포함한 8자 이상.
   // bcrypt 는 72바이트 뒤를 무시하므로 상한도 둔다.
+  @ApiProperty({
+    description:
+      '비밀번호 (대문자·소문자·숫자·특수문자를 모두 포함한 8자 이상, 72자 이하). 응답과 로그에는 나오지 않는다.',
+    example: 'Example-Password1!',
+    minLength: 8,
+    maxLength: 72,
+  })
   @IsString({ message: '비밀번호를 입력해 주세요.' })
   @MaxLength(72, { message: '비밀번호는 72자 이하여야 합니다.' })
   @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9\s]).{8,}$/, {
@@ -30,6 +43,12 @@ export class CreateMemberDto {
   })
   password: string;
 
+  @ApiProperty({
+    description: '닉네임 (앞뒤 공백은 지운 뒤 2~12자)',
+    example: '케빈',
+    minLength: 2,
+    maxLength: 12,
+  })
   @Transform(trim)
   @IsString({ message: '닉네임을 입력해 주세요.' })
   @IsNotEmpty({ message: '닉네임을 입력해 주세요.' })

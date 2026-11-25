@@ -1,4 +1,4 @@
-# 5~8주차 — 영화 평점 서비스 (NestJS 새 프로젝트)
+# 5~9주차 — 영화 평점 서비스 (NestJS 새 프로젝트)
 
 3~4주차 도서 대여 프로젝트(레포 루트)는 그대로 두고, 워크북대로 `nest new movie`로 새 프로젝트를 만들었다.
 영화 정보는 프론트가 TMDB에서 직접 받고, 이 서버는 회원·평점·즐겨찾기만 맡는다.
@@ -6,6 +6,7 @@
 7주차에 **로그인(JWT)** 을 만들어 "요청한 사람이 누구인지"를 URL이 아니라 토큰으로 구분하게 바꿨다.
 8주차에는 **즐겨찾기**와 "평점 + 즐겨찾기를 한 번에 저장하는 **트랜잭션**"(`POST /movie-records`)을 만들고,
 **Swagger**(`/api-docs`)로 API 문서를 붙였다.
+9주차에는 새 API 없이 **문서를 끝까지 채우고**(평점·내 정보 API), **테스트가 정말 잘못된 코드를 잡는지 일부러 깨뜨려 확인**했다. → [9주차](#9주차--문서-완성과-테스트-검증)
 
 ## 실행
 
@@ -152,9 +153,93 @@ POST /auth/login ──▶ AuthService: 이메일로 회원 찾기 → bcrypt.co
 서버를 띄우고 `http://localhost:3000/api-docs` 를 열면 Swagger UI, `/api-docs-json` 에서 OpenAPI JSON 을 볼 수 있다(`src/swagger/`).
 
 - 🔒 가 붙은 API 는 로그인이 필요한 API 다. 먼저 `POST /auth/login` 을 Try it out 으로 호출해 `accessToken` 을 복사하고, 화면 위쪽 **Authorize** 에 **토큰만** 붙여넣는다(`Bearer ` 는 Swagger 가 붙인다). 그 뒤의 모든 요청에 `Authorization: Bearer …` 가 실린다.
-- 15개 API 모두 요청 예시와 응답 코드(성공·400·401·404·409)별 예시를 문서로 남겼다. 문서의 예시가 실제 응답과 같은지는 `test/swagger.e2e-spec.ts` 가 실제 서버 응답과 비교해 확인한다.
+- 15개 API 모두 한 줄 요약(🔒·공개 표시)과 자물쇠가 있고, 각 API 에 성공 응답 예시와 그 API 가 낼 수 있는 실패 응답(400·401·403·404·409 중 해당하는 것)의 상태 코드·`code` 예시가 있다. 문서의 예시가 실제 응답과 같은지는 `test/swagger.e2e-spec.ts` 가 실제 서버 응답과 비교해 확인한다. (8주차에는 평점·내 정보 API 9개가 요약과 자물쇠만 있고 설명·예시가 비어 있었다. 9주차에 채웠다 → 아래 9주차 절)
 - 문서 데코레이터(`@ApiProperty`·`@ApiResponse` 등)는 문서만 만들 뿐 요청 검증·응답 틀을 바꾸지 않는다(검증은 `ValidationPipe`, 실패 틀은 `AllExceptionsFilter` 그대로).
-- 화면 기록: `evidence/week08-swagger-overview.jpg`(전체 API와 자물쇠), `evidence/week08-swagger-favorites-post.jpg`(Authorize 뒤 `POST /favorites` 를 Try it out 으로 보내 201 을 받은 화면).
+- 화면 기록: `evidence/week08-swagger-overview.jpg`(전체 API와 자물쇠), `evidence/week08-swagger-favorites-post.jpg`(Authorize 뒤 `POST /favorites` 를 Try it out 으로 보내 201 을 받은 화면). 9주차 화면은 아래 9주차 절.
+
+## 9주차 — 문서 완성과 테스트 검증
+
+새 API 는 없다. 기능은 8주차 그대로이고, 문서 데코레이터와 테스트만 늘었다(`git diff` 에서 `src/service/` 는 바뀌지 않았다).
+
+### 1. Swagger 문서를 끝까지 채웠다 (필수 미션 앞부분)
+
+8주차에 "15개 API 를 문서화했다"고 적었지만, 실제로 열어 보니 **평점·내 정보·회원가입·중복 확인 9개 API 는 한 줄 요약과 자물쇠만 있고 설명(description)이 0자, 성공 예시가 없고 실패 응답은 401 하나뿐**이었다(즐겨찾기·영화 기록·로그인만 채워져 있었다). 9주차에 9개를 채웠다.
+
+| API | 토큰 | 문서에 적은 실패 응답 (상태 코드 · `code`) |
+|---|---|---|
+| `POST /ratings` | 필요 | 400 `COMMON400`(별점 범위·영화 ID·memberId 를 몰래 보냄) · 401 `AUTH401_2/3/4` · 404 `MEMBER404_1` · 409 `RATING409_1` |
+| `PATCH /ratings/{ratingId}` | 필요 | 400 · 401 · 403 `RATING403_1` · 404 `RATING404_1` |
+| `DELETE /ratings/{ratingId}` | 필요 | 400 · 401 · 403 `RATING403_1` · 404 `RATING404_1` |
+| `GET /members/{memberId}/ratings` | 공개 | 400 · 404 `MEMBER404_1` (성공 본문은 5주차 명세대로 공통 틀로 감싸지 않은 배열) |
+| `GET /members/me` | 필요 | 401 · 404 `MEMBER404_1` |
+| `PATCH /members/me` | 필요 | 400 · 401 · 404 · 409 `MEMBER409_1` |
+| `GET /members/nickname/{nickname}`, `GET /members/email/{email}` | 공개 | 400 |
+| `POST /members` | 공개 | 400 · 409 `MEMBER409_2`(이메일) / `MEMBER409_1`(닉네임) |
+| `GET /favorites`, `GET /favorites/{movieId}`, `DELETE /favorites/{movieId}` | 필요 | 8주차 문서 + 9주차에 `DELETE` 의 400 추가 |
+
+- 문서의 실패 예시는 **실제로 던지는 예외를 만드는 함수에서 그대로 뽑는다**(`src/swagger/api-docs.ts` 의 `ApiRatingForbidden` 등). 예외 문구를 바꾸면 문서도 같이 바뀐다.
+- 8주차에 빠져 있던 400 두 개도 이번에 채웠다: `POST /auth/login`(이메일 형식), `DELETE /favorites/{movieId}`(숫자가 아닌 movieId).
+- `test/swagger.e2e-spec.ts`(현재 50개)가 (a) 필수 API 의 한 줄 요약에 토큰 필요 여부가 있는지, 설명이 20자 이상인지, 응답 상태 코드 목록이 정확히 맞는지, (b) 문서에 적은 실패 예시가 **실제 서버가 돌려주는 응답과 같은지**를 확인한다. 예시가 문서에 없으면 빈 객체와 비교해 조용히 통과하지 않고 바로 실패한다.
+
+### 2. 평점 테스트 (필수 미션 뒷부분)
+
+| 요구 | 테스트 | 상태 |
+|---|---|---|
+| 단위: 같은 영화에 평점 중복 → `RATING409_1` | `src/service/rating.service.spec.ts` › create › "같은 회원·같은 영화면 409 RATING409_1 이고 저장하지 않는다" | **6~7주차에 이미 있던 테스트.** 9주차에 새로 쓰지 않았고, 아래 R1 실험으로 "정말 잡는지"만 확인했다 |
+| 단위: 남의 평점 수정 → `RATING403_1` | 같은 파일 › update › "다른 회원의 평점이면 403 RATING403_1 이고 바꾸지 않는다" | 위와 같음 (R2 실험) |
+| 통합: 토큰 없이 `POST /ratings` → 401 | `test/ratings.e2e-spec.ts` › "토큰 없이 … 401 AUTH401_2 이고 평점은 저장되지 않는다" (DB 행 수 0 까지 확인) | **9주차 새로 작성** |
+| 통합: 토큰을 담아 `POST /ratings` → 201 | 같은 파일 › "토큰을 담아 … 201 이고 … DB 에 한 행이 저장된다" (작성자는 토큰이 정함) | **9주차 새로 작성** |
+
+- 모든 통합 테스트는 매번 만들었다 지우는 일회용 MySQL DB(`umc_movie_test_*`)에서 돈다. 워크북은 메모리 DB(sql.js)를 쓰라고 했지만, 5주차부터 써 온 방식(진짜 MySQL)을 그대로 두었다. UNIQUE 제약·트랜잭션 rollback·동시 요청처럼 **진짜 MySQL 에서만 드러나는 동작**을 확인해야 했기 때문이다. 대신 로컬 MySQL 이 있어야 하고 통합 테스트가 느리다(약 20~40초).
+- 전체: 단위 11개 파일 **143개 통과**, 통합 7개 파일 **145개 통과**, `npm run build`·`npm run lint` 오류 없음 (`evidence/week09-tests/full-*-verbose.txt`, `build-lint.txt`).
+
+### 3. 일부러 깨뜨려 보기 (실습 6 + 확장)
+
+워크북 실습 6("중복 검사를 지우면 테스트가 실패한다")을 즐겨찾기만이 아니라 평점·트랜잭션·문서에도 해 보았다. 코드를 바꾸고 → 테스트를 돌리고 → 원래대로 되돌렸다(`scripts/mutations-week09-*.sh`, 끝나면 `git status` 로 원복 확인).
+
+| 변이 (지운 것) | 단위 테스트 | 통합 테스트 |
+|---|---|---|
+| **MA** `FavoriteService` 중복 사전 검사 | **1개 실패** (`409 FAVORITE409_1 이고 저장하지 않는다`) | **실패 0개** (27개 모두 통과) |
+| **MC** MA + DB UNIQUE 위반을 `FAVORITE409_1` 로 바꾸는 필터 | 1개 실패 | **5개 실패** (중복 409 시나리오, 동시 8요청 등) |
+| **MB** `POST /movie-records` 의 트랜잭션 | **9개 실패** | **2개 실패** (트리거로 즐겨찾기 INSERT 를 실패시키는 rollback 테스트, 경쟁 상황 테스트) |
+| **R1** `RatingService` 중복 사전 검사 | 1개 실패 (`409 RATING409_1`) | 실패 0개 (34개 통과) |
+| **R2** `RatingService` 소유권(403) 검사 | 3개 실패 | 4개 실패 |
+| **R3** `POST /ratings` 의 `@UseGuards(AuthGuard)` | **실패 0개** (전체 143개 통과 — Service 는 가드가 붙어 있는지 모른다) | **18개 실패** (34개 중). 새 401 테스트뿐 아니라 `POST /ratings` 를 쓰는 테스트가 모두 깨진다. 가드가 없으면 `@LoginMember()` 가 "가드를 빠뜨렸다"는 오류를 던져 500 이 되기 때문이다 |
+| **R4** `POST /ratings` 가 201 대신 200 | — | 16개 실패 (새 201 테스트 포함) |
+| **D1** 문서 예시 문구를 틀리게(`5점` → `6점`) | — | swagger 1개 실패 (문서 vs 실제 응답 비교) — 당시 파일은 49개 |
+| **D2** `PATCH /ratings` 문서에서 403 제거 | — | swagger 3개 실패 |
+| **D3** `DELETE /ratings` 문서에서 자물쇠 제거 | — | swagger 2개 실패 |
+
+**실험으로 알게 된 것 (정직하게)**
+
+1. **중복 사전 검사를 지워도 통합 테스트는 초록불이다 (MA, R1).** `existsBy` 로 미리 막는 코드 뒤에는 DB `UNIQUE` 제약과, 그 위반을 409 로 바꾸는 예외 필터가 두 번째 방어선으로 있다. 그래서 사전 검사만 지우면 사용자에게 가는 응답은 그대로 `FAVORITE409_1` 이다. 사전 검사가 지켜 주는 것은 "어떤 코드가 응답하는가"가 아니라 "DB 에 불필요한 INSERT 를 시도하지 않는다"는 점이고, 그건 **단위 테스트만 잡는다**(`저장하지 않는다` 단언). 두 방어선을 모두 지우면(MC) 그제야 통합 테스트가 실패한다.
+2. **워크북의 선택 미션 시나리오 테스트만으로는 트랜잭션을 증명하지 못한다.** "이미 즐겨찾기한 영화에 `addToFavorites: true`" 시나리오는 사전 검사가 평점을 저장하기 전에 먼저 막는다. 그래서 트랜잭션을 걷어 내도(MB) 이 테스트는 통과한다(`test/movie-records.e2e-spec.ts` 의 해당 테스트 이름에 이 사실을 적어 두었다). 트랜잭션을 진짜 증명하는 것은 8주차에 만든 **트리거 기반 rollback 테스트**(평점 INSERT 가 성공한 뒤 즐겨찾기 INSERT 가 DB 에서 실패하게 만들어 두 테이블이 0행인지 센다)와 **경쟁 상황 테스트**이고, MB 에서 이 둘이 실패했다.
+3. 문서도 코드처럼 깨뜨려 볼 수 있다(D1~D3). 문서와 실제 응답을 비교하는 테스트가 없었다면 8주차처럼 "문서화했다"는 말만 남고 비어 있어도 아무도 몰랐을 것이다.
+
+### 4. 증거 파일
+
+| 파일 | 내용 |
+|---|---|
+| `evidence/week09-swagger-overview.jpg`, `…-overview-2.jpg` | Swagger UI 전체 API 15개(버전 라벨 `9주차`), 태그, 자물쇠 |
+| `evidence/week09-swagger-post-ratings-doc.jpg`, `…-responses.jpg` | `POST /ratings` 를 펼친 화면: 설명, 요청 예시 두 가지, 201·400·401·404·409 예시 |
+| `evidence/week09-swagger-patch-ratings-doc.jpg` | `PATCH /ratings/{ratingId}`: 경로 변수 설명, 요청 예시, 200 예시 |
+| `evidence/week09-swagger-authorize.jpg` | Authorize 로 토큰을 넣은 화면(값은 `******` 로 가려짐) |
+| `evidence/week09-swagger-post-ratings-201.jpg`, `…-409.jpg` | `POST /ratings` 를 Try it out 으로 실행: 201 → 같은 요청 한 번 더 → 409 `RATING409_1` |
+| `evidence/week09-swagger-patch-ratings-403.jpg` | 다른 회원의 평점(`ratingId 4`)을 내 토큰으로 `PATCH` → 403 `RATING403_1` |
+| `evidence/week09-swagger-post-favorites-doc.jpg`, `…-201.jpg`, `…-409.jpg`, `…-401.jpg` | 워크북 실습 3: `POST /favorites` 문서 → Authorize 후 201 → 409 `FAVORITE409_1` → Logout 후 401 `AUTH401_2` |
+| `evidence/week09-test-unit-pass.png`, `…-e2e-pass.png`, `…-mission-rating.png` | 단위·통합 전체 통과 화면, 평점 미션 테스트 |
+| `evidence/week09-test-fail-*.png` | 실습 6(`…-favorite-unit`, `…-favorite-e2e-still-green`, `…-both-defenses-e2e`), 트랜잭션 제거(`…-transaction-removed`), 평점 변이(`…-rating-unit`, `…-rating-e2e`) |
+| `evidence/week09-tests/*.txt` | 위 화면의 원본 출력(전체 통과 verbose, 변이별 출력). `…-rating-e2e.png` 의 R3·R4 는 출력이 매우 길어 이미지에는 실패 줄만 발췌했고, 이 폴더에는 R1·R2 와 R3 의 단위 결과(`mutR3-…-unit.txt`)까지만 있다(R3·R4 의 통합 출력 원본은 두지 않았다) |
+
+- Swagger 화면은 **촬영용 일회용 서버**(`PORT 3100`, 일회용 DB `umc_movie_test_swagger9`, 실행마다 새로 만든 무작위 JWT 키)에서 찍었고, 촬영 뒤 서버를 끄고 DB 를 지웠다. 개발 DB(`umc_movie`)는 건드리지 않았다.
+- 화면의 curl 줄에는 토큰의 header 와 payload 앞부분만 보이고 **서명 부분은 화면 오른쪽 끝에서 잘려 보이지 않는다**. 그 키는 이미 폐기됐다.
+- 테스트 화면(`*.png`)은 실제 터미널 캡처가 아니라, 실제로 돌린 출력 텍스트(`evidence/week09-tests/`)를 터미널 모양으로 그린 것이다. 개인 폴더 경로는 `~/movie` 로 줄였고 내용은 고치지 않았다(발췌한 그림은 제목과 첫 줄에 발췌라고 적었다).
+
+### 5. 확인하지 못한 것 / 한계
+
+- 이번 주 변경은 문서 데코레이터와 테스트뿐이라 새로 띄워 본 실서버 시나리오는 없다. Postman·Newman 스크립트(`verify:week08` 등)는 8주차 그대로이고 9주차 것은 만들지 않았다.
+- 테스트가 초록불이어도 브라우저에서만 나타나는 CORS 문제는 잡지 못한다(워크북 안내와 같음). 8주차까지의 e2e 가 preflight 응답까지만 확인한다.
+- `scripts/mutations-week09-*.sh` 를 다시 돌리면 `evidence/week09-tests/` 의 해당 파일이 개인 경로가 들어간 원본 출력으로 덮어써진다. 깨끗한 작업 트리에서만 돌릴 것(소스를 잠시 바꿨다가 되돌린다).
 
 ## CORS
 
@@ -169,6 +254,8 @@ POST /auth/login ──▶ AuthService: 이메일로 회원 찾기 → bcrypt.co
 
 ```bash
 npm run build && npm test && npm run test:e2e && npm run lint
+scripts/mutations-week09-favorite.sh MA MB MC   # 9주차: 코드를 일부러 깨뜨려 테스트가 잡는지 확인 (깨끗한 작업 트리에서만. 끝나면 원복)
+scripts/mutations-week09-rating.sh R1 R2 R3 R4  # 9주차: 평점 테스트 변이
 npm run verify:week08     # 8주차: 실제 서버(PORT 3100)에 즐겨찾기·영화 기록·트랜잭션 rollback·동시 8요청 등 32개 확인 → evidence/week08-api-results.json
 npm run newman:week08     # 8주차: Postman Collection 27개 요청·55개 assertion → evidence/week08-newman.json (컬렉션: evidence/week08.postman_collection.json)
 npm run verify:week07     # 7주차: 실제 서버(PORT 3100)에 9단계 시나리오 등 26개 요청 + 비교·디코드·SQL 확인 5개 → evidence/week07-api-results.json
@@ -178,7 +265,7 @@ npm run verify:week05     # 5주차: 실제 DB 조회 18개 요청 (evidence/wee
 ```
 
 - `test:e2e` 의 `members.e2e-spec.ts`(5주차)와 `verify:week05` 는 실제 로컬 MySQL(`umc_movie`, 시드 데이터)에 **조회만** 한다.
-- 쓰기·인증 테스트(`members-write.e2e-spec.ts`, `auth.e2e-spec.ts`, 8주차 `favorites`·`movie-records`·`swagger` e2e)와 7·8주차 `verify:*`·`newman:*` 스크립트는 **매번 새로 만드는 일회용 DB**(`umc_movie_test`, `umc_movie_test_auth`, `umc_movie_test_rec`, `umc_movie_test_verify8` …)에서만 돌고 끝나면 지운다. 테스트 DB 헬퍼는 이름이 `umc_movie_test` 로 시작하지 않으면 `DROP` 을 하기 전에 멈춘다. `umc_movie` 의 데이터는 바뀌지 않는다.
+- 쓰기·인증 테스트(`members-write.e2e-spec.ts`, `auth.e2e-spec.ts`, 8주차 `favorites`·`movie-records`·`swagger` e2e)와 7·8주차 `verify:*`·`newman:*` 스크립트는 **매번 새로 만드는 일회용 DB**(`umc_movie_test`, `umc_movie_test_auth`, `umc_movie_test_rec`, `umc_movie_test_ratings`, `umc_movie_test_verify8` …)에서만 돌고 끝나면 지운다. 테스트 DB 헬퍼는 이름이 `umc_movie_test` 로 시작하지 않으면 `DROP` 을 하기 전에 멈춘다. `umc_movie` 의 데이터는 바뀌지 않는다.
 - e2e 는 `.env` 의 진짜 `JWT_SECRET` 대신 실행마다 새로 만든 일회용 키를 쓴다(`test/support/env.ts`). 라이브 스크립트도 서버를 띄울 때마다 무작위 키를 넣는다.
 - 8주차 트랜잭션 테스트는 MySQL 트리거로 "즐겨찾기 INSERT 가 실패하는 상황"을 만들어 rollback 을 확인하고, 테스트가 끝나면 트리거도 지운다(일회용 DB 안에서만).
 - 라이브 스크립트가 남기는 증거 파일의 JWT 는 **서명 부분을 `<signature masked>` 로 가린다**(header·payload 는 읽을 수 있게 둔다).

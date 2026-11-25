@@ -16,7 +16,7 @@ export function setupSwagger(app: INestApplication) {
     .setDescription(
       '영화 평점 서비스. 🔒 표시가 있는 API 는 Authorization: Bearer {accessToken} 헤더가 필요하다. 성공·실패 응답은 모두 { isSuccess, code, message, result } 틀을 따른다(5주차 조회 API 의 성공 본문만 예외).',
     )
-    .setVersion('8주차')
+    .setVersion('9주차')
     .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);

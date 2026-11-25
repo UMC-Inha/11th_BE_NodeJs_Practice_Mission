@@ -5,7 +5,12 @@ import { LoginRequestDto } from '../dto/login-request.dto.js';
 import { LoginResponseDto } from '../dto/login-response.dto.js';
 import { loginFailed } from '../exception/api.exception.js';
 import { AuthService } from '../service/auth.service.js';
-import { ApiFailure, ApiSuccess, failureBody } from '../swagger/api-docs.js';
+import {
+  ApiFailure,
+  ApiSuccess,
+  failureBody,
+  validationFailureBody,
+} from '../swagger/api-docs.js';
 
 @ApiTags('인증')
 @Controller('auth')
@@ -30,6 +35,10 @@ export class AuthController {
   @ApiSuccess(200, '로그인 성공', 'COMMON200', '로그인에 성공했습니다.', {
     nickname: '뷰어1',
     accessToken: 'eyJhbGciOiJIUzI1NiIs…',
+  })
+  // 9주차: 8주차에는 빠져 있던 400 (로그인 Body 검증)
+  @ApiFailure(400, '이메일 형식이 아니거나 비밀번호가 비어 있음', {
+    COMMON400: validationFailureBody('이메일 형식이 올바르지 않습니다.'),
   })
   @ApiFailure(401, '이메일 또는 비밀번호가 올바르지 않음', {
     [loginFailed().code]: failureBody(loginFailed()),

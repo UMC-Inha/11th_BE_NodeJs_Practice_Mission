@@ -1,0 +1,154 @@
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.12 ~/movie
+
+ ❯ src/service/movie-record.service.spec.ts (9 tests | 9 failed) 37ms
+     × addToFavorites true: 하나의 트랜잭션 안에서 평점 → 즐겨찾기 순서로 저장하고 commit 한다 5ms
+     × addToFavorites false: 평점만 저장하고 favorite 은 null 1ms
+     × 콜백 안의 모든 Repository 를 manager 에서 꺼낸다(Service 는 DataSource 만 받는다) 0ms
+     × 즐겨찾기 저장이 실패하면 오류를 그대로 던지고 rollback 이 일어난다(commit 없음) 5ms
+     × 이미 평점이 있으면 409 RATING409_1 — 아무것도 저장하지 않고 rollback 1ms
+     × 즐겨찾기가 이미 있고 addToFavorites true 면 409 FAVORITE409_1 — 평점도 저장하지 않는다 0ms
+     × 즐겨찾기가 이미 있어도 addToFavorites false 면 상관없이 평점만 저장한다 0ms
+     × 회원이 없으면 404 MEMBER404_1 1ms
+     × 후기를 생략하면 null 로 저장한다 22ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 9 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/service/movie-record.service.spec.ts > MovieRecordService > addToFavorites true: 하나의 트랜잭션 안에서 평점 → 즐겨찾기 순서로 저장하고 commit 한다
+TypeError: Cannot read properties of undefined (reading 'getRepository')
+ ❯ src/service/movie-record.service.ts:35:40
+     33|       // 이 콜백 안에서는 manager 로 만든 Repository 만 쓴다. 주입받아 둔 Repository 를 섞…
+     34|       // 같은 트랜잭션 연결을 쓴다는 보장이 없어서, 일부 저장이 롤백되지 않을 수 있다.
+     35|       const memberRepository = manager.getRepository(Member);
+       |                                        ^
+     36|       const ratingRepository = manager.getRepository(Rating);
+     37|       const favoriteRepository = manager.getRepository(Favorite);
+ ❯ MovieRecordService.create src/service/movie-record.service.ts:82:6
+ ❯ src/service/movie-record.service.spec.ts:104:34
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/9]⎯
+
+ FAIL  src/service/movie-record.service.spec.ts > MovieRecordService > addToFavorites false: 평점만 저장하고 favorite 은 null
+TypeError: Cannot read properties of undefined (reading 'getRepository')
+ ❯ src/service/movie-record.service.ts:35:40
+     33|       // 이 콜백 안에서는 manager 로 만든 Repository 만 쓴다. 주입받아 둔 Repository 를 섞…
+     34|       // 같은 트랜잭션 연결을 쓴다는 보장이 없어서, 일부 저장이 롤백되지 않을 수 있다.
+     35|       const memberRepository = manager.getRepository(Member);
+       |                                        ^
+     36|       const ratingRepository = manager.getRepository(Rating);
+     37|       const favoriteRepository = manager.getRepository(Favorite);
+ ❯ MovieRecordService.create src/service/movie-record.service.ts:82:6
+ ❯ src/service/movie-record.service.spec.ts:119:34
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/9]⎯
+
+ FAIL  src/service/movie-record.service.spec.ts > MovieRecordService > 콜백 안의 모든 Repository 를 manager 에서 꺼낸다(Service 는 DataSource 만 받는다)
+TypeError: Cannot read properties of undefined (reading 'getRepository')
+ ❯ src/service/movie-record.service.ts:35:40
+     33|       // 이 콜백 안에서는 manager 로 만든 Repository 만 쓴다. 주입받아 둔 Repository 를 섞…
+     34|       // 같은 트랜잭션 연결을 쓴다는 보장이 없어서, 일부 저장이 롤백되지 않을 수 있다.
+     35|       const memberRepository = manager.getRepository(Member);
+       |                                        ^
+     36|       const ratingRepository = manager.getRepository(Rating);
+     37|       const favoriteRepository = manager.getRepository(Favorite);
+ ❯ MovieRecordService.create src/service/movie-record.service.ts:82:6
+ ❯ src/service/movie-record.service.spec.ts:129:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/9]⎯
+
+ FAIL  src/service/movie-record.service.spec.ts > MovieRecordService > 즐겨찾기 저장이 실패하면 오류를 그대로 던지고 rollback 이 일어난다(commit 없음)
+AssertionError: expected TypeError: Cannot read properties of unde… to be Error: favorite insert failed // Object.is equality
+
+- Expected
++ Received
+
+- Error {
+-   "message": "favorite insert failed",
++ TypeError {
++   "message": "Cannot read properties of undefined (reading 'getRepository')",
+  }
+
+ ❯ src/service/movie-record.service.spec.ts:143:47
+    141|     const { service, events } = setup({ favoriteSaveError: boom });
+    142|
+    143|     await expect(service.create(1, dto(true))).rejects.toBe(boom);
+       |                                               ^
+    144|     expect(events).toEqual([
+    145|       'begin',
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/9]⎯
+
+ FAIL  src/service/movie-record.service.spec.ts > MovieRecordService > 이미 평점이 있으면 409 RATING409_1 — 아무것도 저장하지 않고 rollback
+AssertionError: expected TypeError: Cannot read properties of unde… to be an instance of ApiException
+ ❯ codeOf src/service/movie-record.service.spec.ts:97:17
+     95|     (e: unknown) => e,
+     96|   );
+     97|   expect(error).toBeInstanceOf(ApiException);
+       |                 ^
+     98|   return (error as ApiException).code;
+     99| }
+ ❯ src/service/movie-record.service.spec.ts:155:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/9]⎯
+
+ FAIL  src/service/movie-record.service.spec.ts > MovieRecordService > 즐겨찾기가 이미 있고 addToFavorites true 면 409 FAVORITE409_1 — 평점도 저장하지 않는다
+AssertionError: expected TypeError: Cannot read properties of unde… to be an instance of ApiException
+ ❯ codeOf src/service/movie-record.service.spec.ts:97:17
+     95|     (e: unknown) => e,
+     96|   );
+     97|   expect(error).toBeInstanceOf(ApiException);
+       |                 ^
+     98|   return (error as ApiException).code;
+     99| }
+ ❯ src/service/movie-record.service.spec.ts:165:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/9]⎯
+
+ FAIL  src/service/movie-record.service.spec.ts > MovieRecordService > 즐겨찾기가 이미 있어도 addToFavorites false 면 상관없이 평점만 저장한다
+TypeError: Cannot read properties of undefined (reading 'getRepository')
+ ❯ src/service/movie-record.service.ts:35:40
+     33|       // 이 콜백 안에서는 manager 로 만든 Repository 만 쓴다. 주입받아 둔 Repository 를 섞…
+     34|       // 같은 트랜잭션 연결을 쓴다는 보장이 없어서, 일부 저장이 롤백되지 않을 수 있다.
+     35|       const memberRepository = manager.getRepository(Member);
+       |                                        ^
+     36|       const ratingRepository = manager.getRepository(Rating);
+     37|       const favoriteRepository = manager.getRepository(Favorite);
+ ❯ MovieRecordService.create src/service/movie-record.service.ts:82:6
+ ❯ src/service/movie-record.service.spec.ts:173:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/9]⎯
+
+ FAIL  src/service/movie-record.service.spec.ts > MovieRecordService > 회원이 없으면 404 MEMBER404_1
+AssertionError: expected TypeError: Cannot read properties of unde… to be an instance of ApiException
+ ❯ codeOf src/service/movie-record.service.spec.ts:97:17
+     95|     (e: unknown) => e,
+     96|   );
+     97|   expect(error).toBeInstanceOf(ApiException);
+       |                 ^
+     98|   return (error as ApiException).code;
+     99| }
+ ❯ src/service/movie-record.service.spec.ts:179:12
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/9]⎯
+
+ FAIL  src/service/movie-record.service.spec.ts > MovieRecordService > 후기를 생략하면 null 로 저장한다
+TypeError: Cannot read properties of undefined (reading 'getRepository')
+ ❯ src/service/movie-record.service.ts:35:40
+     33|       // 이 콜백 안에서는 manager 로 만든 Repository 만 쓴다. 주입받아 둔 Repository 를 섞…
+     34|       // 같은 트랜잭션 연결을 쓴다는 보장이 없어서, 일부 저장이 롤백되지 않을 수 있다.
+     35|       const memberRepository = manager.getRepository(Member);
+       |                                        ^
+     36|       const ratingRepository = manager.getRepository(Rating);
+     37|       const favoriteRepository = manager.getRepository(Favorite);
+ ❯ MovieRecordService.create src/service/movie-record.service.ts:82:6
+ ❯ src/service/movie-record.service.spec.ts:186:19
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/9]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  9 failed | 10 passed (19)
+   Start at  23:37:38
+   Duration  2.80s (transform 361ms, setup 0ms, import 4.18s, tests 101ms, environment 0ms)
+

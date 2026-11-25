@@ -1,0 +1,8 @@
+
+> movie@0.0.1 build
+> nest build
+
+
+> movie@0.0.1 lint
+> oxlint --type-aware src/ test/
+

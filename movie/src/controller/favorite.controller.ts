@@ -151,6 +151,12 @@ export class FavoriteController {
     '즐겨찾기를 해제했습니다.',
     null,
   )
+  // 9주차: 8주차에는 빠져 있던 400 (GET 과 같은 ParseIntPipe 가 같은 응답을 만든다)
+  @ApiFailure(400, 'movieId 가 숫자가 아님', {
+    COMMON400: validationFailureBody(
+      'Validation failed (numeric string is expected)',
+    ),
+  })
   @ApiAuthFailures()
   @ApiFailure(404, '해제하려는 즐겨찾기를 찾을 수 없음', {
     [favoriteNotFound().code]: failureBody(favoriteNotFound()),

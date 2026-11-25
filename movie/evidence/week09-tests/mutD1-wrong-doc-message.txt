@@ -1,0 +1,39 @@
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.12 ~/movie
+
+ ❯ test/swagger.e2e-spec.ts (49 tests | 1 failed) 7973ms
+       × 9주차: 평점·회원 API 의 실패 예시(400·403·404·409)도 실제 응답과 같다 3481ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/swagger.e2e-spec.ts > Swagger 문서 (격리된 테스트 DB) > 문서의 예시가 실제 서버 응답과 어긋나지 않는다 > 9주차: 평점·회원 API 의 실패 예시(400·403·404·409)도 실제 응답과 같다
+AssertionError: expected { isSuccess: false, …(3) } to match object { isSuccess: false, …(3) }
+
+- Expected
++ Received
+
+  {
+    "code": "COMMON400",
+    "isSuccess": false,
+-   "message": "별점은 6점 이하여야 합니다.",
++   "message": "별점은 5점 이하여야 합니다.",
+    "result": null,
+  }
+
+ ❯ test/swagger.e2e-spec.ts:445:28
+    443|         .post('/ratings', { movieId: 701, score: 6 })
+    444|         .expect(400);
+    445|       expect(tooHigh.body).toMatchObject(
+       |                            ^
+    446|         documented('/ratings', 'post', 400, '별점 범위 오류'),
+    447|       );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 48 passed (49)
+   Start at  23:42:39
+   Duration  12.75s (transform 1.62s, setup 184ms, import 4.05s, tests 7.97s, environment 0ms)
+

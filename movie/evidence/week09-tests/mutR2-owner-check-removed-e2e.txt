@@ -1,0 +1,81 @@
+The plugin "vite-tsconfig-paths" is detected. Vite now supports tsconfig paths resolution natively via the resolve.tsconfigPaths option. You can remove the plugin and set resolve.tsconfigPaths: true in your Vite config instead.
+
+ RUN  v4.1.12 ~/movie
+
+[Nest] 40560  - 11/24/2026, 11:47:27 PM   ERROR [AllExceptionsFilter] TypeORMError: Connection is not established with mysql database
+    at ~/movie/node_modules/typeorm/driver/mysql/MysqlDriver.js:782:22
+    at new Promise (<anonymous>)
+    at MysqlDriver.obtainMasterConnection (~/movie/node_modules/typeorm/driver/mysql/MysqlDriver.js:760:16)
+    at MysqlQueryRunner.connect (~/movie/node_modules/typeorm/driver/mysql/MysqlQueryRunner.js:61:18)
+    at MysqlQueryRunner.query (~/movie/node_modules/typeorm/driver/mysql/MysqlQueryRunner.js:153:47)
+    at SelectQueryBuilder.loadRawResults (~/movie/node_modules/typeorm/query-builder/SelectQueryBuilder.js:2325:43)
+    at SelectQueryBuilder.executeEntitiesAndRawResults (~/movie/node_modules/typeorm/query-builder/SelectQueryBuilder.js:2150:37)
+    at SelectQueryBuilder.getRawAndEntities (~/movie/node_modules/typeorm/query-builder/SelectQueryBuilder.js:766:40)
+    at SelectQueryBuilder.getOne (~/movie/node_modules/typeorm/query-builder/SelectQueryBuilder.js:793:36)
+    at EntityManager.findOneBy (~/movie/node_modules/typeorm/entity-manager/EntityManager.js:736:14)
+ ❯ test/members-write.e2e-spec.ts (32 tests | 4 failed) 84338ms
+       × Body 에 memberId 를 넣어 보내면 400 이고 저장하지 않는다 5055ms
+       × 같은 영화에 한 번 더 등록하면 409 RATING409_1, DB 에는 1건만 남는다 5022ms
+       × 다른 회원의 평점이면 403 RATING403_1 이고 바뀌지 않는다 5002ms
+       × 다른 회원의 평점이면 403 이고 지워지지 않는다 5017ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  test/members-write.e2e-spec.ts > 쓰기 API (격리된 테스트 DB) > POST /ratings 평점 등록 (토큰의 주인이 작성자) > Body 에 memberId 를 넣어 보내면 400 이고 저장하지 않는다
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ test/members-write.e2e-spec.ts:223:5
+    221|     });
+    222|
+    223|     it('Body 에 memberId 를 넣어 보내면 400 이고 저장하지 않는다', async () => {
+       |     ^
+    224|       const owner = await f.signUpAndLogin();
+    225|       const other = await f.signUpAndLogin();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  test/members-write.e2e-spec.ts > 쓰기 API (격리된 테스트 DB) > POST /ratings 평점 등록 (토큰의 주인이 작성자) > 같은 영화에 한 번 더 등록하면 409 RATING409_1, DB 에는 1건만 남는다
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ test/members-write.e2e-spec.ts:244:5
+    242|     });
+    243|
+    244|     it('같은 영화에 한 번 더 등록하면 409 RATING409_1, DB 에는 1건만 남는다', async () =>…
+       |     ^
+    245|       const owner = await f.signUpAndLogin();
+    246|       await f.addRating(owner, 550);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  test/members-write.e2e-spec.ts > 쓰기 API (격리된 테스트 DB) > PATCH /ratings/{ratingId} 평점 수정 > 다른 회원의 평점이면 403 RATING403_1 이고 바뀌지 않는다
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ test/members-write.e2e-spec.ts:415:5
+    413|     });
+    414|
+    415|     it('다른 회원의 평점이면 403 RATING403_1 이고 바뀌지 않는다', async () => {
+       |     ^
+    416|       const owner = await f.signUpAndLogin();
+    417|       const intruder = await f.signUpAndLogin();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  test/members-write.e2e-spec.ts > 쓰기 API (격리된 테스트 DB) > DELETE /ratings/{ratingId} 평점 삭제 > 다른 회원의 평점이면 403 이고 지워지지 않는다
+Error: Test timed out in 5000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+ ❯ test/members-write.e2e-spec.ts:481:5
+    479|     });
+    480|
+    481|     it('다른 회원의 평점이면 403 이고 지워지지 않는다', async () => {
+       |     ^
+    482|       const owner = await f.signUpAndLogin();
+    483|       const intruder = await f.signUpAndLogin();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  4 failed | 30 passed (34)
+   Start at  23:45:48
+   Duration  98.68s (transform 7.42s, setup 406ms, import 24.82s, tests 91.50s, environment 0ms)
+
